@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from models.testmodels import *
 
 
 app = FastAPI(title="BrainMove", debug=True, description="BrainMove API")
@@ -11,8 +12,11 @@ async def hello_world(response_model=str):
     print("Hello World!")
     return 'Hello world'
 
-
+@app.post("/ingest")
+async def ingest_data(data: TestModel, response_model=StatusResponse):
+    print("Data received:", data)
+    return {"status": "success", "data_received": data}
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", port=8000, reload=True, reload_dirs=["."])
+    uvicorn.run("main:app", port=8000, reload=True, reload_dirs=["."], host="0.0.0.0")
