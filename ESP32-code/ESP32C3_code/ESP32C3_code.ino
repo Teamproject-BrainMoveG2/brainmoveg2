@@ -35,12 +35,12 @@ void setup()
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
   // TOF code
-  Wire.begin();
+  // Wire.begin();
 
-  if (!lox.begin()) {
-    Serial.println("Failed to boot VL53L0X");
-    while (1) delay(10);
-  }
+  // if (!lox.begin()) {
+  //   Serial.println("Failed to boot VL53L0X");
+  //   while (1) delay(10);
+  // }
 
   // RGB code
   pinMode(roodLed, OUTPUT);
@@ -129,10 +129,10 @@ void wifi()
     http.addHeader("Content-Type", "application/json"); // JSON content-type
 
     String payload =
-      String("{\"device\":\"esp32-c3\",\"ms\":") + String(millis()) +
-      String(",\"rssi\":") + String(WiFi.RSSI()) +
-      String(",\"ip\":\"") + WiFi.localIP().toString() + String("\"}");
-
+      String("{\"device\":\"esp32-c3\",\"ms\":\"") + String(millis()) +
+      String("\",\"rssi\":\"") + String(WiFi.RSSI()) +
+      String("\",\"ip\":\"") + WiFi.localIP().toString() + String("\"}");
+    Serial.print(payload);
     int code = http.POST(payload); // POST request
     Serial.printf("POST status: %d\n", code);
 
@@ -144,61 +144,3 @@ void wifi()
     delay(100);
   }
 }
-
-// #include <WiFi.h>
-// #include <HTTPClient.h>
-// #include "Adafruit_VL53L0X.h"
-
-// const char* ssid = "JOUW_RPI_HOTSPOT";
-// const char* password = "JOUW_WACHTWOORD";
-// const char* rpiUrl = "http://192.168.4.1/api/distance";  // RPi endpoint
-
-// void setup() {
-//   Serial.begin(115200);
-//   pinMode(A0, INPUT);
-//   while (!Serial) delay(1);
-
-//   Wire.begin();  // I2C op defaults GPIO2/3
-//   if (!lox.begin()) {
-//     Serial.println("VL53L0X boot falen!");
-//     while(1);
-//   }
-//   Serial.println("VL53L0X klaar!");
-
-//   WiFi.begin(ssid, password);
-//   while (WiFi.status() != WL_CONNECTED) {
-//     delay(1000);
-//     Serial.print(".");
-//   }
-//   Serial.println("\nWiFi verbonden!");
-// }
-
-// void loop() {
-//   VL53L0X_RangingMeasurementData_t measure;
-//   lox.rangingTest(&measure, false);
-
-//   if (measure.RangeStatus != 4) {
-//     int distance = measure.RangeMilliMeter;
-//     Serial.print("Afstand: "); Serial.print(distance); Serial.println(" mm");
-
-//     if (WiFi.status() == WL_CONNECTED) {
-//       HTTPClient http;
-//       http.begin(rpiUrl);
-//       http.addHeader("Content-Type", "application/json");
-//       String postData = "{\"distance\":" + String(distance) + "}";
-//       int httpCode = http.POST(postData);
-//       if (httpCode > 0) Serial.printf("Verzonden, code: %d\n", httpCode);
-//       http.end();
-//     }
-//   } else {
-//     Serial.println("Out of range");
-//   }
-//   uint32_t Vbatt = 0;
-//   for(int i = 0; i < 16; i++) {
-//     Vbatt = Vbatt + analogReadMilliVolts(A0); // ADC with correction
-//   }
-//   float Vbattf = 2 * Vbatt / 16 / 1000.0;     // attenuation ratio 1/2, mV --> V
-//   Serial.println(Vbattf, 3);
-//   delay(1000);
-//   delay(1000);
-// }
