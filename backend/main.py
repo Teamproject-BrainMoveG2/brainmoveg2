@@ -19,4 +19,4 @@ async def ingest_data(data: TestModel, response_model=StatusResponse):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", port=8000, reload=True, reload_dirs=["."])
+    uvicorn.run("main:app", port=8000, reload=True, reload_dirs=["."], host="0.0.0.0")
