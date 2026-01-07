@@ -1,33 +1,38 @@
-//Wifi code
+// Wifi code
 #include "WiFi.h"
 #include <HTTPClient.h>
-//TOF code
+#include "secrets.h"
+// TOF code
 #include <Wire.h>
 #include "Adafruit_VL53L0X.h"
 
 Adafruit_VL53L0X lox;
 
-//Buzzer code
+// Buzzer code
 const int BUZZER_PIN = D3;
 
-//Wifi code
-const char* ssid = "Plop wifi";
-const char* password = "plopplop";
-//RGB code
+// RGB code
 int roodLed = A0;
 int blauwLed = A1;
 int groenLed = A2;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(1000);
-  //Wifi code
-  WiFi.begin(ssid, password);
+  // Wifi code
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  uint8_t r = WiFi.waitForConnectResult();
+  Serial.printf("result=%d status=%d ip=%s\n",
+                r, WiFi.status(),
+                WiFi.localIP().toString().c_str());
+
   Serial.print("Verbinden met WiFi");
-  //Buzzer code
+  // Buzzer code
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
-  //TOF code
+  // TOF code
   Wire.begin();
 
   if (!lox.begin()) {
@@ -35,15 +40,15 @@ void setup() {
     while (1) delay(10);
   }
 
-  //RGB code
+  // RGB code
   pinMode(roodLed, OUTPUT);
   pinMode(blauwLed, OUTPUT);
   pinMode(groenLed, OUTPUT);
-  
 }
 
-void loop() {
-  //Wifi code
+void loop()
+{
+  // Wifi code
   wifi();
 
   // buzzer code
@@ -52,11 +57,11 @@ void loop() {
   beep(1, 500, 100);
   delay(2000);
 
-  //TOF code
-  tof();
-  
-  //RGB code
-  // Rood
+  // TOF code
+  //  tof();
+
+  // RGB code
+  //  Rood
   digitalWrite(roodLed, LOW);
   digitalWrite(groenLed, HIGH);
   digitalWrite(blauwLed, HIGH);
@@ -75,41 +80,53 @@ void loop() {
   delay(500);
 }
 
-//Buzzer code
-void beep(int times, int on_ms, int off_ms) {
-  for (int i = 0; i < times; i++) {
+// Buzzer code
+void beep(int times, int on_ms, int off_ms)
+{
+  for (int i = 0; i < times; i++)
+  {
     digitalWrite(BUZZER_PIN, HIGH);
     delay(on_ms);
     digitalWrite(BUZZER_PIN, LOW);
     delay(off_ms);
   }
 }
-//TOF code
-void tof(){
+// TOF code
+void tof()
+{
   VL53L0X_RangingMeasurementData_t measure;
 
   lox.rangingTest(&measure, false);
 
-  if (measure.RangeStatus != 4) {
+  if (measure.RangeStatus != 4)
+  {
     Serial.print("Distance (mm): ");
     Serial.println(measure.RangeMilliMeter);
-    if (measure.RangeMilliMeter < 300) {
+    if (measure.RangeMilliMeter < 300)
+    {
       Serial.println("potje gedetecteerd");
     }
-  } else {
+  }
+  else
+  {
     Serial.println("Out of range");
   }
 }
 
-//Wifi code
-void wifi(){
-  if (WiFi.status() == WL_CONNECTED) {
+// Wifi code
+void wifi()
+{
+  Serial.print(WiFi.status());
+  if (WiFi.status() == WL_CONNECTED)
+  {
     Serial.println("\nVerbonden! IP-adres: ");
     Serial.println(WiFi.localIP());
-    delay(5000);  // Print elke 5 sec
-  } else {
+    delay(500); // Print elke 5 sec
+  }
+  else
+  {
     Serial.print(".");
-    delay(1000);
+    delay(100);
   }
 }
 
@@ -123,16 +140,16 @@ void wifi(){
 
 // void setup() {
 //   Serial.begin(115200);
-//   pinMode(A0, INPUT); 
+//   pinMode(A0, INPUT);
 //   while (!Serial) delay(1);
-  
+
 //   Wire.begin();  // I2C op defaults GPIO2/3
 //   if (!lox.begin()) {
 //     Serial.println("VL53L0X boot falen!");
 //     while(1);
 //   }
 //   Serial.println("VL53L0X klaar!");
-  
+
 //   WiFi.begin(ssid, password);
 //   while (WiFi.status() != WL_CONNECTED) {
 //     delay(1000);
@@ -144,11 +161,11 @@ void wifi(){
 // void loop() {
 //   VL53L0X_RangingMeasurementData_t measure;
 //   lox.rangingTest(&measure, false);
-  
+
 //   if (measure.RangeStatus != 4) {
 //     int distance = measure.RangeMilliMeter;
 //     Serial.print("Afstand: "); Serial.print(distance); Serial.println(" mm");
-    
+
 //     if (WiFi.status() == WL_CONNECTED) {
 //       HTTPClient http;
 //       http.begin(rpiUrl);
@@ -163,7 +180,7 @@ void wifi(){
 //   }
 //   uint32_t Vbatt = 0;
 //   for(int i = 0; i < 16; i++) {
-//     Vbatt = Vbatt + analogReadMilliVolts(A0); // ADC with correction   
+//     Vbatt = Vbatt + analogReadMilliVolts(A0); // ADC with correction
 //   }
 //   float Vbattf = 2 * Vbatt / 16 / 1000.0;     // attenuation ratio 1/2, mV --> V
 //   Serial.println(Vbattf, 3);
