@@ -16,6 +16,8 @@ int roodLed = A0;
 int blauwLed = A1;
 int groenLed = A2;
 
+const char* url = "http://10.42.0.1:8000/ingest"; // <-- RPi hotspot IP
+
 void setup()
 {
   Serial.begin(115200);
@@ -116,12 +118,25 @@ void tof()
 // Wifi code
 void wifi()
 {
-  Serial.print(WiFi.status());
+  // Serial.print(WiFi.status());
   if (WiFi.status() == WL_CONNECTED)
   {
-    Serial.println("\nVerbonden! IP-adres: ");
-    Serial.println(WiFi.localIP());
-    delay(500); // Print elke 5 sec
+    // Serial.println("\nVerbonden! IP-adres: ");
+    // Serial.println(WiFi.localIP());
+    // delay(500); // Print elke 5 sec
+    HTTPClient http;
+    http.begin(url);
+    http.addHeader("Content-Type", "application/json"); // JSON content-type
+
+    String payload =
+      String("{\"device\":\"esp32-c3\",\"ms\":") + String(millis()) +
+      String(",\"rssi\":") + String(WiFi.RSSI()) +
+      String(",\"ip\":\"") + WiFi.localIP().toString() + String("\"}");
+
+    int code = http.POST(payload); // POST request
+    Serial.printf("POST status: %d\n", code);
+
+    http.end();
   }
   else
   {
