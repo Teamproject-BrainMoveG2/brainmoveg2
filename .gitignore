@@ -228,3 +228,6 @@ __marimo__/
 
 # Secrets file
 secrets.h
+
+# Node modules
+node_modules/
