@@ -1,0 +1,165 @@
+:root {
+  --primary: #10A8C9;
+  --primary-light: #D0F3FB;
+  --primary-light-5: #E7F9FD;
+  --primary-dark: #096376;
+
+  --accent-orange: #FA9248;
+  --accent-orange-light: #FEE1CD;
+  --accent-orange-dark: #603A20;
+
+  --accent-green: #408C54;
+  --accent-green-dark: #285734;
+  --accent-green-light: #D4F7DD;
+
+  --white: #FFFFFF;
+
+  --grey-2: #F9FAFA;
+  --grey-5: #F1F3F3;
+  --grey-10: #E3E7E8;
+  --grey-15: #D5DBDC;
+  --grey-20: #C7CED1;
+  --grey-30: #ABB7BA;
+  --grey-40: #8F9FA3;
+  --grey-50: #73878C;
+  --grey-60: #5C6C70;
+  --grey-70: #455154;
+  --grey-80: #2E3638;
+  --grey-85: #23292A;
+  --grey-90: #171B1C;
+  --grey-95: #0C0E0E;
+
+  --yellow: #FAF448;
+
+  --red: #DC3218;
+  --red-light: #FECDCD;
+  --red-light-5: #FEE6E6;
+  --red-dark: #731A0D;
+
+  --blue: #183CDC;
+  --blue-dark: #0D1F73;
+  --blue-dark-2: #0D1F73;
+
+  --green: #18DC63;
+
+  --brown: #844200;
+
+  /* Font sizes */
+  --font-size-1: .75rem;
+  --font-size-2: .875rem;
+  --font-size-3: 1rem;
+  --font-size-4: 1.125rem;
+  --font-size-5: 1.25rem;
+  --font-size-6: 1.5rem;
+  --font-size-7: 1.75rem;
+  --font-size-8: 2rem;
+  --font-size-9: 2.25rem;
+  --font-size-10: 2.625rem;
+  --font-size-11: 3rem;
+  --font-size-12: 3.375rem;
+  --font-size-13: 3.75rem;
+  --font-size-14: 4.25rem;
+  --font-size-15: 4.75rem;
+  --font-size-16: 5.25rem;
+  --font-size-17: 5.75rem;
+  --font-size-18: 6.25rem;
+  --font-size-19: 6.75rem;
+  --font-size-20: 7.25rem;
+  --font-size-21: 7.75rem;
+  --font-size-22: 8.25rem;
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Border radius */
+  --radius-s: .5rem;
+  --radius: 1rem;
+  --radius-l: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-round: 11.25rem;
+
+  /* Spacing */
+  --spacing-baseline: .5rem;
+  --spacing-01: .125rem;
+  --spacing-02: .25rem;
+  --spacing-03: .5rem;
+  --spacing-04: .75rem;
+  --spacing-05: 1rem;
+  --spacing-06: 1.5rem;
+  --spacing-07: 2rem;
+  --spacing-08: 2.5rem;
+  --spacing-09: 3rem;
+  --spacing-10: 4rem;
+  --spacing-11: 5rem;
+  --spacing-12: 6rem;
+  --spacing-13: 7rem;
+  --spacing-14: 10rem;
+}
+
+/* Page base */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Sans Pro", sans-serif;
+  background-color: var(--grey-2);
+  font-size: var(--font-size-3);      /* 16px */
+  line-height: 24px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Heading 1 */
+.h1 {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: var(--font-size-9);      /* 36px */
+  line-height: 40px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+/* Heading 2 */
+.h2 {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: var(--font-size-5);      /* 20px */
+  line-height: 32px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Logo text */
+.logo-text {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: var(--font-size-6);      /* 24px */
+  line-height: 32px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Smaller body */
+.small-body {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: var(--font-size-2);      /* 14px */
+  line-height: 24px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.body-large {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: var(--font-size-5);      /* 20px */
+  line-height: 32px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.body-extra-large {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: var(--font-size-7);      /* 28px */
+  line-height: 40px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
