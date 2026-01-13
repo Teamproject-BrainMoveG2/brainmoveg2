@@ -9,7 +9,7 @@ const router = createRouter({
       path: '/',
       name: 'Welkom',
       component: onboarding,
-      meta: { showNavbar: false, }, 
+      meta: { showNavbar: false, showHeader: false }, 
     },
     {
       path: '/introductie',

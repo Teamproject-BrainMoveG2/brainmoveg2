@@ -1,6 +1,5 @@
 <script setup>
-    import { BatteryMedium } from 'lucide-vue-next';
-    import { Wifi } from 'lucide-vue-next';
+    import PotjeCard from '../components/PotjeCard.vue';
 </script>
 
 <template>
@@ -28,20 +27,26 @@
     <div class="c-cardcontainer">
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
-            <div class="c-cardpotje">
-                <div class="c-cardpotje__title">
-                    <div class="c-cardpotje__circle"></div> <p class="small-body">Groen</p>
-                </div>
-                <div class="c-cardpotje__content">
-                    <div class="c-cardpotje__status">
-                        <p class="c-cardpotje__percentage">78%</p>
-                        <BatteryMedium class="c-cardpotje__icon" />
-                    </div>
-                    <Wifi class="c-cardpotje__icon" />
-                </div>
-            </div>
-            
-
+            <PotjeCard 
+                name="Groen" 
+                :batteryPercentage="78" 
+                :isConnected="true"
+            />
+            <PotjeCard 
+                name="Rood" 
+                :batteryPercentage="78" 
+                :isConnected="true"
+            />
+            <PotjeCard 
+                name="Blauw" 
+                :batteryPercentage="78" 
+                :isConnected="true"
+            />
+            <PotjeCard 
+                name="Geel" 
+                :batteryPercentage="78" 
+                :isConnected="false"
+            />
         </div>
     </div>
     <RouterLink class="c-btn c-btn--primary" to="/Dashboard">Ga door</RouterLink>
@@ -65,62 +70,6 @@
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-04);
 
-}
-
-.c-cardpotje{
-    border-radius: var(--radius-s);
-    padding: var(--spacing-05);
-    background-color: var(--white);
-    display: flex;
-    flex-direction: column;
-    color: var(--grey-85);
-    gap: var(--spacing-baseline);
-}
-
-.c-cardpotje__circle{
-    width: .9375rem;
-    height: .9375rem;
-    border-radius: 50%;
-    background-color: var(--accent-green);
-}
-
-.c-cardpotje__title{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-04);
-}
-
-.c-cardpotje__content{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.c-cardpotje__status{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-03);
-}
-
-.c-cardpotje__percentage{
-    font-family: bebas-neue, sans-serif;
-    font-size: var(--font-size-8);
-    font-weight: var(--font-weight-bold);
-    line-height: 2.5rem;
-}
-
-.c-cardpotje__icon {
-  width: 1.875rem;
-  height: 1.875rem;
-  line-height: 2rem;
-}
-
-.c-title {
-  text-align: start;
-  width: 100%;
 }
 
 .c-instructions {
