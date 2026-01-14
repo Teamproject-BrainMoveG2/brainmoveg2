@@ -43,7 +43,7 @@ const router = createRouter({
       path: '/game/:id',
       name: 'game',
       component: Game,
-      meta: { showNavbar: false, showHeader: true }, 
+      meta: { showNavbar: false, showHeader: false }, 
     },
   ],
 })

@@ -11,8 +11,14 @@ logger = logging.getLogger(__name__)  # Module-specific logger
 
 
 app = FastAPI(title="BrainMove", debug=True, description="BrainMove API", logger=logger)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],)
-sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='asgi', logger=True)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode='asgi', logger=True)
 sio_app = socketio.ASGIApp(sio, app)
 app.state.sio = sio
 app.include_router(router=games.router, dependencies=[Depends(get_sio)])
