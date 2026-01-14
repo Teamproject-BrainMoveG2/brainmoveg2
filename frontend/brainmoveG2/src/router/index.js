@@ -4,6 +4,7 @@ import introductie from '../views/introductie.vue';
 import dashboard from '../views/dashboard.vue';
 import gamesettings from '../views/gamesettings.vue';
 import instructions from '../views/instructions.vue';
+import Game from '../views/Game.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +37,12 @@ const router = createRouter({
       path: '/instructions/:id',
       name: 'instructions',
       component: instructions,
+      meta: { showNavbar: false, showHeader: true }, 
+    },
+    {
+      path: '/game/:id',
+      name: 'game',
+      component: Game,
       meta: { showNavbar: false, showHeader: true }, 
     },
   ],

@@ -92,7 +92,7 @@ const buttonClass = computed(() => {
              <h1>hoe te spelen</h1>
          </div>
         <InstructionList :instructions="currentGame.steps" :color="colorVariant" />
-        <RouterLink :class="buttonClass" to="/dashboard">Ga door</RouterLink>
+        <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel starten!</RouterLink>
     </main>
 
 </template>
