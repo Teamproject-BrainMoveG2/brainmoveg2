@@ -6,7 +6,7 @@ from dependencies import get_game_service, get_settings, get_sio
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
 
-from models.models import Cone
+from models.models import Cone, ConeDTO
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,9 +25,9 @@ async def start_game(game_service: GameService = Depends(get_game_service), sio=
     return {"message":result}
 
 @router.post("/hit")
-async def record_cone_hit(cone: Cone, game_service: GameService = Depends(get_game_service), sio=Depends(get_sio)):
+async def record_cone_hit(cone: ConeDTO, game_service: GameService = Depends(get_game_service), sio=Depends(get_sio)):
     try:
-        await game_service.record_round(cone, sio)
+        await game_service.record_round(cone.cone_id, sio)
     except ValueError as ve:
         logger.error(f"Error recording cone hit: {ve}")
         raise HTTPException(status_code=400, detail="No round is in progress.")

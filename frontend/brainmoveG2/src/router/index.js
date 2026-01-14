@@ -4,7 +4,7 @@ import introductie from '../views/introductie.vue';
 import dashboard from '../views/dashboard.vue';
 import gamesettings from '../views/gamesettings.vue';
 import instructions from '../views/instructions.vue';
-import Game from '../views/Game.vue';
+import Game from '../views/game.vue';
 import gameoverzicht from '../views/gameoverzicht.vue';
 
 const router = createRouter({

@@ -14,7 +14,9 @@ class Round(BaseModel):
 
 class Cone(BaseModel):
     cone_id: int
-    color: str = "red"
+    color: str
+class ConeDTO(BaseModel):
+    cone_id: int
 
 class GameOverStats(BaseModel):
     total_rounds: int = 10

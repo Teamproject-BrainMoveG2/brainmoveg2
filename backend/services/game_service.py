@@ -33,10 +33,15 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self, cone: Cone, sio: socketio.AsyncServer) -> None:
-        global roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs
+    async def record_round(self, cone: int, sio: socketio.AsyncServer) -> None:
+
+        global roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
+        if len(roundList) >= maxRounds:
+            raise ValueError("Maximum number of rounds reached.")
+        cone = next((c for c in connectedCones if c.cone_id == cone), None)
         if currentRoundStartTime is None or currentCone is None:
-            raise ValueError("No round has been started.")
+
+            raise ValueError("No round has been started. color: " + cone.color + " id: " + str(cone.cone_id))
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
         totalTimeMs += reaction_speed_ms
@@ -59,7 +64,9 @@ class GameService:
         currentCone = None 
         self.logger.info(f"Round {new_round.number} recorded: {new_round}")
         if len(roundList) >= maxRounds:
-            self.logger.info("Max rounds reached. Game over.")
+            self.logger.info("Max rounds reached. Game over. rounds:")
+            for r in roundList:
+                self.logger.info(r)
             gameoverStats = GameOverStats(
                 total_rounds=len(roundList),
                 total_time_ms=totalTimeMs,
