@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import io from 'socket.io-client';
 import { X } from 'lucide-vue-next';
 
+const Ip = `${window.location.hostname}:8000`;
 const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
@@ -32,7 +33,7 @@ const startCountdown = () => {
 
 const startGame = async () => {
     try {
-        const response = await fetch('http://192.168.137.2:8000/games/start', {
+        const response = await fetch(`http://${Ip}/games/start`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -46,7 +47,7 @@ const startGame = async () => {
 };
 
 const connectSocket = () => {
-    socket = io('http://192.168.137.2:8000');
+    socket = io(`http://${Ip}`);
     
     socket.on('connect', () => {
         console.log('Socket connected:', socket.id);
@@ -76,8 +77,13 @@ const connectSocket = () => {
     
     socket.on('game_over', (data) => {
         console.log('Game over:', data);
-        // Navigate to game overview page
-        router.push(`/gameoverzicht/${gameId.value}`);
+        // Parse the JSON string and navigate to game overview page with stats
+        const gameStats = JSON.parse(data);
+        router.push({
+            name: 'gameoverzicht',
+            params: { id: gameId.value },
+            state: { gameStats }
+        });
     });
     
     socket.on('disconnect', () => {
@@ -87,7 +93,7 @@ const connectSocket = () => {
 
 const recordHit = async (coneId) => {
     try {
-        const response = await fetch('http://192.168.137.2:8000/games/hit', {
+        const response = await fetch(`http://${Ip}/games/hit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
