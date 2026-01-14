@@ -32,7 +32,7 @@ const startCountdown = () => {
 
 const startGame = async () => {
     try {
-        const response = await fetch('http://localhost:8000/games/start', {
+        const response = await fetch('http://192.168.137.2:8000/games/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -46,7 +46,7 @@ const startGame = async () => {
 };
 
 const connectSocket = () => {
-    socket = io('http://localhost:8000');
+    socket = io('http://192.168.137.2:8000');
     
     socket.on('connect', () => {
         console.log('Socket connected:', socket.id);
@@ -87,7 +87,7 @@ const connectSocket = () => {
 
 const recordHit = async (coneId) => {
     try {
-        const response = await fetch('http://localhost:8000/games/hit', {
+        const response = await fetch('http://192.168.137.2:8000/games/hit', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
