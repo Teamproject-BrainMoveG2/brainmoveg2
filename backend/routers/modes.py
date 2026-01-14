@@ -25,8 +25,9 @@ async def get_game_modes(settings: Annotated[config.Settings, Depends(get_settin
 
 @router.get("/{mode_id}/tutorial")
 async def get_tutorial_for_mode(mode_id: int, settings: Annotated[config.Settings, Depends(get_settings)],):
-    rounds = TutorialRepository.get_rondes_by_mode_id(settings=settings, mode_id=mode_id)
-    if not rounds:
+    mode = ModeRepository.get_mode_by_id(settings=settings, mode_id=mode_id)
+    steps = TutorialRepository.get_rondes_by_mode_id(settings=settings, mode_id=mode_id)
+    if not steps:
         raise HTTPException(status_code=404, detail="Game mode not found.")
-    return rounds
+    return {"image": mode["image"], "steps": steps }
    

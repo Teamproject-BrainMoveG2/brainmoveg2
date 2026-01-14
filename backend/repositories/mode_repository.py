@@ -8,6 +8,6 @@ class ModeRepository:
     
     @staticmethod
     def get_mode_by_id(settings, mode_id):
-        sql = "SELECT * FROM spelmodus WHERE id = %s"
+        sql = "SELECT * FROM spelmodus WHERE spelmodus_id = %s"
         params = [mode_id]
         return Database.get_one_row(sql, params, settings)
