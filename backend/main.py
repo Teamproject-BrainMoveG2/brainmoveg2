@@ -1,22 +1,39 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dependencies import get_sio
 from models.testmodels import *
+from models.models import *
+from routers import games
+import logging
+import socketio
+logging.basicConfig(level=logging.INFO)  # Sets global log level
+logger = logging.getLogger(__name__)  # Module-specific logger
 
 
-app = FastAPI(title="BrainMove", debug=True, description="BrainMove API")
+app = FastAPI(title="BrainMove", debug=True, description="BrainMove API", logger=logger)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],)
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='asgi', logger=True)
+sio_app = socketio.ASGIApp(sio, app)
+app.state.sio = sio
+app.include_router(router=games.router, dependencies=[Depends(get_sio)])
+app.mount("/socket.io", sio_app)
 
-
-@app.get("/")
-async def hello_world(response_model=str):
-    print("Hello World!")
+@app.get("/", response_model=str)
+async def hello_world():
+    logger.info("Hello World endpoint called.")
+    sio.emit('message', {'data': 'Hello, World!'})
     return 'Hello world'
 
-@app.post("/ingest")
-async def ingest_data(data: TestModel, response_model=StatusResponse):
-    print("Data received:", data)
+@app.post("/ingest", response_model=StatusResponse)
+async def ingest_data(data: TestModel):
+    logger.info(f"Data received: {data}")
     return {"status": "success", "data_received": data}
+
+@sio.event
+async def connect(sid, environ):
+    print(f"Client connected: {sid}")
+    await sio.emit("B2F_client_connected", {"client_id": sid}, to=sid)
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", port=8000, reload=True, reload_dirs=["."], host="0.0.0.0")
+    uvicorn.run("main:sio_app", port=8000, reload=True, reload_dirs=["."], host="0.0.0.0")
