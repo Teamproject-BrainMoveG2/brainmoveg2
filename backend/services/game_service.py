@@ -4,6 +4,7 @@ from fastapi import Depends
 import random
 import socketio
 import logging
+import asyncio
 connectedCones = [Cone(cone_id=1, color="red"), Cone(cone_id=2, color="blue"), Cone(cone_id=3, color="green"), Cone(cone_id=4, color="yellow")]
 roundList = []
 maxRounds = 10
@@ -18,16 +19,17 @@ class GameService:
 
     async def start_game(self, sio: socketio.AsyncServer) -> str:
         self.logger.info("Game started.")
-        await self.new_round()
-        await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1})
+        await self.new_round(sio)
         return "Game started!"
     
-    async def new_round(self):
+    async def new_round(self, sio: socketio.AsyncServer):
         global currentRoundStartTime, currentCone
         if (currentRoundStartTime is None and currentCone is None):
             currentRoundStartTime = datetime.now(timezone.utc)
             currentCone = random.choice(connectedCones)
             self.logger.info(f"New round started. Hit cone {currentCone}!")
+            await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
@@ -68,5 +70,5 @@ class GameService:
             )
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
-            await self.new_round()
-            await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1})
+            asyncio.sleep(1)  # brief pause before next round
+            await self.new_round(sio)
