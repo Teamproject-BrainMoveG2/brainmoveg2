@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel
 from enum import Enum
 
@@ -15,8 +16,14 @@ class Round(BaseModel):
 class Cone(BaseModel):
     cone_id: int
     color: str
+    battery_percentage: int | None
+    last_status: datetime.datetime | None
 class ConeDTO(BaseModel):
     cone_id: int
+
+class ConeStatusDTO(BaseModel):
+    cone_id: int
+    battery_percentage: int
 
 class GameOverStats(BaseModel):
     total_rounds: int = 10
