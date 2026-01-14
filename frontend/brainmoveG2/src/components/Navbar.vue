@@ -7,7 +7,7 @@ const route = useRoute()
 
 <template>
   <nav class="c-navbar">
-    <router-link to="/" class="c-navbar__item small-body" :class="{ active: route.path === '/' }">
+    <router-link to="/dashboard" class="c-navbar__item small-body" :class="{ active: route.path === '/dashboard' }">
       <Home :size="24" />
       <span class="c-navbar__text">Home</span>
     </router-link>
