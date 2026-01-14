@@ -5,6 +5,7 @@ import random
 import socketio
 import logging
 import asyncio
+TOO_LATE_MS = 5000
 connectedCones = [Cone(cone_id=1, color="red"), Cone(cone_id=2, color="blue"), Cone(cone_id=3, color="green"), Cone(cone_id=4, color="yellow")]
 roundList = []
 maxRounds = 10
@@ -35,7 +36,7 @@ class GameService:
     
     async def record_round(self, cone: int, sio: socketio.AsyncServer) -> None:
 
-        global roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
         if len(roundList) >= maxRounds:
             raise ValueError("Maximum number of rounds reached.")
         cone = next((c for c in connectedCones if c.cone_id == cone), None)
@@ -45,7 +46,9 @@ class GameService:
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
         totalTimeMs += reaction_speed_ms
-        if cone.cone_id != currentCone.cone_id:
+        if reaction_speed_ms > TOO_LATE_MS:
+            round_result = RoundResult.GEMIST
+        elif cone.cone_id != currentCone.cone_id:
             round_result = RoundResult.FOUT
         else:
             round_result = RoundResult.GOED
@@ -77,5 +80,5 @@ class GameService:
             )
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
-            asyncio.sleep(1)  # brief pause before next round
+            await asyncio.sleep(1)  # brief pause before next round
             await self.new_round(sio)
