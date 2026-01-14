@@ -22,5 +22,9 @@ async def start_game(game_service: GameService = Depends(get_game_service), sio=
 
 @router.post("/hit")
 async def record_cone_hit(cone: Cone, game_service: GameService = Depends(get_game_service), sio=Depends(get_sio)):
-    await game_service.record_round(cone, sio)
+    try:
+        await game_service.record_round(cone, sio)
+    except ValueError as ve:
+        logger.error(f"Error recording cone hit: {ve}")
+        raise HTTPException(status_code=400, detail="No round is in progress.")
     return {"message": f"Cone {cone.cone_id} hit recorded."}
