@@ -4,6 +4,7 @@ from fastapi import Depends
 import random
 import socketio
 import logging
+import asyncio
 connectedCones = [Cone(cone_id=1, color="red"), Cone(cone_id=2, color="blue"), Cone(cone_id=3, color="green"), Cone(cone_id=4, color="yellow")]
 roundList = []
 maxRounds = 10
@@ -68,5 +69,6 @@ class GameService:
             )
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
+            asyncio.sleep(1)  # brief pause before next round
             await self.new_round()
             await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1})
