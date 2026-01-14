@@ -9,7 +9,7 @@ class Database:
         try:
             db = connector.connect(
                             host=settings.host,
-                            user=settings.user,
+                            user=settings.username,
                             password=settings.password,
                             database=settings.database,
                             autocommit=False
