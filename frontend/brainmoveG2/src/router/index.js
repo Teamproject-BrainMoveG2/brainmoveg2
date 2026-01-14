@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import onboarding from '../views/onboarding.vue';
 import introductie from '../views/introductie.vue';
+import dashboard from '../views/dashboard.vue';
+import gamesettings from '../views/gamesettings.vue';
+import instructions from '../views/instructions.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +18,24 @@ const router = createRouter({
       path: '/introductie',
       name: 'introductie',
       component: introductie,
+      meta: { showNavbar: false, showHeader: true }, 
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: dashboard,
+      meta: { showNavbar: true, showHeader: true }, 
+    },
+    {
+      path: '/gamesettings/:id',
+      name: 'gamesettings',
+      component: gamesettings,
+      meta: { showNavbar: true, showHeader: true }, 
+    },
+    {
+      path: '/instructions/:id',
+      name: 'instructions',
+      component: instructions,
       meta: { showNavbar: false, showHeader: true }, 
     },
   ],

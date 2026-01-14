@@ -49,7 +49,7 @@
             />
         </div>
     </div>
-    <RouterLink class="c-btn c-btn--primary" to="/Dashboard">Ga door</RouterLink>
+    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
   </main>
 </template>
 
