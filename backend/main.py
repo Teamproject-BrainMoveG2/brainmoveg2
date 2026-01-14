@@ -1,7 +1,11 @@
+import config
+from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_sio
+from dependencies import get_settings
 from models.testmodels import *
+from repositories.ronde_repository import RondeRepository
 from models.models import *
 from routers import games
 import logging
@@ -30,10 +34,22 @@ async def hello_world():
     sio.emit('message', {'data': 'Hello, World!'})
     return 'Hello world'
 
-@app.post("/ingest", response_model=StatusResponse)
-async def ingest_data(data: TestModel):
-    logger.info(f"Data received: {data}")
+@app.get("/test-db")
+async def test_database_connection(settings: Annotated[config.Settings, Depends(get_settings)], response_model=StatusResponse):
+    try:
+        result = RondeRepository.get_ronde_by_id(settings, 1)
+        if result:
+            return 200
+        else:
+            return 500
+    except Exception as e:
+        return 500
+    
+@app.post("/ingest")
+async def ingest_data(data: TestModel, response_model=StatusResponse):
+    print("Data received:", data)
     return {"status": "success", "data_received": data}
+
 
 @sio.event
 async def connect(sid, environ):

@@ -1,4 +1,4 @@
-from models.models import Round, RoundResult, Cone
+from models.models import Round, RoundResult, Cone, GameOverStats
 from datetime import datetime, timezone
 from fastapi import Depends
 import random
@@ -6,8 +6,10 @@ import socketio
 import logging
 connectedCones = [Cone(cone_id=1, color="red"), Cone(cone_id=2, color="blue"), Cone(cone_id=3, color="green"), Cone(cone_id=4, color="yellow")]
 roundList = []
+maxRounds = 10
 currentRoundStartTime = None
-currentCone = None 
+currentCone = None
+totalTimeMs = 0
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
@@ -29,13 +31,13 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self,cone: Cone,sio: socketio.AsyncServer) -> None:
-        global roundList, currentRoundStartTime, currentCone
+    async def record_round(self, cone: Cone, sio: socketio.AsyncServer) -> None:
+        global roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs
         if currentRoundStartTime is None or currentCone is None:
             raise ValueError("No round has been started.")
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
-        
+        totalTimeMs += reaction_speed_ms
         if cone.cone_id != currentCone.cone_id:
             round_result = RoundResult.FOUT
         else:
@@ -54,5 +56,17 @@ class GameService:
         currentRoundStartTime = None 
         currentCone = None 
         self.logger.info(f"Round {new_round.number} recorded: {new_round}")
-        await self.new_round()
-        await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1})
+        if len(roundList) >= maxRounds:
+            self.logger.info("Max rounds reached. Game over.")
+            gameoverStats = GameOverStats(
+                total_rounds=len(roundList),
+                total_time_ms=totalTimeMs,
+                correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                average_reaction_speed_ms=totalTimeMs / len(roundList)
+            )
+            await sio.emit('game_over', gameoverStats.model_dump_json())
+        else:
+            await self.new_round()
+            await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1})

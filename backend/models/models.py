@@ -12,11 +12,17 @@ class Round(BaseModel):
     result: RoundResult
     cone_id: int
 
-
-
 class Cone(BaseModel):
     cone_id: int
     color: str = "red"
+
+class GameOverStats(BaseModel):
+    total_rounds: int = 10
+    total_time_ms: int
+    correct_hits: int
+    wrong_hits: int
+    missed_hits: int
+    average_reaction_speed_ms: float
 
 
 
