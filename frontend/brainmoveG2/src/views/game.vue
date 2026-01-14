@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import io from 'socket.io-client';
 import { X } from 'lucide-vue-next';
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
 const showCountdown = ref(true);
 const countdownValue = ref(3);
@@ -71,6 +72,12 @@ const connectSocket = () => {
         console.log('Round result:', data);
         // Reset background after result
         backgroundColor.value = 'var(--grey-2)';
+    });
+    
+    socket.on('game_over', (data) => {
+        console.log('Game over:', data);
+        // Navigate to game overview page
+        router.push(`/gameoverzicht/${gameId.value}`);
     });
     
     socket.on('disconnect', () => {
