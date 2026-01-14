@@ -174,4 +174,11 @@ const selectDifficulty = (difficulty) => {
     background: var(--red);
 }
 
+/* Wrap difficulty options on small screens */
+@media (max-width: 410px) {
+    .c-difficulty-options {
+        flex-wrap: wrap;
+    }
+}
+
 </style>

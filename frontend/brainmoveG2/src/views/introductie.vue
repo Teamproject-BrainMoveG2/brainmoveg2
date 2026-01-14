@@ -88,4 +88,13 @@ const instructions = [
     gap: var(--spacing-04);
 }
 
+@media (max-width: 395px) {
+
+    h1{
+        font-size: var(--font-size-6);
+    }
+
+    
+}
+
 </style>
