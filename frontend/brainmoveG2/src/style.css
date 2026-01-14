@@ -267,6 +267,34 @@ p {
   transform: translateY(0);
 }
 
+.c-btn--green {
+  background-color: var(--accent-green);
+  color: var(--white);
+}
+
+.c-btn--green:hover {
+  background-color: var(--accent-green-dark);
+  transform: translateY(-2px);
+}
+
+.c-btn--green:active {
+  transform: translateY(0);
+}
+
+.c-btn--orange {
+  background-color: var(--accent-orange);
+  color: var(--white);
+}
+
+.c-btn--orange:hover {
+  background-color: var(--accent-orange-dark);
+  transform: translateY(-2px);
+}
+
+.c-btn--orange:active {
+  transform: translateY(0);
+}
+
 /* Responsive for larger screens */
 @media (min-width: 768px) {
   .c-btn {

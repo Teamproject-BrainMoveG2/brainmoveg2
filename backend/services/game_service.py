@@ -29,7 +29,7 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self, sio: socketio.AsyncServer, cone: Cone) -> None:
+    async def record_round(self,cone: Cone,sio: socketio.AsyncServer) -> None:
         global roundList, currentRoundStartTime, currentCone
         if currentRoundStartTime is None or currentCone is None:
             raise ValueError("No round has been started.")
