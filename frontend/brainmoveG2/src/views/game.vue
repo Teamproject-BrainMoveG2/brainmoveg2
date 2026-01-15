@@ -102,25 +102,6 @@ const connectSocket = () => {
     });
 };
 
-const recordHit = async (coneId) => {
-    try {
-        const response = await fetch(`http://${Ip}/games/hit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                cone_id: coneId,
-                color: currentColor.value
-            })
-        });
-        const data = await response.json();
-        console.log('Hit recorded:', data);
-    } catch (error) {
-        console.error('Error recording hit:', error);
-    }
-};
-
 onMounted(() => {
     startCountdown();
     connectSocket();

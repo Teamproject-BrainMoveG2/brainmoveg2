@@ -20,12 +20,6 @@ onMounted(() => {
     }
 });
 
-const formatTime = (milliseconds) => {
-    const seconds = Math.floor(milliseconds / 1000);
-    const ms = milliseconds % 1000;
-    return `${seconds}.${ms.toString().padStart(3, '0')}s`;
-};
-
 const formatTimeMinutes = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -40,9 +34,6 @@ const accuracy = computed(() => {
     return Math.round((gameStats.value.correct_hits / total) * 100);
 });
 
-const goToDashboard = () => {
-    router.push('/dashboard');
-};
 </script>
 
 <template>
