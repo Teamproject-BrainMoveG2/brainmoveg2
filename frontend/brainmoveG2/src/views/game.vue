@@ -13,6 +13,8 @@ const countdownValue = ref(3);
 const currentRound = ref(0);
 const currentColor = ref('');
 const backgroundColor = ref('var(--grey-2)');
+const showResultOverlay = ref(false);
+const roundResult = ref('');
 let socket = null;
 
 const startCountdown = () => {
@@ -58,6 +60,9 @@ const connectSocket = () => {
         currentRound.value = data.round;
         currentColor.value = data.color;
         
+        // Hide result overlay when new round starts
+        showResultOverlay.value = false;
+        
         // Change background color based on received color
         const colorMap = {
             'blue': 'var(--blue)',
@@ -71,6 +76,9 @@ const connectSocket = () => {
     
     socket.on('round_result', (data) => {
         console.log('Round result:', data);
+        // Show result overlay
+        roundResult.value = data.result;
+        showResultOverlay.value = true;
         // Reset background after result
         backgroundColor.value = 'var(--grey-2)';
     });
@@ -135,14 +143,19 @@ onUnmounted(() => {
   </header>
     <main class="c-content-wrapper" :style="{ backgroundColor: backgroundColor }">
         <!-- Countdown Overlay -->
-        <div v-if="showCountdown" class="c-countdown-overlay"/>
-        <!-- Countdown Overlay -->
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
                 {{ countdownValue }}
             </div>
             <div class="c-countdown-go" v-else>
                 GO!
+            </div>
+        </div>
+
+        <!-- Result Overlay -->
+        <div v-if="showResultOverlay" class="c-result-overlay">
+            <div class="c-result-text" :class="`c-result-${roundResult}`">
+                {{ roundResult.toUpperCase() }}
             </div>
         </div>
     </main>
@@ -249,6 +262,53 @@ onUnmounted(() => {
     }
     100% {
         transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+.c-result-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.c-result-text {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: var(--font-size-22);
+    font-weight: var(--font-weight-bold);
+    animation: resultPulse 0.5s ease-in-out;
+}
+
+.c-result-goed {
+    color: var(--accent-green);
+}
+
+.c-result-fout {
+    color: var(--red);
+}
+
+.c-result-gemist {
+    color: var(--accent-orange);
+}
+
+@keyframes resultPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
         opacity: 1;
     }
 }

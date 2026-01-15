@@ -21,11 +21,18 @@ const circleColor = computed(() => {
     const colorName = props.name.toLowerCase();
     
     const colorMap = {
+        // Dutch names
         'groen': 'var(--accent-green)',
         'oranje': 'var(--accent-orange)',
         'geel': 'var(--yellow)',
         'blauw': 'var(--blue)',
         'rood': 'var(--red)',
+        // English names
+        'green': 'var(--accent-green)',
+        'orange': 'var(--accent-orange)',
+        'yellow': 'var(--yellow)',
+        'blue': 'var(--blue)',
+        'red': 'var(--red)',
     };
     
     return colorMap[colorName] || 'var(--accent-green)';
