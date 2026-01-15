@@ -1,14 +1,20 @@
 # brainmoveg2
 
-# Venv Installation
+## Venv Installation
 
-Venv aanmaken (Windows)
+### Venv aanmaken
+Windows
 `python -m venv venv`
-Venv aanmaken (Linux(Pi))
+
+Linux(Pi)
 `py -m venv venv`
-venv activeren (Windows)
+
+### Venv activeren
+Windows  
 `.\venv\Scripts\Activate.ps1`
-venv activeren (Linux(Pi))
+
+Linux(Pi)  
 `source venv/bin/activate`
-Packages installen
+
+## Packages installen:  
 `pip install -r ./requirements.txt`
