@@ -85,13 +85,16 @@ const connectSocket = () => {
     
     socket.on('game_over', (data) => {
         console.log('Game over:', data);
-        // Parse the JSON string and navigate to game overview page with stats
-        const gameStats = JSON.parse(data);
-        router.push({
-            name: 'gameoverzicht',
-            params: { id: gameId.value },
-            state: { gameStats }
-        });
+        // Wait for 2 seconds to show the final result overlay before navigating
+        setTimeout(() => {
+            // Parse the JSON string and navigate to game overview page with stats
+            const gameStats = JSON.parse(data);
+            router.push({
+                name: 'gameoverzicht',
+                params: { id: gameId.value },
+                state: { gameStats }
+            });
+        }, 2000);
     });
     
     socket.on('disconnect', () => {

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import InstructionList from '../components/InstructionList.vue';
+import InstructionList from '../components/lijst/InstructionList.vue';
 import { useGameColors } from '../composables/useGameColors';
 
 const route = useRoute();
