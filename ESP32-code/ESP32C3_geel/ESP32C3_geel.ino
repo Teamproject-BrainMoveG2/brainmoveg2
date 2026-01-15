@@ -215,7 +215,7 @@ void setLedByBattery(int percent)
   {
     setRgb(false, true, false); // groen
   }
-  else if (percent >= 30)
+  else if (percent >= 25)
   {
     setRgb(true, true, false); // geel (rood+groen)
   }
