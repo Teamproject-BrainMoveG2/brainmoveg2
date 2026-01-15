@@ -1,11 +1,13 @@
 from models.models import Round, RoundResult, Cone, GameOverStats
 from datetime import datetime, timezone
+from services.cone_service import ConeService 
 from fastapi import Depends
 import random
 import socketio
 import logging
 import asyncio
-connectedCones = [Cone(cone_id=1, color="red"), Cone(cone_id=2, color="blue"), Cone(cone_id=3, color="green"), Cone(cone_id=4, color="yellow")]
+TOO_LATE_MS = 5000
+connectedCones = []
 roundList = []
 maxRounds = 10
 currentRoundStartTime = None
@@ -17,14 +19,15 @@ class GameService:
         self.logger.info("GameService initialized.")
 
 
-    async def start_game(self, sio: socketio.AsyncServer) -> str:
+    async def start_game(self, sio: socketio.AsyncServer, coneService: ConeService) -> str:
         self.logger.info("Game started.")
-        await self.new_round(sio)
+        await self.new_round(sio, coneService)
         return "Game started!"
     
-    async def new_round(self, sio: socketio.AsyncServer):
+    async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService):
         global currentRoundStartTime, currentCone
         if (currentRoundStartTime is None and currentCone is None):
+            connectedCones = coneService.get_active_cones()
             currentRoundStartTime = datetime.now(timezone.utc)
             currentCone = random.choice(connectedCones)
             self.logger.info(f"New round started. Hit cone {currentCone}!")
@@ -33,19 +36,23 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self, cone: int, sio: socketio.AsyncServer) -> None:
+    async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService) -> None:
 
-        global roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
         if len(roundList) >= maxRounds:
             raise ValueError("Maximum number of rounds reached.")
+        connectedCones = coneService.get_active_cones()
         cone = next((c for c in connectedCones if c.cone_id == cone), None)
         if currentRoundStartTime is None or currentCone is None:
-
+            if cone is None:
+                raise ValueError("No round has been started. cone id: unknown")
             raise ValueError("No round has been started. color: " + cone.color + " id: " + str(cone.cone_id))
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
         totalTimeMs += reaction_speed_ms
-        if cone.cone_id != currentCone.cone_id:
+        if reaction_speed_ms > TOO_LATE_MS:
+            round_result = RoundResult.GEMIST
+        elif cone.cone_id != currentCone.cone_id:
             round_result = RoundResult.FOUT
         else:
             round_result = RoundResult.GOED
@@ -77,5 +84,5 @@ class GameService:
             )
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
-            asyncio.sleep(1)  # brief pause before next round
-            await self.new_round(sio)
+            await asyncio.sleep(1)  # brief pause before next round
+            await self.new_round(sio, coneService)

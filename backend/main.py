@@ -7,7 +7,7 @@ from dependencies import get_settings
 from models.testmodels import *
 from repositories.ronde_repository import RondeRepository
 from models.models import *
-from routers import games, modes
+from routers import cones, games, modes
 import logging
 import socketio
 logging.basicConfig(level=logging.INFO)  # Sets global log level
@@ -27,6 +27,7 @@ sio_app = socketio.ASGIApp(sio, app)
 app.state.sio = sio
 app.include_router(router=games.router, dependencies=[Depends(get_sio)])
 app.include_router(router=modes.router, dependencies=[Depends(get_sio)])
+app.include_router(router=cones.router, dependencies=[Depends(get_sio)])
 app.mount("/socket.io", sio_app)
 
 @app.get("/", response_model=str)
