@@ -1,6 +1,9 @@
 <script setup>
 import PotjeCard from '../components/PotjeCard.vue';
 import InstructionList from '../components/InstructionList.vue';
+import { ref, onMounted } from 'vue';
+
+const Ip = `${window.location.hostname}:8000`;
 
 //hard coded instructions for setting up the potjes
 const instructions = [
@@ -13,6 +16,31 @@ const instructions = [
         text: 'Zet de potjes in een vierkant van 2m op 2m. Als je minder dan 4 potjes gebruikt, laat dan sommige hoeken leeg.'
     }
 ];
+
+const cones = ref([]);
+
+// Color mapping from English to Dutch
+const colorToDutch = {
+    'red': 'Rood',
+    'blue': 'Blauw',
+    'green': 'Groen',
+    'yellow': 'Geel',
+    'orange': 'Oranje'
+};
+
+const fetchCones = async () => {
+    try {
+        const response = await fetch(`http://${Ip}/cones`);
+        const data = await response.json();
+        cones.value = data;
+    } catch (error) {
+        console.error('Error fetching cones:', error);
+    }
+};
+
+onMounted(() => {
+    fetchCones();
+});
 
 </script>
 
@@ -32,24 +60,11 @@ const instructions = [
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
             <PotjeCard 
-                name="Groen" 
-                :batteryPercentage="78" 
-                :isConnected="true"
-            />
-            <PotjeCard 
-                name="Rood" 
-                :batteryPercentage="78" 
-                :isConnected="true"
-            />
-            <PotjeCard 
-                name="Blauw" 
-                :batteryPercentage="78" 
-                :isConnected="true"
-            />
-            <PotjeCard 
-                name="Geel" 
-                :batteryPercentage="78" 
-                :isConnected="false"
+                v-for="cone in cones" 
+                :key="cone.cone_id"
+                :name="colorToDutch[cone.color] || cone.color" 
+                :batteryPercentage="cone.battery_percentage" 
+                :isConnected="cone.connected"
             />
         </div>
     </div>

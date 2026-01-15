@@ -21,14 +21,25 @@ const circleColor = computed(() => {
     const colorName = props.name.toLowerCase();
     
     const colorMap = {
+        // Dutch names
         'groen': 'var(--accent-green)',
         'oranje': 'var(--accent-orange)',
         'geel': 'var(--yellow)',
         'blauw': 'var(--blue)',
         'rood': 'var(--red)',
+        // English names
+        'green': 'var(--accent-green)',
+        'orange': 'var(--accent-orange)',
+        'yellow': 'var(--yellow)',
+        'blue': 'var(--blue)',
+        'red': 'var(--red)',
     };
     
     return colorMap[colorName] || 'var(--accent-green)';
+});
+
+const isLowBattery = computed(() => {
+    return props.batteryPercentage < 25;
 });
 </script>
 
@@ -40,8 +51,8 @@ const circleColor = computed(() => {
         </div>
         <div class="c-cardpotje__content">
             <div class="c-cardpotje__status" v-if="isConnected">
-                <p class="c-cardpotje__percentage">{{ batteryPercentage }}%</p>
-                <BatteryMedium class="c-cardpotje__icon" />
+                <p class="c-cardpotje__percentage" :class="{ 'c-cardpotje__percentage--low': isLowBattery }">{{ batteryPercentage }}%</p>
+                <BatteryMedium class="c-cardpotje__icon" :class="{ 'c-cardpotje__icon--low-battery': isLowBattery }" />
             </div>
             <p class="c-cardpotje__connecting" v-else>Connecting ...</p>
             <Wifi v-if="isConnected" class="c-cardpotje__icon" />
@@ -99,10 +110,18 @@ const circleColor = computed(() => {
     line-height: 2.5rem;
 }
 
+.c-cardpotje__percentage--low {
+    color: var(--red);
+}
+
 .c-cardpotje__icon {
     width: 1.875rem;
     height: 1.875rem;
     line-height: 2rem;
+}
+
+.c-cardpotje__icon--low-battery {
+    color: var(--red);
 }
 
 .c-cardpotje--disconnected .c-cardpotje__icon {
