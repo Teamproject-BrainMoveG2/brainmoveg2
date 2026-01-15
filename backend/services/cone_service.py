@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from models.models import Cone, ConeStatusDTO
+from models.models import Cone, ConeStatusDTO, ConeWithStatus
 
 colors = ['red', 'blue', 'green', 'yellow']
 cones = [Cone(cone_id=1, color="red", battery_percentage=None, last_status=None),
@@ -21,7 +21,23 @@ class ConeService:
                 self.logger.info(f"Cone updated: {c}")
                 break
     def get_cones(self):
-        return cones
+        conesWithStatus = []
+        for c in cones:
+            if c.battery_percentage is not None and c.last_status is not None:
+                conesWithStatus.append(ConeWithStatus(
+                    cone_id=c.cone_id,
+                    color=c.color,
+                    battery_percentage=c.battery_percentage,
+                    connected=(datetime.now() - c.last_status).total_seconds() < 60
+                ))
+            else:
+                conesWithStatus.append(ConeWithStatus(
+                    cone_id=c.cone_id,
+                    color=c.color,
+                    battery_percentage=0,
+                    connected=False
+                ))
+        return conesWithStatus
 
     def get_active_cones(self):
         active_cones = [c for c in cones if c.battery_percentage is not None and (datetime.now() - c.last_status).total_seconds() < 60]

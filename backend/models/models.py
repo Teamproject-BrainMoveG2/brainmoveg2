@@ -18,6 +18,12 @@ class Cone(BaseModel):
     color: str
     battery_percentage: int | None
     last_status: datetime.datetime | None
+
+class ConeWithStatus(BaseModel):
+    cone_id: int
+    color: str
+    battery_percentage: int
+    connected: bool
 class ConeDTO(BaseModel):
     cone_id: int
 
