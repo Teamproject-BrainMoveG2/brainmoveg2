@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useGameColors } from '../composables/useGameColors';
 
 const route = useRoute();
 const gameId = ref(route.params.id);
@@ -12,20 +13,8 @@ const difficulties = [
     { id: 'intense', label: 'Intense', color: 'red' }
 ];
 
-// Get the color variant based on game ID
-const colorVariant = computed(() => {
-    const colorMap = {
-        '1': 'green',
-        '2': 'orange',
-        '3': 'primary'
-    };
-    return colorMap[gameId.value] || 'primary'; // Default to blue
-});
-
-// Get the button class based on game ID
-const buttonClass = computed(() => {
-    return `c-btn c-btn--${colorVariant.value}`;
-});
+// Use the game colors composable
+const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 const selectDifficulty = (difficulty) => {
     selectedDifficulty.value = difficulty;
