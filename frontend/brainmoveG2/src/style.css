@@ -165,7 +165,7 @@ p {
 .small-body {
   font-family: "Source Sans Pro", sans-serif;
   font-size: var(--font-size-3);      /* 14px */
-  line-height: 24px;
+  line-height: 1.5rem;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   margin: 0;
