@@ -19,9 +19,9 @@ class GameService:
         self.logger.info("GameService initialized.")
 
 
-    async def start_game(self, sio: socketio.AsyncServer) -> str:
+    async def start_game(self, sio: socketio.AsyncServer, coneService: ConeService) -> str:
         self.logger.info("Game started.")
-        await self.new_round(sio)
+        await self.new_round(sio, coneService)
         return "Game started!"
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService):
@@ -44,7 +44,8 @@ class GameService:
         connectedCones = coneService.get_active_cones()
         cone = next((c for c in connectedCones if c.cone_id == cone), None)
         if currentRoundStartTime is None or currentCone is None:
-
+            if cone is None:
+                raise ValueError("No round has been started. cone id: unknown")
             raise ValueError("No round has been started. color: " + cone.color + " id: " + str(cone.cone_id))
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
@@ -84,4 +85,4 @@ class GameService:
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
             await asyncio.sleep(1)  # brief pause before next round
-            await self.new_round(sio)
+            await self.new_round(sio, coneService)
