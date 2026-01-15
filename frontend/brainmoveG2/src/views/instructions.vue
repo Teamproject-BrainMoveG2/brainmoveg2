@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import InstructionList from '../components/InstructionList.vue';
+import { useGameColors } from '../composables/useGameColors';
 
 const route = useRoute();
 const gameId = ref(route.params.id);
@@ -66,20 +67,8 @@ const currentGame = computed(() => {
     return gameInstructions[gameId.value] 
 });
 
-// Get the color variant based on game ID
-const colorVariant = computed(() => {
-    const colorMap = {
-        '1': 'green',
-        '2': 'orange',
-        '3': 'primary'
-    };
-    return colorMap[gameId.value] || 'primary'; // Default to blue
-});
-
-// Get the button class based on game ID
-const buttonClass = computed(() => {
-    return `c-btn c-btn--${colorVariant.value}`;
-});
+// Use the game colors composable
+const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 </script>
 

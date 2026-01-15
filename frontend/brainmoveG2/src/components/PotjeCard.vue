@@ -113,4 +113,27 @@ const circleColor = computed(() => {
     font-size: var(--font-size-2);
     color: var(--grey-60);
 }
+
+/* Smaller fonts for screens below 360px */
+@media (max-width: 395px) {
+    .c-cardpotje__percentage {
+        font-size: var(--font-size-7);
+        line-height: 2rem;
+    }
+
+    .c-cardpotje__icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        line-height: 1.5rem;
+    }
+
+    .c-cardpotje__connecting {
+        font-size: var(--font-size-1);
+    }
+
+    .c-cardpotje {
+        padding: var(--spacing-04);
+    }
+}
+
 </style>
