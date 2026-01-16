@@ -52,6 +52,7 @@ const decrement = () => {
     background-color: var(--white);
     border-radius: var(--radius-s);
     padding: var(--spacing-baseline);
+    width: 100%;
 }
 
 .c-counter__button {
