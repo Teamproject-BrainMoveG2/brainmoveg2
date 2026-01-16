@@ -5,18 +5,29 @@ import { useGameColors } from '../composables/useGameColors';
 import SettingContainer from '../components/SettingContainer.vue';
 import DifficultyButton from '../components/buttons/DifficultyButton.vue';
 import CounterButton from '../components/buttons/CounterButton.vue';
+import TextInput from '../components/inputs/TextInput.vue';
+import SmallPotjeCard from '../components/cards/SmallPotjeCard.vue';
 
 const route = useRoute();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
 const rounds = ref(1);
 const colors = ref(4);
+const username = ref('');
 
 const difficulties = [
     { id: 'relaxed', label: 'Relaxed', color: 'green' },
     { id: 'challenging', label: 'Challenging', color: 'orange' },
     { id: 'intense', label: 'Intense', color: 'red' }
 ];
+
+const colorPotjes = ref([
+    { id: 1, name: 'Groen', color: '#22c55e', battery: 38 },
+    { id: 2, name: 'Rood', color: '#ef4444', battery: 38 },
+    { id: 3, name: 'Blauw', color: '#3b82f6', battery: 38 },
+    { id: 4, name: 'Geel', color: '#eab308', battery: 38 }
+]);
+
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -51,9 +62,16 @@ const selectDifficulty = (difficulty) => {
             </SettingContainer>
         </div>
         <SettingContainer title="Gebruikersnaam">
-            <form action="#" class="c-form">
-                <input type="text" class="c-input small-body" placeholder="Voer je gebruikersnaam in" />
-            </form>
+            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" />
+        </SettingContainer>
+        <SettingContainer title="Gebruikte kleuren" layout="grid">
+            <SmallPotjeCard 
+                v-for="potje in colorPotjes.slice(0, colors)" 
+                :key="potje.id"
+                :name="potje.name" 
+                :color="potje.color"
+                :battery="potje.battery"
+            />
         </SettingContainer>
         
         <RouterLink :class="buttonClass" :to="`/instructions/${gameId}`">Ga door</RouterLink>
@@ -62,24 +80,38 @@ const selectDifficulty = (difficulty) => {
 
 <style scoped>
 
-.c-form{
-    width: 100%;
+
+.c-smallPotjeCard {
+    display: flex;
+    padding: var(--spacing-baseline);
+    background-color: var(--white);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--radius-s);
 }
 
-.c-input{
-    width: 100%;
-    padding: var(--spacing-05) var(--spacing-05);
-    border: 1px solid var(--grey-15);
-    border-radius: var(--radius);
-    font-size: var(--font-size-base);
-    transition: border 0.3s ease;
-    color: var(--grey-70);
-    box-sizing: border-box;
+.c-smallPotjeCard__section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-03);
 }
 
-.c-input:focus, .c-input:hover, .c-input:active {
-    outline: none;
-    border-color: var(--primary);
+.c-smallPotjeCard__section--battery {
+    gap: var(--spacing-02);
+}
+
+.c-smallPotjeCard__color {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+}
+
+.c-battery-icon {
+    color: var(--grey-85);
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
 .c-setting-section--extra {

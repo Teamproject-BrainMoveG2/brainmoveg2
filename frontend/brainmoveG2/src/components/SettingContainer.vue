@@ -4,13 +4,17 @@ defineProps({
         type: String,
         default: ''
     },
+    layout: {
+        type: String,
+        default: 'flex'
+    }
 });
 </script>
 
 <template>
     <div class="c-setting-section">
         <p v-if="title">{{ title }}</p>
-        <div class="c-setting-options">
+        <div :class="['c-setting-options', layout === 'grid' ? 'c-setting-options--grid' : '']">
             <slot></slot>
         </div>
     </div>
@@ -32,10 +36,16 @@ defineProps({
     width: 100%;
 }
 
+.c-setting-options--grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-05);
+}
+
 /* Wrap difficulty options on small screens */
 @media (max-width: 410px) {
     .c-setting-options {
-        flex-wrap: wrap;
+        gap: var(--spacing-03);
     }
 }
 
