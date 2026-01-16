@@ -1,6 +1,6 @@
 <script setup>
 import { CirclePlay } from 'lucide-vue-next';
-import ClockIcon from '../assets/svg/clock.svg';
+import ClockIcon from '../../assets/svg/clock.svg';
 
 const props = defineProps({
     title: {

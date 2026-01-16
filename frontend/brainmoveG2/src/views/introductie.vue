@@ -1,6 +1,6 @@
 <script setup>
-import PotjeCard from '../components/PotjeCard.vue';
-import InstructionList from '../components/InstructionList.vue';
+import PotjeCard from '../components/cards/PotjeCard.vue';
+import InstructionList from '../components/lijst/InstructionList.vue';
 import { ref, onMounted } from 'vue';
 
 const Ip = `${window.location.hostname}:8000`;

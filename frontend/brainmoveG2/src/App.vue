@@ -1,8 +1,8 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router'
 import { computed } from 'vue'
-import Navbar from './components/Navbar.vue'
-import Header from './components/Header.vue'
+import Navbar from './components/navigatie/Navbar.vue'
+import Header from './components/navigatie/Header.vue'
 
 
 const route = useRoute()

@@ -85,37 +85,21 @@ const connectSocket = () => {
     
     socket.on('game_over', (data) => {
         console.log('Game over:', data);
-        // Parse the JSON string and navigate to game overview page with stats
-        const gameStats = JSON.parse(data);
-        router.push({
-            name: 'gameoverzicht',
-            params: { id: gameId.value },
-            state: { gameStats }
-        });
+        // Wait for 2 seconds to show the final result overlay before navigating
+        setTimeout(() => {
+            // Parse the JSON string and navigate to game overview page with stats
+            const gameStats = JSON.parse(data);
+            router.push({
+                name: 'gameoverzicht',
+                params: { id: gameId.value },
+                state: { gameStats }
+            });
+        }, 2000);
     });
     
     socket.on('disconnect', () => {
         console.log('Socket disconnected');
     });
-};
-
-const recordHit = async (coneId) => {
-    try {
-        const response = await fetch(`http://${Ip}/games/hit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                cone_id: coneId,
-                color: currentColor.value
-            })
-        });
-        const data = await response.json();
-        console.log('Hit recorded:', data);
-    } catch (error) {
-        console.error('Error recording hit:', error);
-    }
 };
 
 onMounted(() => {
