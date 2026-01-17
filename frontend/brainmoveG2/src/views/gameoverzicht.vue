@@ -9,6 +9,7 @@ const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
+const activeTab = ref('speloverzicht');
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -35,14 +36,31 @@ const accuracy = computed(() => {
     return Math.round((gameStats.value.correct_hits / total) * 100);
 });
 
+
+const openContent = (tabName) => {
+    activeTab.value = tabName;
+};
+
 </script>
 
 <template>
     <div class="c-overzichttab">
-        <button class="c-tabGame" onclick="openCity(event, 'scoreboard')">Scoreboard</button>
-        <button class="c-tabGame" onclick="openCity(event, 'speloverzicht')">Speloverzicht</button>
+        <button 
+            class="c-tabGame body-large" 
+            :class="{ 'c-tabGame--active': activeTab === 'scoreboard' }"
+            @click="openContent('scoreboard')"
+        >
+            Scoreboard
+        </button>
+        <button 
+            class="c-tabGame body-large" 
+            :class="{ 'c-tabGame--active': activeTab === 'speloverzicht' }"
+            @click="openContent('speloverzicht')"
+        >
+            Speloverzicht
+        </button>
     </div>
-    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main v-show="activeTab === 'speloverzicht'" class="c-content-wrapper u-justify-center u-viewport-height-80">
         <div class="c-title-div">
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
@@ -85,6 +103,12 @@ const accuracy = computed(() => {
         </div>
         <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
+    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper u-justify-center u-viewport-height-80">
+        <div class="c-title-div">
+            <h1>Scoreboard</h1>
+            <p class="body-large">Coming soon...</p>
+        </div>
+    </main>
 </template>
 
 <style>
@@ -112,6 +136,22 @@ const accuracy = computed(() => {
       gap: var(--spacing-09);
 
   }
+}
+
+.c-tabGame{
+    background: none;
+    cursor: pointer;
+    outline: inherit;
+    padding-bottom: var(--spacing-05);
+    border: none;
+    border-bottom: 3px solid var(--grey-15);
+    text-align: center;
+    width: 100%;
+    transition: border-color 0.2s ease;
+}
+
+.c-tabGame--active{
+    border-bottom: 3px solid var(--primary);
 }
 
 .c-title-div {
