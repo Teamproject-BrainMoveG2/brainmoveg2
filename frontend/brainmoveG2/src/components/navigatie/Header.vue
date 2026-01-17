@@ -78,10 +78,6 @@ export default {
 
 <style scoped>
 .c-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
   padding: var(--spacing-06);
   display: flex;

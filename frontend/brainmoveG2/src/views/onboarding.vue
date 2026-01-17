@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <main class="c-content-wrapper">
+  <main class="c-content-wrapper u-viewport-height u-justify-center">
     
     <div class="c-mascot__container">
       <img src="../assets/img/macot1.png" alt="BrainMove Mascot" class="c-mascot" />

@@ -45,7 +45,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="c-content-wrapper">
+  <main class="c-content-wrapper u-justify-center u-viewport-height-80">
 
     <div class="c-mascot__container">
       <img src="../assets/img/macot2.png" alt="BrainMove Mascot" class="c-mascot" />

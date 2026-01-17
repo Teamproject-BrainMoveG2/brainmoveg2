@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
+import StatCard from '../components/cards/StatCard.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -37,44 +38,39 @@ const accuracy = computed(() => {
 </script>
 
 <template>
-    <main class="c-content-wrapper">
+    <div class="c-overzichttab">
+        <button class="c-tabGame" onclick="openCity(event, 'scoreboard')">Scoreboard</button>
+        <button class="c-tabGame" onclick="openCity(event, 'speloverzicht')">Speloverzicht</button>
+    </div>
+    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
         <div class="c-title-div">
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
         </div>
         <div class="c-stats-grid">
-            <div class="c-stat-card">
-                <p class="c-stat-label">Avg. snelheid</p>
-                <div class="c-stats-content">
-                    <Clock :size="32" class="c-stat-icon" />
-                    <p class="c-stat-value">{{ gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0 }}MS</p>
-                </div>
-            </div>
+            <StatCard 
+                label="Avg. snelheid" 
+                :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}MS`"
+                :icon="Clock"
+            />
             
-            <div class="c-stat-card">
-                <p class="c-stat-label">Aantal rondes</p>
-                <div class="c-stats-content">
-                    <RotateCw :size="32" class="c-stat-icon" />
-                    <p class="c-stat-value">{{ gameStats ? gameStats.total_rounds : 0 }}</p>
-                </div>
-            </div>
+            <StatCard 
+                label="Aantal rondes" 
+                :value="gameStats ? gameStats.total_rounds : 0"
+                :icon="RotateCw"
+            />
             
-            <div class="c-stat-card">
-                <p class="c-stat-label">Accuracy</p>
-                <div class="c-stats-content">
-                    <Target :size="32" class="c-stat-icon" />
-                    <p class="c-stat-value">{{ accuracy }}%</p>
-                </div>
-            </div>
+            <StatCard 
+                label="Accuracy" 
+                :value="`${accuracy}%`"
+                :icon="Target"
+            />
             
-            <div class="c-stat-card">
-                <p class="c-stat-label">Niveau</p>
-                <div class="c-stats-content">
-                     <Trophy :size="32" class="c-stat-icon" />
-                     <p class="c-stat-value">PRO</p>
-                </div>
-               
-            </div>
+            <StatCard 
+                label="Niveau" 
+                value="PRO"
+                :icon="Trophy"
+            />
         </div>
         <div class="c-results-container">
             <div class="c-result-card c-result-card--correct">
@@ -92,6 +88,32 @@ const accuracy = computed(() => {
 </template>
 
 <style>
+
+.c-overzichttab {
+    padding: 0 var(--spacing-06);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-width: 26.25rem;
+  margin: 0 auto;
+  margin-top: 2rem;
+
+
+  @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+
+  }
+}
+
 .c-title-div {
     display: flex;
     flex-direction: column;
@@ -104,50 +126,6 @@ const accuracy = computed(() => {
     gap: 16px;
     margin-top: var(--spacing-xlarge);
     width: 100%;
-}
-
-.c-stat-card {
-    text-align: center;
-    background-color: var(--white);
-    padding: 16px;
-    border-radius: var(--radius-s);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-height: 140px;
-    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1);
-}
-
-.c-stat-card:nth-child(1),
-.c-stat-card:nth-child(4) {
-    background-color: var(--primary-light);
-}
-
-.c-stats-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: 8px;
-    align-items: center;
-    gap: 4px;
-}
-
-
-.c-stat-icon {
-    width: 32px;
-    height: 32px;
-    color: var(--text-primary);
-}
-
-.c-stat-value {
-    font-family: "Bebas Neue", sans-serif;
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 40px;
-    color: var(--text-primary);
-    margin: 0;
 }
 
 .c-results-container {
