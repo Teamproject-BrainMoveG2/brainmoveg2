@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Clock, RotateCw, Target, Trophy } from 'lucide-vue-next';
+import { Clock, RotateCw, Target, Trophy, Info } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 import StatCard from '../components/cards/StatCard.vue';
 
@@ -112,12 +112,158 @@ const openContent = (tabName) => {
                 <h1 class="c-scoreCircle__number">5454</h1>
                 <h2 class="c-scoreCircle__text">uw score</h2>
             </div>
-            
+        </div>
+        <div class="c-leaderboard">
+            <div class="c-leaderboard__head">
+                <p class="c-leaderboard__head-title">scoreboard</p>
+                <Info class="c-leaderboard__head-icon"/>
+            </div>
+            <table class="c-table">
+                <thead>
+                    <tr class="c-table__headings">
+                        <th >POS.</th>
+                        <th >Naam</th>
+                        <th >score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="c-table__row">
+                        <td>
+                            <div class="c-table__trophy">
+                                <Trophy class="c-table__trophy-icon"/>
+                                <span>1</span>
+                            </div>
+                        </td>
+                        
+                        <td>Jan</td>
+                        <td>6000</td>
+                    </tr>
+                     <tr class="c-table__row">
+                        <td>
+                            <div class="c-table__trophy">
+                                <Trophy class="c-table__trophy-icon"/>
+                                <span>1</span>
+                            </div>
+                        </td>
+                        
+                        <td>Jan</td>
+                        <td>6000</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
 </template>
 
 <style>
+
+.c-table{
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.c-table__headings {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-04);
+    border-bottom: 2px solid var(--grey-95);
+    font-size: var(--font-size-5);
+    line-height: var(--font-size-6);
+    font-family: "Bebas Neue", sans-serif;
+    gap: var(--spacing-07);
+    text-decoration: none;
+}
+
+th {
+    font-weight: normal;
+}
+
+th:nth-child(1),
+th:nth-child(3) {
+    width: auto;
+    flex-shrink: 0;
+}
+
+th:nth-child(2) {
+    flex-grow: 1;
+    text-align: left;
+}
+
+td:nth-child(1),
+td:nth-child(3) {
+    width: auto;
+    flex-shrink: 0;
+}
+
+td:nth-child(2) {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.c-table__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-05) var(--spacing-04) ;
+    border-bottom: 2px solid var(--grey-15);
+    gap: var(--spacing-04);
+
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: var(--font-size-3); 
+    line-height: 1.5rem;
+    font-weight: var(--font-weight-regular);
+    letter-spacing: 0;
+}
+
+
+
+.c-table__trophy {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-02);
+    border: 1px solid var(--grey-85);
+    padding: var(--spacing-02) var(--spacing-03);
+    border-radius: var(--radius-s);
+} 
+
+.c-table__trophy-icon {
+    width: .875rem;
+    height: .875rem;
+} 
+
+.c-leaderboard {
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    padding: var(--spacing-04) var(--spacing-05);
+    box-shadow: 0 4px 16.3px 0 rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+    gap: var(--spacing-04);
+    border-radius: var(--radius-s);
+}
+
+.c-leaderboard__head {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+    padding: 0 var(--spacing-04);
+}
+
+.c-leaderboard__head-title{
+    font-size: var(--font-size-5);
+    line-height: var(--font-size-6);
+    font-family: "Bebas Neue", sans-serif;
+
+}
+
+.c-leaderboard__head-icon{
+    width: 1.5rem;
+    height: 1.5rem;
+    
+}
 
 .c-scoreCircle {
     width: 11.25rem;
@@ -130,6 +276,7 @@ const openContent = (tabName) => {
     border: 3px solid var(--primary);
     margin: 2rem auto;
     padding: 1.5625rem;
+    
 }
 
 .c-scoreCircle__inner {
