@@ -105,13 +105,51 @@ const openContent = (tabName) => {
     </main>
     <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper u-justify-center u-viewport-height-80">
         <div class="c-title-div">
-            <h1>Scoreboard</h1>
-            <p class="body-large">Coming soon...</p>
+            <h1>Game name</h1>
+        </div>
+        <div class="c-scoreCircle">
+            <div class="c-scoreCircle__inner">
+                <h1 class="c-scoreCircle__number">5454</h1>
+                <h2 class="c-scoreCircle__text">uw score</h2>
+            </div>
+            
         </div>
     </main>
 </template>
 
 <style>
+
+.c-scoreCircle {
+    width: 11.25rem;
+    height: 11.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-04);
+    border: 3px solid var(--primary);
+    margin: 2rem auto;
+    padding: 1.5625rem;
+}
+
+.c-scoreCircle__inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.c-scoreCircle__number {
+    font-size: var(--font-size-10);
+    line-height: var(--font-size-11);
+    margin-top: 2rem;
+    color: var(--primary);
+}
 
 .c-overzichttab {
     padding: 0 var(--spacing-06);
