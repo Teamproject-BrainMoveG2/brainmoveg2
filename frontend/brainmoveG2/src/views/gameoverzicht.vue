@@ -4,12 +4,20 @@ import { useRoute, useRouter } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 import StatCard from '../components/cards/StatCard.vue';
+import ScoreboardRow from '../components/ScoreboardRow.vue';
+import ScoreCircle from '../components/ScoreCircle.vue';
 
 const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
 const activeTab = ref('speloverzicht');
+const scoreboardData = ref([
+  { position: 1, name: 'Alice', score: 6500, isPlayer: false },
+  { position: 2, name: 'Bob', score: 6200, isPlayer: false },
+  { position: 3, name: 'Charlie', score: 6000, isPlayer: false },
+  { position: 4, name: 'You', score: 5454, isPlayer: true },
+]);
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -34,6 +42,11 @@ const accuracy = computed(() => {
     const total = gameStats.value.correct_hits + gameStats.value.wrong_hits + gameStats.value.missed_hits;
     if (total === 0) return 0;
     return Math.round((gameStats.value.correct_hits / total) * 100);
+});
+
+const playerScore = computed(() => {
+    const player = scoreboardData.value.find(row => row.isPlayer);
+    return player ? player.score : 0;
 });
 
 
@@ -107,12 +120,7 @@ const openContent = (tabName) => {
         <div class="c-title-div">
             <h1>Game name</h1>
         </div>
-        <div class="c-scoreCircle">
-            <div class="c-scoreCircle__inner">
-                <h1 class="c-scoreCircle__number">5454</h1>
-                <h2 class="c-scoreCircle__text">uw score</h2>
-            </div>
-        </div>
+        <ScoreCircle :score="playerScore" />
         <div class="c-leaderboard">
             <div class="c-leaderboard__head">
                 <p class="c-leaderboard__head-title">scoreboard</p>
@@ -127,50 +135,14 @@ const openContent = (tabName) => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="c-table__row">
-                        <td>
-                            <div class="c-table__trophy">
-                                <Trophy class="c-table__trophy-icon"/>
-                                <span>1</span>
-                            </div>
-                        </td>
-                        
-                        <td>Jan</td>
-                        <td>6000</td>
-                    </tr>
-                     <tr class="c-table__row">
-                        <td>
-                            <div class="c-table__trophy">
-                                <Trophy class="c-table__trophy-icon"/>
-                                <span>1</span>
-                            </div>
-                        </td>
-                        
-                        <td>Jan</td>
-                        <td>6000</td>
-                    </tr>
-                    <tr class="c-table__row">
-                        <td>
-                            <div class="c-table__trophy">
-                                <Trophy class="c-table__trophy-icon"/>
-                                <span>1</span>
-                            </div>
-                        </td>
-                        
-                        <td>Jan</td>
-                        <td>6000</td>
-                    </tr>
-                    <tr class="c-table__row c-table__row--player">
-                        <td>
-                            <div class="c-table__trophy c-table__trophy--player">
-                                <Medal class="c-table__trophy-icon"/>
-                                <span>1</span>
-                            </div>
-                        </td>
-                        
-                        <td>Jan</td>
-                        <td>6000</td>
-                    </tr>
+                    <ScoreboardRow
+                      v-for="(row, index) in scoreboardData"
+                      :key="index"
+                      :position="row.position"
+                      :name="row.name"
+                      :score="row.score"
+                      :is-player="row.isPlayer"
+                    />
                 </tbody>
             </table>
         </div>
@@ -244,6 +216,18 @@ td:nth-child(2) {
     border: none;
 }
 
+.c-table__row:nth-child(1) .c-table__trophy, .c-table__row:nth-child(1) .c-table__trophy-icon {
+
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+}
+
+.c-table__row:nth-child(3) .c-table__trophy, .c-table__row:nth-child(3) .c-table__trophy-icon {
+
+    border-color: var(--accent-orange-dark);
+    color: var(--accent-orange-dark);
+}
+
 .c-table__row--player{
 
     background-color: var(--primary-light);
@@ -275,8 +259,6 @@ td:nth-child(2) {
     display: flex;
     flex-direction: column;
     text-align: start;
-    padding: var(--spacing-04) var(--spacing-05);
-
     width: 100%;
     box-sizing: border-box;
     gap: var(--spacing-04);
@@ -301,38 +283,6 @@ td:nth-child(2) {
     width: 1.5rem;
     height: 1.5rem;
     
-}
-
-.c-scoreCircle {
-    width: 11.25rem;
-    height: 11.25rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-04);
-    border: 3px solid var(--primary);
-    padding: 1.5625rem;
-    
-}
-
-.c-scoreCircle__inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: var(--primary-light);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    
-}
-
-.c-scoreCircle__number {
-    font-size: var(--font-size-10);
-    line-height: var(--font-size-11);
-    margin-top: 2rem;
-    color: var(--primary);
 }
 
 .c-overzichttab {
