@@ -39,7 +39,7 @@ const selectDifficulty = (difficulty) => {
 </script>
 
 <template>
-    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main class="c-content-wrapper">
         <div class="c-title">
             <h1>Game</h1>
             <p>Description</p>

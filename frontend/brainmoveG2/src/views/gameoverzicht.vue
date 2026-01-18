@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Clock, RotateCw, Target, Trophy, Info } from 'lucide-vue-next';
+import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 import StatCard from '../components/cards/StatCard.vue';
 
@@ -60,7 +60,7 @@ const openContent = (tabName) => {
             Speloverzicht
         </button>
     </div>
-    <main v-show="activeTab === 'speloverzicht'" class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main v-show="activeTab === 'speloverzicht'" class="c-content-wrapper">
         <div class="c-title-div">
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
@@ -103,7 +103,7 @@ const openContent = (tabName) => {
         </div>
         <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
-    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
         <div class="c-title-div">
             <h1>Game name</h1>
         </div>
@@ -149,9 +149,32 @@ const openContent = (tabName) => {
                         <td>Jan</td>
                         <td>6000</td>
                     </tr>
+                    <tr class="c-table__row">
+                        <td>
+                            <div class="c-table__trophy">
+                                <Trophy class="c-table__trophy-icon"/>
+                                <span>1</span>
+                            </div>
+                        </td>
+                        
+                        <td>Jan</td>
+                        <td>6000</td>
+                    </tr>
+                    <tr class="c-table__row c-table__row--player">
+                        <td>
+                            <div class="c-table__trophy c-table__trophy--player">
+                                <Medal class="c-table__trophy-icon"/>
+                                <span>1</span>
+                            </div>
+                        </td>
+                        
+                        <td>Jan</td>
+                        <td>6000</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
+        <RouterLink :class="buttonClass" :to="``">Opnieuw spelen</RouterLink>
     </main>
 </template>
 
@@ -217,7 +240,17 @@ td:nth-child(2) {
     letter-spacing: 0;
 }
 
+.c-table__row:nth-child(3) {
+    border: none;
+}
 
+.c-table__row--player{
+
+    background-color: var(--primary-light);
+    border-radius: var(--radius);
+    border: none;
+
+}
 
 .c-table__trophy {
     display: flex;
@@ -226,7 +259,12 @@ td:nth-child(2) {
     border: 1px solid var(--grey-85);
     padding: var(--spacing-02) var(--spacing-03);
     border-radius: var(--radius-s);
-} 
+}
+
+.c-table__trophy--player {
+    border: none;
+    
+}
 
 .c-table__trophy-icon {
     width: .875rem;
@@ -238,7 +276,7 @@ td:nth-child(2) {
     flex-direction: column;
     text-align: start;
     padding: var(--spacing-04) var(--spacing-05);
-    box-shadow: 0 4px 16.3px 0 rgba(0, 0, 0, 0.1);
+
     width: 100%;
     box-sizing: border-box;
     gap: var(--spacing-04);
@@ -274,7 +312,6 @@ td:nth-child(2) {
     justify-content: center;
     padding: var(--spacing-04);
     border: 3px solid var(--primary);
-    margin: 2rem auto;
     padding: 1.5625rem;
     
 }
@@ -305,20 +342,22 @@ td:nth-child(2) {
   align-items: center;
   max-width: 26.25rem;
   margin: 0 auto;
-  margin-top: 2rem;
+  padding-top: 2rem;
+  margin-bottom: 2rem;
+  
 
 
   @media (min-width: 768px) {
 
     max-width: 500px;
-    gap: var(--spacing-08);
+   
 
   }
 
   @media (min-width: 1024px) {
 
       max-width: 550px;
-      gap: var(--spacing-09);
+    
 
   }
 }
@@ -351,6 +390,7 @@ td:nth-child(2) {
     gap: 16px;
     margin-top: var(--spacing-xlarge);
     width: 100%;
+  
 }
 
 .c-results-container {
