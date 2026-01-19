@@ -78,7 +78,7 @@ export default {
   border-radius: var(--radius-s);
   padding: var(--spacing-05);
   max-width: 500px;
-  width: 60%;
+  width: 75%;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);

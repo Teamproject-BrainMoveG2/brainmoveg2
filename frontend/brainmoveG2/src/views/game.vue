@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import io from 'socket.io-client';
 import { X } from 'lucide-vue-next';
@@ -8,6 +9,7 @@ const Ip = `${window.location.hostname}:8000`;
 const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
+
 const showCountdown = ref(true);
 const countdownValue = ref(3);
 const currentRound = ref(0);
@@ -16,6 +18,9 @@ const backgroundColor = ref('var(--grey-2)');
 const showResultOverlay = ref(false);
 const roundResult = ref('');
 let socket = null;
+
+// Get settings from router state
+const settings = (typeof window !== 'undefined' && window.history.state && window.history.state.state) ? window.history.state.state : {};
 
 const startCountdown = () => {
     const interval = setInterval(() => {
@@ -39,7 +44,14 @@ const startGame = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                username: settings.username || 'speler',
+                mode_id: settings.mode_id || 1,
+                difficulty_id: settings.difficulty_id || 1,
+                aantal_rondes: settings.aantal_rondes || 1,
+                aantal_kleuren: settings.aantal_kleuren || 1
+            })
         });
         const data = await response.json();
         console.log('Game started:', data);

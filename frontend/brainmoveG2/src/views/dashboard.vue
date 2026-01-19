@@ -1,5 +1,12 @@
+
 <script setup>
+import { onMounted } from 'vue';
 import GameCard from '../components/cards/GameCard.vue';
+import { useGames } from '../composables/useGames';
+
+const { modes, fetchGames } = useGames();
+
+onMounted(fetchGames);
 </script>
 
 <template>
@@ -9,11 +16,13 @@ import GameCard from '../components/cards/GameCard.vue';
         </div>
         
         <div class="c-game-grid">
-            <GameCard 
-                title="Speed reflex game"
-                gameId= "1"
-                description="Raak de juiste kleur aan binnen het tijdslimiet"
-                backgroundColor="var(--accent-green-light)"
+            <GameCard
+                v-for="mode in modes"
+                :key="mode.spelmodus_id"
+                :title="mode.naam"
+                :gameId="mode.spelmodus_id.toString()"
+                :description="mode.description"
+                :icon="mode.icon"
             />
         </div>
     </main>

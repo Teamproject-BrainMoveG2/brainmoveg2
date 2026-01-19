@@ -13,7 +13,7 @@ defineProps({
 
 <template>
     <div class="c-setting-section">
-        <p v-if="title">{{ title }}</p>
+        <p class="small-body" v-if="title">{{ title }}</p>
         <div :class="['c-setting-options', layout === 'grid' ? 'c-setting-options--grid' : '']">
             <slot></slot>
         </div>
