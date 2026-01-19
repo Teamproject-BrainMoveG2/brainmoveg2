@@ -29,5 +29,11 @@ async def get_tutorial_for_mode(mode_id: int, settings: Annotated[config.Setting
     steps = TutorialRepository.get_rondes_by_mode_id(settings=settings, mode_id=mode_id)
     if not steps:
         raise HTTPException(status_code=404, detail="Game mode not found.")
-    return {"image": mode["image"], "steps": steps }
+    steps_data = []
+    for step in steps:
+        steps_data.append({
+            "number": step["number"],
+            "description": step["description"],
+        })
+    return {"image": mode["image"], "steps": steps_data }
    
