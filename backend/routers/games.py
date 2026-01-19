@@ -24,7 +24,7 @@ router = APIRouter(
 async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service)):
     logger.info("Starting a new game via API.")
     try:
-        result = await game_service.start_game(gameStart.username, gameStart.mode_id, gameStart.difficulty_id, sio, cone_service, settings)
+        result = await game_service.start_game(gameStart.username, gameStart.mode_id, gameStart.difficulty_id, gameStart.aantal_rondes, gameStart.aantal_kleuren, sio, cone_service, settings)
     except Exception as e:
         logger.error(f"Error starting game: {e}")
         raise HTTPException(status_code=400, detail=str(e))

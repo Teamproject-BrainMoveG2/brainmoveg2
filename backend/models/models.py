@@ -50,3 +50,5 @@ class GameStartDTO(BaseModel):
     username: str
     mode_id: int
     difficulty_id: int
+    aantal_rondes: int
+    aantal_kleuren: int
