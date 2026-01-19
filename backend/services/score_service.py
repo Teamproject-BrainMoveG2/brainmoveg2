@@ -1,6 +1,6 @@
 import config
 from repositories.gamesession_repository import GameSessionRepository
-
+from models.models import ScoreEntry
 ACCURACY_WEIGHT = 0.2
 REACTION_WEIGHT = 0.8
 ACCURACY_MULTIPLIER = 10
@@ -15,4 +15,13 @@ class ScoreService:
         return score
     def get_top_scores(self, settings: config.Settings, limit: int = 3) -> list[dict]:
         top_scores = GameSessionRepository.get_top_scores(settings, limit=limit)
-        return top_scores
+        top_scores_models = []
+        if top_scores:
+            for ts in top_scores:
+                top_scores_models.append(ScoreEntry(
+                    username=ts['username'],
+                    score=ts['score'],
+                    place=ts['rank']
+                ))
+            return top_scores_models
+        return []
