@@ -32,7 +32,7 @@ class ConeStatusDTO(BaseModel):
     battery_percentage: int
 class ScoreEntry(BaseModel):
     username: str
-    score: float
+    score: float | None
     place: int
 
 class GameOverStats(BaseModel):
@@ -42,7 +42,7 @@ class GameOverStats(BaseModel):
     wrong_hits: int
     missed_hits: int
     average_reaction_speed_ms: float
-    score: float
+    score: ScoreEntry
     top_scores: list[ScoreEntry] = []
 
 
@@ -50,3 +50,5 @@ class GameStartDTO(BaseModel):
     username: str
     mode_id: int
     difficulty_id: int
+    aantal_rondes: int
+    aantal_kleuren: int

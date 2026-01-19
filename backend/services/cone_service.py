@@ -1,6 +1,7 @@
 from datetime import datetime
 import logging
 
+from fastapi.encoders import jsonable_encoder
 import socketio
 from models.models import Cone, ConeStatusDTO, ConeWithStatus
 
@@ -21,7 +22,7 @@ class ConeService:
                 c.battery_percentage = coneStatus.battery_percentage
                 c.last_status = datetime.now()
                 self.logger.info(f"Cone updated: {c}")
-                await sio.emit('cone_update', self.get_cones())
+                await sio.emit('cone_update', jsonable_encoder(self.get_cones()))
                 break
     def get_cones(self):
         conesWithStatus = []
@@ -42,6 +43,8 @@ class ConeService:
                 ))
         return conesWithStatus
 
-    def get_active_cones(self):
+    def get_active_cones(self, max_cones: int = None):
         active_cones = [c for c in cones if c.battery_percentage is not None and (datetime.now() - c.last_status).total_seconds() < 60]
+        if max_cones is not None:
+            active_cones = active_cones[:max_cones]
         return active_cones

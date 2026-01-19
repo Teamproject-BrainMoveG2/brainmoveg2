@@ -1,3 +1,7 @@
+// MQTT code
+#include <ArduinoJson.h>
+#include <PubSubClient.h>
+
 // Wifi code
 #include "WiFi.h"
 #include <HTTPClient.h>
@@ -13,6 +17,13 @@ static const uint16_t HIT_MM = 150;     // detectiedrempel
 static const uint16_t RELEASE_MM = 180; // loslaat-drempel (hysteresis)
 static unsigned long lastHitMs = 0;
 static const unsigned long HIT_COOLDOWN_MS = 300; // extra bescherming tegen dubbel triggeren
+
+// MQTT Configuration
+const char *MQTT_SERVER = "10.42.0.1"; // RPi hotspot IP
+const int MQTT_PORT = 1883;
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+String mqtt_topic_buzzer;
 
 // Buzzer code
 const int BUZZER_PIN = D6;
@@ -44,10 +55,13 @@ void setup()
 
   // I2C + sensor init
   Wire.begin();
+  digitalWrite(BUZZER_PIN, LOW); // reassert low before sensor init
+
   if (!lox.begin())
   {
     Serial.println("Failed to boot VL53L0X");
-    // Fail-safe: buzzer/led indicatie en stop
+    // Fail-safe: led indicatie en stop
+    digitalWrite(BUZZER_PIN, LOW);
     while (true)
     {
       delay(1000);
@@ -77,6 +91,9 @@ void setup()
     Serial.println("\nWiFi FAIL (timeout)");
     // Hier kan je beslissen: verder zonder WiFi, of resetten, of blijven proberen.
   }
+  // MQTT code
+  setup_mqtt();
+
   // batterij code
   lees_batterij();
 }
@@ -91,6 +108,13 @@ void loop()
   // delay(1000);
   // beep(1, 500, 100);
   // delay(2000);
+
+  // MQTT
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    reconnect_mqtt();
+    mqttClient.loop();
+  }
 
   // TOF code
   tof();
@@ -235,5 +259,60 @@ void setLedByBattery(int percent)
   else
   {
     setRgb(true, false, false); // rood
+  }
+}
+
+// MQTT code
+void setup_mqtt()
+{
+  mqtt_topic_buzzer = String("brainmove/cones/") + KLEUR + "/buzzer";
+  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
+  mqttClient.setCallback(mqtt_callback);
+}
+
+void mqtt_callback(char *topic, byte *payload, unsigned int length)
+{
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, payload, length);
+
+  String action = doc["action"];
+  String pattern = doc["pattern"];
+  int duration = doc["duration_ms"];
+
+  if (action == "beep")
+  {
+    trigger_buzzer_pattern(pattern, duration);
+  }
+}
+
+void trigger_buzzer_pattern(String pattern, int duration)
+{
+  if (pattern == "single")
+  {
+    beep(1, duration, 100);
+  }
+  else if (pattern == "double")
+  {
+    beep(2, duration, 100);
+  }
+  else if (pattern == "triple")
+  {
+    beep(3, duration, 100);
+  }
+  else if (pattern == "long")
+  {
+    beep(1, duration, 200);
+  }
+}
+
+void reconnect_mqtt()
+{
+  if (!mqttClient.connected())
+  {
+    if (mqttClient.connect("ESP32"))
+    {
+      mqttClient.subscribe(mqtt_topic_buzzer.c_str());
+      Serial.println("MQTT Connected and subscribed to: " + mqtt_topic_buzzer);
+    }
   }
 }
