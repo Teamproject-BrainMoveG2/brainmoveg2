@@ -10,9 +10,12 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 
 </script>
 
+
 <template>
   <Header v-if="showHeader" />
+  <div :style="showNavbar ? 'padding-bottom: 100px;' : ''">
     <RouterView />
+  </div>
   <Navbar v-if="showNavbar" />
 </template>
 
