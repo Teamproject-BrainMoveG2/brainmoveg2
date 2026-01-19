@@ -1,3 +1,4 @@
+import socketio
 import config
 from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
@@ -20,8 +21,8 @@ router = APIRouter(
 )
 
 @router.post("/status")
-async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depends(get_cone_service)):
-    cone_service.register_cone(cone)
+async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depends(get_cone_service), sio: socketio.AsyncServer = Depends(get_sio)):
+    await cone_service.register_cone(cone, sio)
     logger.info(f"Cone status received: {cone}")
     return {"message": f"Cone {cone.cone_id} status recorded."}
 

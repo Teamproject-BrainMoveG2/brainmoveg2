@@ -1,5 +1,7 @@
 from datetime import datetime
 import logging
+
+import socketio
 from models.models import Cone, ConeStatusDTO, ConeWithStatus
 
 colors = ['red', 'blue', 'green', 'yellow']
@@ -13,12 +15,13 @@ class ConeService:
         self.logger = logging.getLogger(__name__) 
         self.logger.info("ConeService initialized.")
 
-    def register_cone(self, coneStatus: ConeStatusDTO) -> None:
+    async def register_cone(self, coneStatus: ConeStatusDTO, sio: socketio.AsyncServer) -> None:
         for c in cones:
             if c.cone_id == coneStatus.cone_id:
                 c.battery_percentage = coneStatus.battery_percentage
                 c.last_status = datetime.now()
                 self.logger.info(f"Cone updated: {c}")
+                await sio.emit('cone_update', self.get_cones())
                 break
     def get_cones(self):
         conesWithStatus = []
