@@ -13,8 +13,22 @@ class ScoreService:
         accuracy = correct_hits / total_rounds * ACCURACY_MULTIPLIER
         score = SCORE_MULTIPLIER * (ACCURACY_WEIGHT * accuracy + REACTION_WEIGHT * MAX_REACTION_TIME_MS/average_reaction_speed)
         return score
-    def get_top_scores(self, settings: config.Settings, limit: int = 3) -> list[dict]:
-        top_scores = GameSessionRepository.get_top_scores(settings, limit=limit)
+    
+    def calculate_level(self, score: float) -> int:
+        if score >= 1500:
+            return 5
+        elif score >= 1200:
+            return 4
+        elif score >= 900:
+            return 3
+        elif score >= 600:
+            return 2
+        elif score >= 300:
+            return 1
+        else:
+            return 0
+    def get_top_scores(self, settings: config.Settings, mode_id: int, limit: int = 3) -> list[dict]:
+        top_scores = GameSessionRepository.get_top_scores(settings, mode_id, limit=limit)
         top_scores_models = []
         if top_scores:
             for ts in top_scores:

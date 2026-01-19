@@ -24,6 +24,7 @@ currentCone = None
 totalTimeMs = 0
 session_id = None
 session_username = ""
+session_mode_id = 0
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
@@ -31,7 +32,7 @@ class GameService:
 
 
     async def start_game(self, username: str, mode_id: int, difficulty_id: int, aantal_rondes: int, aantal_kleuren: int, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> str:
-        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username
+        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
@@ -39,6 +40,7 @@ class GameService:
         maxRounds = aantal_rondes
         maxCones = aantal_kleuren
         session_username = username
+        session_mode_id = mode_id
         difficulty = difficulty_id
         TOO_LATE_MS = TOO_LATE.get(difficulty_id, 5000)
         try:
@@ -76,8 +78,7 @@ class GameService:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings) -> None:
-
-        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id
         if len(roundList) >= maxRounds:
             raise ValueError("Maximum number of rounds reached.")
         connectedCones = coneService.get_active_cones()
@@ -130,16 +131,19 @@ class GameService:
                 ended_on=datetime.now(timezone.utc),
                 score=playerScore.score
             )
-            top_scores = scoreService.get_top_scores(settings, limit=3)
+            top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=3)
             if top_scores is None:
                 top_scores = []
+            niveau = scoreService.calculate_level(playerScore.score)
             gameoverStats = GameOverStats(
                 total_rounds=len(roundList),
                 total_time_ms=totalTimeMs,
+                niveau=niveau,
                 correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
                 wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
                 missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
                 average_reaction_speed_ms=totalTimeMs / len(roundList),
+                rounds=roundList,
                 score=playerScore,
                 top_scores=top_scores
             )

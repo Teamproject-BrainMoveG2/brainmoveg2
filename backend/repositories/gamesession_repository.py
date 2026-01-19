@@ -14,9 +14,9 @@ class GameSessionRepository:
         return Database.execute_sql(sql, params=params, settings=settings)
     
     @staticmethod
-    def get_top_scores(settings, limit=10):
-        sql = "SELECT username, score, RANK() OVER (ORDER BY score DESC) AS rank FROM spelsessie ORDER BY score DESC LIMIT %s"
-        params = [limit]
+    def get_top_scores(settings, mode_id, limit=10):
+        sql = "SELECT username, score, RANK() OVER (ORDER BY score DESC) AS rank FROM spelsessie WHERE spelmodus_id = %s ORDER BY score DESC LIMIT %s"
+        params = [mode_id, limit]
         return Database.get_rows(sql, params=params, settings=settings)
     
     @staticmethod
