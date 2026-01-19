@@ -1,7 +1,6 @@
 <script setup>
-
-import { useRouter, useRoute } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useGameColors } from '../composables/useGameColors';
 import InstructionList from '../components/lijst/InstructionList.vue';
 
@@ -10,7 +9,7 @@ const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const tutorial = ref({steps: [] });
-const settings = route.state || {};
+const settings = route.query;
 
 const Ip = `${window.location.hostname}:8000`;
 
@@ -30,7 +29,7 @@ function startGameAndGo() {
     router.push({
         name: 'game',
         params: { id: gameId.value },
-        state: settings
+        query: settings
     });
 }
 
