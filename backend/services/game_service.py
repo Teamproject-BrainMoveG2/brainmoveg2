@@ -1,7 +1,11 @@
+from typing_extensions import Annotated
+import config
 from models.models import Round, RoundResult, Cone, GameOverStats
 from datetime import datetime, timezone
 from services.cone_service import ConeService 
 from services.score_service import ScoreService
+from repositories.ronde_repository import RondeRepository
+from repositories.gamesession_repository import GameSessionRepository
 from fastapi import Depends
 import random
 import socketio
@@ -15,17 +19,27 @@ roundList = []
 currentRoundStartTime = None
 currentCone = None
 totalTimeMs = 0
+session_id = None
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
         self.logger.info("GameService initialized.")
 
 
-    async def start_game(self, sio: socketio.AsyncServer, coneService: ConeService) -> str:
+    async def start_game(self, username: str, mode_id: int, difficulty_id: int, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> str:
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
+        session_id = GameSessionRepository.create_session(
+            settings=settings,
+            username=username,
+            mode_id=mode_id,
+            difficulty_id=difficulty_id,
+            started_on=datetime.now(timezone.utc),
+            ended_on=None
+        )
+
         await self.new_round(sio, coneService)
         return "Game started!"
     
@@ -45,7 +59,7 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService) -> None:
+    async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings) -> None:
 
         global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
         if len(roundList) >= maxRounds:
@@ -89,6 +103,7 @@ class GameService:
             playerScore = scoreService.calculate_score(
                 total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList)
             )
+            top_scores = scoreService.get_top_scores(settings, limit=3)
             gameoverStats = GameOverStats(
                 total_rounds=len(roundList),
                 total_time_ms=totalTimeMs,
@@ -96,13 +111,27 @@ class GameService:
                 wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
                 missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
                 average_reaction_speed_ms=totalTimeMs / len(roundList),
-                score=playerScore
+                score=playerScore,
+                top_scores=top_scores
             )
             # Reset game state
             roundList = []
             totalTimeMs = 0
             currentRoundStartTime = None
             currentCone = None
+            for r in roundList:
+                RondeRepository.create_ronde(settings, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+            
+            GameSessionRepository.end_session(
+                settings=settings,
+                session_id=session_id,
+                ended_on=datetime.now(timezone.utc),
+                score=playerScore
+            )
+            player_rank = GameSessionRepository.get_player_rank(settings, session_id)
+            playerScore.rank = player_rank
+            gameoverStats.score = playerScore
+
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
             await asyncio.sleep(1)  # brief pause before next round
