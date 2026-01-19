@@ -21,7 +21,11 @@ router = APIRouter(
 @router.post("/start")
 async def start_game(game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service)):
     logger.info("Starting a new game via API.")
-    result = await game_service.start_game(sio, cone_service)
+    try:
+        result = await game_service.start_game(sio, cone_service)
+    except Exception as e:
+        logger.error(f"Error starting game: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     return {"message":result}
 
 @router.post("/hit")
@@ -31,6 +35,9 @@ async def record_cone_hit(cone: ConeDTO, game_service: GameService = Depends(get
     except ValueError as ve:
         logger.error(f"Error recording cone hit: {ve}")
         raise HTTPException(status_code=400, detail="No round is in progress.")
+    except Exception as e:
+        logger.error(f"Error recording cone hit: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     return {"message": f"Cone {cone.cone_id} hit recorded."}
 
 
