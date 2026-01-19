@@ -1,6 +1,7 @@
 import config
 from repositories.gamesession_repository import GameSessionRepository
 from models.models import ScoreEntry
+from repositories.niveau_repository import NiveauRepository
 ACCURACY_WEIGHT = 0.2
 REACTION_WEIGHT = 0.8
 ACCURACY_MULTIPLIER = 10
@@ -15,18 +16,23 @@ class ScoreService:
         return score
     
     def calculate_level(self, score: float) -> int:
+        niveau = 0
         if score >= 1500:
-            return 5
+            niveau = 5
         elif score >= 1200:
-            return 4
+            niveau = 4
         elif score >= 900:
-            return 3
+            niveau = 3
         elif score >= 600:
-            return 2
+            niveau = 2
         elif score >= 300:
-            return 1
+            niveau = 1
         else:
-            return 0
+            niveau = 0
+
+        niveau_text = NiveauRepository.get_niveau_by_id(None, niveau)
+        return niveau_text
+
     def get_top_scores(self, settings: config.Settings, mode_id: int, limit: int = 3) -> list[dict]:
         top_scores = GameSessionRepository.get_top_scores(settings, mode_id, limit=limit)
         top_scores_models = []
