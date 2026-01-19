@@ -8,6 +8,12 @@
 
 Adafruit_VL53L0X lox;
 
+static bool tofArmed = true;                 // mag er een nieuwe hit komen?
+static const uint16_t HIT_MM = 150;          // detectiedrempel
+static const uint16_t RELEASE_MM = 180;      // loslaat-drempel (hysteresis)
+static unsigned long lastHitMs = 0;
+static const unsigned long HIT_COOLDOWN_MS = 300; // extra bescherming tegen dubbel triggeren
+
 // Buzzer code
 const int BUZZER_PIN = D6;
 
@@ -103,35 +109,41 @@ void beep(int times, int on_ms, int off_ms)
 void tof()
 {
   VL53L0X_RangingMeasurementData_t measure;
-
   lox.rangingTest(&measure, false);
 
-  if (measure.RangeStatus != 4)
-  {
+  bool valid = (measure.RangeStatus != 4);   // jouw "geldige meting" check
+  uint16_t d = measure.RangeMilliMeter;
+
+  if (valid) {
     Serial.print("Distance (mm): ");
-    Serial.println(measure.RangeMilliMeter);
-    if (measure.RangeMilliMeter < 150)
-    {
-      Serial.println("potje gedetecteerd");
-      HTTPClient http;
-      String hitUrl = String(url) + "games/hit";
-      http.begin(hitUrl);
-      http.addHeader("Content-Type", "application/json");
-
-      String payload = String("{\"cone_id\":\"") + KLEUR + "\"}";
-
-      int code = http.POST(payload);
-      delay(1000);
-      // Serial.printf("POST status: %d\n", code);
-
-      http.end();
-    }
-  }
-  else
-  {
+    Serial.println(d);
+  } else {
     Serial.println("Out of range");
   }
+
+  // Re-arm: pas als er echt niets meer dichtbij is (of meting ongeldig)
+  if (!valid || d > RELEASE_MM) {
+    tofArmed = true;
+  }
+
+  // Trigger: alleen als we "armed" zijn én we nu dichtbij detecteren
+  if (tofArmed && valid && d < HIT_MM && (millis() - lastHitMs) > HIT_COOLDOWN_MS)
+  {
+    tofArmed = false;
+    lastHitMs = millis();
+
+    Serial.println("potje gedetecteerd");
+
+    HTTPClient http;
+    String hitUrl = String(url) + "games/hit";
+    http.begin(hitUrl);
+    http.addHeader("Content-Type", "application/json");
+    String payload = String("{\"cone_id\":\"") + KLEUR + "\"}";
+    http.POST(payload);
+    http.end();
+  }
 }
+
 
 // Wifi code
 void wifi()
@@ -158,35 +170,36 @@ void wifi()
 }
 void lees_batterij() {
   uint32_t Vsum_mV = 0;
+  for (int i = 0; i < 16; i++) Vsum_mV += analogReadMilliVolts(batterij); // mV op ADC pin (gekalibreerd)
 
-  for (int i = 0; i < 16; i++) {
-    Vsum_mV += analogReadMilliVolts(batterij);  // mV (gekalibreerd)
-  }
+  float Vadc = (Vsum_mV / 16.0f) / 1000.0f; // V op ADC pin
+  float Vbat = 2.0f * Vadc;                 // 1/2 spanningsdeler -> batterijspanning
 
-  float Vadc = (Vsum_mV / 16.0f) / 1000.0f;     // mV -> V
-  float Vbat = 2.0f * Vadc;                     // spanningsdeler 1/2 (pas aan indien anders!)
-
-  float bat_procent_f = (Vadc / 3.3f) * 100.0f;
+  float bat_procent_f = (Vbat - 3.0f) / (4.2f - 3.0f) * 100.0f; // 3.0V=0%, 4.2V=100%
   bat_procent_f = constrain(bat_procent_f, 0.0f, 100.0f);
 
   int bat_procent = (int)(bat_procent_f + 0.5f);
 
   Serial.printf("batterij=%d%%\n", bat_procent);
+  Serial.printf("Vadc=%.3fV\nVbat=%.3fV\n", Vadc, Vbat);
   setLedByBattery(bat_procent);
-  
+ 
   HTTPClient http;
   String statusUrl = String(url) + "cones/status";
   http.begin(statusUrl);
   http.addHeader("Content-Type", "application/json");
+
 
   String payload =
   String("{\"cone_id\":\"") + KLEUR +
   String("\",\"battery_percentage\":") + bat_procent +
   String("}");
 
+
   int code = http.POST(payload);
 
-  http.end();  
+
+  http.end();
 }
 
 void setRgb(bool rOn, bool gOn, bool bOn) {

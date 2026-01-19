@@ -8,6 +8,12 @@
 
 Adafruit_VL53L0X lox;
 
+static bool tofArmed = true;                 // mag er een nieuwe hit komen?
+static const uint16_t HIT_MM = 150;          // detectiedrempel
+static const uint16_t RELEASE_MM = 180;      // loslaat-drempel (hysteresis)
+static unsigned long lastHitMs = 0;
+static const unsigned long HIT_COOLDOWN_MS = 300; // extra bescherming tegen dubbel triggeren
+
 // Buzzer code
 const int BUZZER_PIN = D6;
 
@@ -21,10 +27,9 @@ int roodLed = A1;
 int blauwLed = D3;
 int groenLed = A2;
 
-const char *url = "http://10.42.0.1:8000/"; // <-- RPi hotspot IP
+const char* url = "http://10.42.0.1:8000/"; // <-- RPi hotspot IP
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   delay(200);
 
@@ -38,14 +43,10 @@ void setup()
 
   // I2C + sensor init
   Wire.begin();
-  if (!lox.begin())
-  {
+  if (!lox.begin()) {
     Serial.println("Failed to boot VL53L0X");
     // Fail-safe: buzzer/led indicatie en stop
-    while (true)
-    {
-      delay(1000);
-    }
+    while (true) { delay(1000); }
   }
 
   // WiFi init (met timeout)
@@ -54,26 +55,23 @@ void setup()
   Serial.print("Verbinden met WiFi");
 
   uint32_t t0 = millis();
-  while (WiFi.status() != WL_CONNECTED && (millis() - t0) < 10000)
-  {
+  while (WiFi.status() != WL_CONNECTED && (millis() - t0) < 10000) {
     Serial.print(".");
     delay(250);
   }
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
+  if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("\nWiFi OK, IP=%s RSSI=%d\n",
                   WiFi.localIP().toString().c_str(),
                   WiFi.RSSI());
-  }
-  else
-  {
+  } else {
     Serial.println("\nWiFi FAIL (timeout)");
     // Hier kan je beslissen: verder zonder WiFi, of resetten, of blijven proberen.
   }
-  // batterij code
+  //batterij code
   lees_batterij();
 }
+
 
 void loop()
 {
@@ -88,10 +86,9 @@ void loop()
 
   // TOF code
   tof();
-
+ 
   unsigned long now = millis();
-  if (now - lastBatteryMs >= BATTERY_INTERVAL_MS)
-  {
+  if (now - lastBatteryMs >= BATTERY_INTERVAL_MS) {
     lastBatteryMs = now;
     lees_batterij();
   }
@@ -112,35 +109,41 @@ void beep(int times, int on_ms, int off_ms)
 void tof()
 {
   VL53L0X_RangingMeasurementData_t measure;
-
   lox.rangingTest(&measure, false);
 
-  if (measure.RangeStatus != 4)
-  {
+  bool valid = (measure.RangeStatus != 4);   // jouw "geldige meting" check
+  uint16_t d = measure.RangeMilliMeter;
+
+  if (valid) {
     Serial.print("Distance (mm): ");
-    Serial.println(measure.RangeMilliMeter);
-    if (measure.RangeMilliMeter < 150)
-    {
-      Serial.println("potje gedetecteerd");
-      HTTPClient http;
-      String hitUrl = String(url) + "games/hit";
-      http.begin(hitUrl);
-      http.addHeader("Content-Type", "application/json");
-
-      String payload = String("{\"cone_id\":\"") + KLEUR + "\"}";
-
-      int code = http.POST(payload);
-      delay(1000);
-      // Serial.printf("POST status: %d\n", code);
-
-      http.end();
-    }
-  }
-  else
-  {
+    Serial.println(d);
+  } else {
     Serial.println("Out of range");
   }
+
+  // Re-arm: pas als er echt niets meer dichtbij is (of meting ongeldig)
+  if (!valid || d > RELEASE_MM) {
+    tofArmed = true;
+  }
+
+  // Trigger: alleen als we "armed" zijn én we nu dichtbij detecteren
+  if (tofArmed && valid && d < HIT_MM && (millis() - lastHitMs) > HIT_COOLDOWN_MS)
+  {
+    tofArmed = false;
+    lastHitMs = millis();
+
+    Serial.println("potje gedetecteerd");
+
+    HTTPClient http;
+    String hitUrl = String(url) + "games/hit";
+    http.begin(hitUrl);
+    http.addHeader("Content-Type", "application/json");
+    String payload = String("{\"cone_id\":\"") + KLEUR + "\"}";
+    http.POST(payload);
+    http.end();
+  }
 }
+
 
 // Wifi code
 void wifi()
@@ -165,62 +168,54 @@ void wifi()
     // delay(100);
   }
 }
-void lees_batterij()
-{
+void lees_batterij() {
   uint32_t Vsum_mV = 0;
+  for (int i = 0; i < 16; i++) Vsum_mV += analogReadMilliVolts(batterij); // mV op ADC pin (gekalibreerd)
 
-  for (int i = 0; i < 16; i++)
-  {
-    Vsum_mV += analogReadMilliVolts(batterij); // mV (gekalibreerd)
-  }
+  float Vadc = (Vsum_mV / 16.0f) / 1000.0f; // V op ADC pin
+  float Vbat = 2.0f * Vadc;                 // 1/2 spanningsdeler -> batterijspanning
 
-  float Vadc = (Vsum_mV / 16.0f) / 1000.0f; // mV -> V
-  float Vbat = 2.0f * Vadc;                 // spanningsdeler 1/2 (pas aan indien anders!)
-
-  float bat_procent_f = (Vadc / 3.3f) * 100.0f;
+  float bat_procent_f = (Vbat - 3.0f) / (4.2f - 3.0f) * 100.0f; // 3.0V=0%, 4.2V=100%
   bat_procent_f = constrain(bat_procent_f, 0.0f, 100.0f);
 
   int bat_procent = (int)(bat_procent_f + 0.5f);
 
   Serial.printf("batterij=%d%%\n", bat_procent);
+  Serial.printf("Vadc=%.3fV\nVbat=%.3fV\n", Vadc, Vbat);
   setLedByBattery(bat_procent);
-
+ 
   HTTPClient http;
   String statusUrl = String(url) + "cones/status";
   http.begin(statusUrl);
   http.addHeader("Content-Type", "application/json");
 
+
   String payload =
-      String("{\"cone_id\":\"") + KLEUR +
-      String("\",\"battery_percentage\":") + bat_procent +
-      String("}");
+  String("{\"cone_id\":\"") + KLEUR +
+  String("\",\"battery_percentage\":") + bat_procent +
+  String("}");
+
 
   int code = http.POST(payload);
+
 
   http.end();
 }
 
-void setRgb(bool rOn, bool gOn, bool bOn)
-{
-  digitalWrite(roodLed, rOn ? LOW : HIGH);
+void setRgb(bool rOn, bool gOn, bool bOn) {
+  digitalWrite(roodLed,  rOn ? LOW : HIGH);
   digitalWrite(groenLed, gOn ? LOW : HIGH);
   digitalWrite(blauwLed, bOn ? LOW : HIGH);
 }
 
-void setLedByBattery(int percent)
-{
+void setLedByBattery(int percent) {
   percent = constrain(percent, 0, 100);
 
-  if (percent >= 60)
-  {
-    setRgb(false, true, false); // groen
-  }
-  else if (percent >= 25)
-  {
-    setRgb(true, true, false); // geel (rood+groen)
-  }
-  else
-  {
-    setRgb(true, false, false); // rood
+  if (percent >= 60) {
+    setRgb(false, true, false);   // groen
+  } else if (percent >= 25) {
+    setRgb(true, true, false);    // geel (rood+groen)
+  } else {
+    setRgb(true, false, false);   // rood
   }
 }
