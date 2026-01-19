@@ -72,21 +72,4 @@ const props = defineProps({
     color: var(--grey-85);
 }
 
-@media (min-width: 768px) {
-    .c-instruction-text {
-        font-size: var(--font-size-4);
-        line-height: 28px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .c-instruction-number {
-        font-size: var(--font-size-8);
-    }
-    
-    .c-instruction-text {
-        font-size: var(--font-size-5);
-        line-height: 32px;
-    }
-}
 </style>

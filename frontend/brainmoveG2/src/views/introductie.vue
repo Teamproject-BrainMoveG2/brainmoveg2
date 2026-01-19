@@ -32,6 +32,7 @@ const { cones, colorToDutch } = useCones();
     <InstructionList :instructions="instructions" />
     
     <div class="c-cardcontainer">
+
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
             <PotjeCard 
@@ -44,6 +45,7 @@ const { cones, colorToDutch } = useCones();
         </div>
     </div>
     <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
+    
   </main>
 </template>
 
@@ -78,5 +80,21 @@ const { cones, colorToDutch } = useCones();
     gap: var(--spacing-04);
 }
 
+.c-mascot {
+  width: 60%;
+  height: auto;
+  position: relative;
+  z-index: 2;   
+
+    @media (min-width: 768px) {
+
+        max-width: 300px;
+    }
+
+    @media (min-width: 1024px) {
+
+        max-width: 350px;
+    }
+}
 
 </style>
