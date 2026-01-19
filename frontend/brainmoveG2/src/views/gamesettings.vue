@@ -1,12 +1,25 @@
 <script setup>
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useCones } from '../composables/useCones';
 import { useGameColors } from '../composables/useGameColors';
+import { useRoute, RouterLink } from 'vue-router';
+import { ref,onMounted } from 'vue';
 import SettingContainer from '../components/SettingContainer.vue';
 import DifficultyButton from '../components/buttons/DifficultyButton.vue';
 import CounterButton from '../components/buttons/CounterButton.vue';
 import TextInput from '../components/inputs/TextInput.vue';
 import SmallPotjeCard from '../components/cards/SmallPotjeCard.vue';
+import { useGames } from '../composables/useGames';
+
+const getColorValue = (color) => {
+    const colorMap = {
+        'red': 'var(--red)',
+        'blue': 'var(--blue)',
+        'green': 'var(--accent-green)',
+        'yellow': 'var(--yellow)',
+        'orange': 'var(--accent-orange)'
+    };
+    return colorMap[color] || 'var(--accent-green)';
+};
 
 const route = useRoute();
 const gameId = ref(route.params.id);
@@ -21,28 +34,24 @@ const difficulties = [
     { id: 'intense', label: 'Intense', color: 'red' }
 ];
 
-const colorPotjes = ref([
-    { id: 1, name: 'Groen', color: '#22c55e', battery: 38 },
-    { id: 2, name: 'Rood', color: '#ef4444', battery: 38 },
-    { id: 3, name: 'Blauw', color: '#3b82f6', battery: 38 },
-    { id: 4, name: 'Geel', color: '#eab308', battery: 38 }
-]);
+const { cones, colorToDutch } = useCones();
+const { modes, fetchGames } = useGames();
 
-
-// Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 const selectDifficulty = (difficulty) => {
     selectedDifficulty.value = difficulty;
 };
 
+onMounted(fetchGames);
+
 </script>
 
 <template>
     <main class="c-content-wrapper">
         <div class="c-title">
-            <h1>Game</h1>
-            <p>Description</p>
+            <h1>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.naam || '' }}</h1>
+            <p>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.description || '' }}</p>
         </div>
         <SettingContainer title="Kies je moeilijkheidsgraad">
                 <DifficultyButton
@@ -66,21 +75,35 @@ const selectDifficulty = (difficulty) => {
         </SettingContainer>
         <SettingContainer title="Gebruikte kleuren" layout="grid">
             <SmallPotjeCard 
-                v-for="potje in colorPotjes.slice(0, colors)" 
-                :key="potje.id"
-                :name="potje.name" 
-                :color="potje.color"
-                :battery="potje.battery"
+                v-for="cone in cones.slice(0, colors)" 
+                :key="cone.cone_id"
+                :name="colorToDutch[cone.color] || cone.color" 
+                :color="getColorValue(cone.color)"
+                :battery="cone.battery_percentage"
+                :isConnected="cone.connected"
             />
         </SettingContainer>
         
-        <RouterLink :class="buttonClass" :to="`/instructions/${gameId}`">Ga door</RouterLink>
+        <RouterLink
+            :class="buttonClass"
+            :to="{
+                name: 'instructions',
+                params: { id: gameId },
+                state: {
+                    username: username,
+                    mode_id: Number(gameId),
+                    difficulty_id: difficulties.findIndex(d => d.id === selectedDifficulty) + 1,
+                    aantal_rondes: rounds,
+                    aantal_kleuren: colors
+                }
+            }"
+        >
+            Ga door
+        </RouterLink>
     </main>
 </template>
 
 <style scoped>
-
-
 .c-smallPotjeCard {
     display: flex;
     padding: var(--spacing-baseline);

@@ -1,21 +1,10 @@
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import GameCard from '../components/cards/GameCard.vue';
+import { useGames } from '../composables/useGames';
 
-const modes = ref([]);
-const Ip = `${window.location.hostname}:8000`;
-
-
-async function fetchGames() {
-    try {
-        const response = await fetch(`http://${Ip}/modes`);
-        if (!response.ok) throw new Error('Failed to fetch modes');
-        modes.value = await response.json();
-    } catch (e) {
-        modes.value = [];
-    }
-}
+const { modes, fetchGames } = useGames();
 
 onMounted(fetchGames);
 </script>

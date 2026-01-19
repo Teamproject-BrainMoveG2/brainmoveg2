@@ -37,7 +37,7 @@ const isLowBattery = computed(() => props.battery < 25);
                 <BatteryMedium class="c-battery-icon" :class="{ 'c-battery-icon--low-battery': isLowBattery }" />
             </template>
             <template v-else>
-                <p class="c-smallPotjeCard__connecting">Connecting ...</p>
+                <p class="c-smallPotjeCard__connecting">Connecting...</p>
                 <BatteryMedium class="c-battery-icon c-battery-icon--disconnected" />
             </template>
         </div>

@@ -1,13 +1,16 @@
 <script setup>
 
-import { onMounted, ref } from 'vue';
-import { useRoute, RouterLink } from 'vue-router';
-import InstructionList from '../components/lijst/InstructionList.vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import { useGameColors } from '../composables/useGameColors';
+import InstructionList from '../components/lijst/InstructionList.vue';
+
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
 const tutorial = ref({steps: [] });
+const settings = route.state || {};
 
 const Ip = `${window.location.hostname}:8000`;
 
@@ -23,6 +26,14 @@ async function fetchTutorial() {
 
 onMounted(fetchTutorial);
 
+function startGameAndGo() {
+    router.push({
+        name: 'game',
+        params: { id: gameId.value },
+        state: settings
+    });
+}
+
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
@@ -37,7 +48,7 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
              <h1>hoe te spelen</h1>
          </div>
         <InstructionList :instructions="tutorial.steps" :color="colorVariant" />
-        <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel starten!</RouterLink>
+        <button :class="buttonClass" @click="startGameAndGo">Spel starten!</button>
     </main>
 
 </template>
