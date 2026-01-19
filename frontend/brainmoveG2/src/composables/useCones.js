@@ -34,7 +34,6 @@ export function useCones() {
       
       fetchCones();
       
-      // window.location.reload();
     });
     socket.on('disconnect', () => {
       console.log('Socket disconnected');
