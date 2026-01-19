@@ -87,8 +87,9 @@ export default {
     </div>
 
     <!-- Dashboard header -->
-    <button v-else-if="isDashboard" @click="togglePopup" class="c-bell-button" aria-label="Notificaties">
+    <button v-else-if="isDashboard" @click="togglePopup" class="c-bell-button" aria-label="Notificaties" style="position: relative;">
       <Bell />
+      <span v-if="warningCones.length > 0" class="c-bell-notification"></span>
     </button>
 
     <!-- Back button for other pages -->
@@ -116,6 +117,19 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.c-bell-notification {
+  position: absolute;
+  top: .375rem;
+  right: .375rem;
+  width: .5rem;
+  height: .5rem;
+  background: #2196f3;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #2196f3;
+  z-index: 2;
 }
 
 .c-game-header {
