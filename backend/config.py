@@ -1,4 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
+
 
 class Settings(BaseSettings):
     dbuser: str
@@ -6,6 +8,12 @@ class Settings(BaseSettings):
     port: int
     password: str
     database:str
+
+    # MQTT Configuration
+    mqtt_broker: str = "localhost"
+    mqtt_port: int = 1883
+    mqtt_username: Optional[str] = None
+    mqtt_password: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True)
 
