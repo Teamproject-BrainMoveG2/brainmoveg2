@@ -1,7 +1,9 @@
 <script setup>
 import { BatteryMedium } from 'lucide-vue-next';
 
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
     name: {
         type: String,
         required: true
@@ -13,24 +15,37 @@ defineProps({
     battery: {
         type: Number,
         required: true
+    },
+    isConnected: {
+        type: Boolean,
+        default: true
     }
 });
+
+const isLowBattery = computed(() => props.battery < 25);
 </script>
 
 <template>
-    <div class="c-smallPotjeCard">
+    <div class="c-smallPotjeCard" :class="{ 'c-smallPotjeCard--disconnected': !isConnected }">
         <div class="c-smallPotjeCard__section">
             <div class="c-smallPotjeCard__color" :style="{ backgroundColor: color }"></div>
             <p class="c-smallPotjeCard__name small-body">{{ name }}</p>
         </div>
         <div class="c-smallPotjeCard__section c-smallPotjeCard__section--battery">
-            <p class="small-body">{{ battery }}%</p>
-            <BatteryMedium class="c-battery-icon" />
+            <template v-if="isConnected">
+                <p class="small-body" :class="{ 'c-smallPotjeCard__percentage--low': isLowBattery }">{{ battery }}%</p>
+                <BatteryMedium class="c-battery-icon" :class="{ 'c-battery-icon--low-battery': isLowBattery }" />
+            </template>
+            <template v-else>
+                <p class="c-smallPotjeCard__connecting">Connecting ...</p>
+                <BatteryMedium class="c-battery-icon c-battery-icon--disconnected" />
+            </template>
         </div>
     </div>
 </template>
 
 <style scoped>
+
 .c-smallPotjeCard {
     display: flex;
     padding: var(--spacing-baseline);
@@ -39,6 +54,13 @@ defineProps({
     justify-content: space-between;
     align-items: center;
     border-radius: var(--radius-s);
+    transition: all 0.2s;
+}
+
+.c-smallPotjeCard--disconnected {
+    background-color: var(--red-light-5);
+    justify-content: flex-start;
+    gap: var(--spacing-baseline);
 }
 
 @media (max-width: 380px) {
@@ -56,10 +78,6 @@ defineProps({
     gap: var(--spacing-03);
 }
 
-.c-smallPotjeCard__section--battery {
-    gap: var(--spacing-02);
-}
-
 .c-smallPotjeCard__color {
     width: 1.5rem;
     height: 1.5rem;
@@ -70,5 +88,22 @@ defineProps({
     color: var(--grey-85);
     width: 1.5rem;
     height: 1.5rem;
+    transition: color 0.2s;
+}
+
+.c-battery-icon--low-battery {
+    color: var(--red);
+}
+
+.c-battery-icon--disconnected {
+    display: none;
+}
+
+.c-smallPotjeCard__percentage--low {
+    color: var(--red);
+}
+
+.c-smallPotjeCard__connecting {
+    color: var(--red);
 }
 </style>

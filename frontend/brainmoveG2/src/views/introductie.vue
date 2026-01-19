@@ -1,9 +1,7 @@
 <script setup>
 import PotjeCard from '../components/cards/PotjeCard.vue';
 import InstructionList from '../components/lijst/InstructionList.vue';
-import { ref, onMounted } from 'vue';
-
-const Ip = `${window.location.hostname}:8000`;
+import { useCones } from '../composables/useCones';
 
 //hard coded instructions for setting up the potjes
 const instructions = [
@@ -17,30 +15,7 @@ const instructions = [
     }
 ];
 
-const cones = ref([]);
-
-// Color mapping from English to Dutch
-const colorToDutch = {
-    'red': 'Rood',
-    'blue': 'Blauw',
-    'green': 'Groen',
-    'yellow': 'Geel',
-    'orange': 'Oranje'
-};
-
-const fetchCones = async () => {
-    try {
-        const response = await fetch(`http://${Ip}/cones`);
-        const data = await response.json();
-        cones.value = data;
-    } catch (error) {
-        console.error('Error fetching cones:', error);
-    }
-};
-
-onMounted(() => {
-    fetchCones();
-});
+const { cones, colorToDutch } = useCones();
 
 </script>
 
@@ -57,6 +32,7 @@ onMounted(() => {
     <InstructionList :instructions="instructions" />
     
     <div class="c-cardcontainer">
+
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
             <PotjeCard 
@@ -69,6 +45,7 @@ onMounted(() => {
         </div>
     </div>
     <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
+    
   </main>
 </template>
 
@@ -103,5 +80,21 @@ onMounted(() => {
     gap: var(--spacing-04);
 }
 
+.c-mascot {
+  width: 60%;
+  height: auto;
+  position: relative;
+  z-index: 2;   
+
+    @media (min-width: 768px) {
+
+        max-width: 300px;
+    }
+
+    @media (min-width: 1024px) {
+
+        max-width: 350px;
+    }
+}
 
 </style>

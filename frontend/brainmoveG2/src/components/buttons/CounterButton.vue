@@ -80,4 +80,10 @@ const decrement = () => {
 .c-counter__button:active {
     opacity: 0.7;
 }
+
+@media  (max-width: 380px) {
+    .c-counter__button {
+        padding: var(--spacing-baseline) var(--spacing-03);
+    }
+}
 </style>

@@ -1,13 +1,19 @@
 <script>
 import { useRouter, useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useCones } from '../../composables/useCones';
 import { Bell, X } from 'lucide-vue-next';
+
+import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
+import PotjesStatusPopup from './PotjesStatusPopup.vue';
 
 export default {
   name: 'Header',
   components: {
     Bell,
-    X
+    X,
+    SmallPotjeCard,
+    PotjesStatusPopup
   },
   props: {
     currentRound: {
@@ -22,6 +28,7 @@ export default {
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const showPopup = ref(false);
     
     const goBack = () => {
       router.back();
@@ -29,6 +36,14 @@ export default {
 
     const stopGame = () => {
       router.push('/dashboard');
+    };
+
+    const togglePopup = () => {
+      showPopup.value = !showPopup.value;
+    };
+
+    const closePopup = () => {
+      showPopup.value = false;
     };
 
     // Check if current page is dashboard
@@ -41,11 +56,20 @@ export default {
       return route.name === 'game';
     });
 
+
+    // Use shared composable for cones logic
+    const { warningCones, colorToDutch } = useCones();
+
     return {
       goBack,
       stopGame,
       isDashboard,
-      isGame
+      isGame,
+      showPopup,
+      togglePopup,
+      closePopup,
+      warningCones,
+      colorToDutch
     };
   }
 };
@@ -63,7 +87,7 @@ export default {
     </div>
 
     <!-- Dashboard header -->
-    <button v-else-if="isDashboard" class="c-bell-button" aria-label="Notificaties">
+    <button v-else-if="isDashboard" @click="togglePopup" class="c-bell-button" aria-label="Notificaties">
       <Bell />
     </button>
 
@@ -73,6 +97,15 @@ export default {
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
+
+    <!-- Popup overlay -->
+    <PotjesStatusPopup
+      :show="showPopup"
+      :warningCones="warningCones"
+      :colorToDutch="colorToDutch"
+      @close="closePopup"
+    />
+
   </header>
 </template>
 
