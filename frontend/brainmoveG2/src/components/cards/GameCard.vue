@@ -1,6 +1,10 @@
 <script setup>
+
 import { CirclePlay } from 'lucide-vue-next';
 import ClockIcon from '../../assets/svg/clock.svg';
+import BrainIcon from '../../assets/svg/brain.svg';
+import TargetIcon from '../../assets/svg/target.svg';
+
 
 const props = defineProps({
     title: {
@@ -15,15 +19,21 @@ const props = defineProps({
         type: String,
         required: true
     },
-    backgroundColor: {
+    icon: {
         type: String,
-        default: 'var(--accent-green-light)'
+        required: true
     }
 });
+const iconMap = {
+    clock: ClockIcon,
+    brain: BrainIcon,
+    target: TargetIcon
+};
+
 </script>
 
 <template>
-    <router-link :to="`/gamesettings/${gameId}`" class="c-game-card" :style="{ backgroundColor: backgroundColor }">
+    <router-link :to="`/gamesettings/${gameId}`" class="c-game-card">
         <div class="c-game-card__content">
                 <CirclePlay class="c-game-card__play-icon" />
             <div class="c-game-card__text">
@@ -32,7 +42,7 @@ const props = defineProps({
             </div>
         </div>
         <div class="c-game-card__clock">
-            <img :src="ClockIcon" alt="Clock icon" />
+            <img :src="iconMap[icon]" :alt="`${icon} icon`" v-if="iconMap[icon]" />
         </div>
     </router-link>
 </template>
@@ -54,6 +64,14 @@ const props = defineProps({
     color: inherit;
 }
 
+.c-game-card:nth-child(2){
+    background-color: var(--accent-orange-light);
+}
+
+.c-game-card:nth-child(3){
+    background-color: var(--primary-light);
+}
+
 .c-game-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -70,6 +88,14 @@ const props = defineProps({
     width: 2rem;
     height: 2rem;
     color: var(--accent-green);
+}
+
+.c-game-card:nth-child(2) .c-game-card__play-icon{
+    color: var(--accent-orange);
+}
+
+.c-game-card:nth-child(3) .c-game-card__play-icon{
+    color: var(--primary);
 }
 
 .c-game-card__text {
@@ -91,7 +117,6 @@ const props = defineProps({
 }
 
 .c-game-card__clock img {
-    width: 8.25rem;
     height: auto;
     opacity: 0.9;
 }

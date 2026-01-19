@@ -21,7 +21,7 @@ const props = defineProps({
             class="c-instruction-item"
         >
             <span class="c-instruction-number" :class="`c-instruction-number--${color}`">{{ instruction.number }}</span>
-            <p class="c-instruction-text">{{ instruction.text }}</p>
+            <p class="c-instruction-text">{{ instruction.description }}</p>
         </div>
     </div>
 </template>

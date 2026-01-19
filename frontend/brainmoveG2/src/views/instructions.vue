@@ -1,71 +1,27 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+
+import { onMounted, ref } from 'vue';
+import { useRoute, RouterLink } from 'vue-router';
 import InstructionList from '../components/lijst/InstructionList.vue';
 import { useGameColors } from '../composables/useGameColors';
 
 const route = useRoute();
 const gameId = ref(route.params.id);
+const tutorial = ref({steps: [] });
 
-// Instructions for different games
-const gameInstructions = {
-    '1': {
-        steps: [
-            {
-                number: 1,
-                text: 'Een kleur verschijnt op je scherm'
-            },
-            {
-                number: 2,
-                text: 'Tik zo snel mogelijk het bijbehorende potje aan'
-            },
-            {
-                number: 3,
-                text: 'De tijd wordt steeds korter - hoe lang houd je vol?'
-            }
-        ]
-    },
-    '2': {
-        title: 'Memory game',
-        steps: [
-            {
-                number: 1,
-                text: 'Onthoud de volgorde van de oplichtende potjes'
-            },
-            {
-                number: 2,
-                text: 'Herhaal de volgorde door de potjes aan te tikken'
-            },
-            {
-                number: 3,
-                text: 'De volgorde wordt steeds langer - hoeveel kun je onthouden?'
-            }
-        ],
-    },
-    '3': {
-        title: 'Calm game',
-        steps: [
-            {
-                number: 1,
-                text: 'Een kleur verschijnt op je scherm'
-            },
-            {
-                number: 2,
-                text: 'Tik zo snel mogelijk het bijbehorende potje aan'
-            },
-            {
-                number: 3,
-                text: 'Er is geen tijdslimiet - Doe je best om rustig en gefocust te blijven'
-            }
-        ],
+const Ip = `${window.location.hostname}:8000`;
+
+async function fetchTutorial() {
+    try {
+        const response = await fetch(`http://${Ip}/modes/${gameId.value}/tutorial`);
+        if (!response.ok) throw new Error('Failed to fetch tutorial');
+        tutorial.value = await response.json();
+    } catch (e) {
+        tutorial.value = {steps: [] };
     }
-    // Add more games here as needed
-};
+}
 
-// Get the instructions for the current game based on game ID
-const currentGame = computed(() => {
-    return gameInstructions[gameId.value] 
-});
+onMounted(fetchTutorial);
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -80,7 +36,7 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
          <div class="c-title">
              <h1>hoe te spelen</h1>
          </div>
-        <InstructionList :instructions="currentGame.steps" :color="colorVariant" />
+        <InstructionList :instructions="tutorial.steps" :color="colorVariant" />
         <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel starten!</RouterLink>
     </main>
 

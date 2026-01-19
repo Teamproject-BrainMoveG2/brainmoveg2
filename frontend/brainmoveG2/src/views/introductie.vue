@@ -7,11 +7,11 @@ import { useCones } from '../composables/useCones';
 const instructions = [
     {
         number: 1,
-        text: 'Zet de schakelaar aan van alle potjes.'
+        description: 'Zet de schakelaar aan van alle potjes.'
     },
     {
         number: 2,
-        text: 'Zet de potjes in een vierkant van 2m op 2m. Als je minder dan 4 potjes gebruikt, laat dan sommige hoeken leeg.'
+        description: 'Zet de potjes in een vierkant van 2m op 2m. Als je minder dan 4 potjes gebruikt, laat dan sommige hoeken leeg.'
     }
 ];
 

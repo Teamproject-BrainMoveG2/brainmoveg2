@@ -1,5 +1,23 @@
+
 <script setup>
+import { ref, onMounted } from 'vue';
 import GameCard from '../components/cards/GameCard.vue';
+
+const modes = ref([]);
+const Ip = `${window.location.hostname}:8000`;
+
+
+async function fetchGames() {
+    try {
+        const response = await fetch(`http://${Ip}/modes`);
+        if (!response.ok) throw new Error('Failed to fetch modes');
+        modes.value = await response.json();
+    } catch (e) {
+        modes.value = [];
+    }
+}
+
+onMounted(fetchGames);
 </script>
 
 <template>
@@ -9,11 +27,13 @@ import GameCard from '../components/cards/GameCard.vue';
         </div>
         
         <div class="c-game-grid">
-            <GameCard 
-                title="Speed reflex game"
-                gameId= "1"
-                description="Raak de juiste kleur aan binnen het tijdslimiet"
-                backgroundColor="var(--accent-green-light)"
+            <GameCard
+                v-for="mode in modes"
+                :key="mode.spelmodus_id"
+                :title="mode.naam"
+                :gameId="mode.spelmodus_id.toString()"
+                :description="mode.description"
+                :icon="mode.icon"
             />
         </div>
     </main>
