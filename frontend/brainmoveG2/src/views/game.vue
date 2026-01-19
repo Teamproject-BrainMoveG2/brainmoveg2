@@ -73,10 +73,9 @@ const connectSocket = () => {
         currentRound.value = data.round;
         currentColor.value = data.color;
         totalRounds.value = data.max_rounds;
-        console.log(`kaknker`);
         // Hide result overlay when new round starts
         showResultOverlay.value = false;
-            console.log(`kaknker2`);
+      
         // Change background color based on received color
         const colorMap = {
             'blue': 'var(--blue)',
@@ -85,9 +84,8 @@ const connectSocket = () => {
             'red': 'var(--red)',
             'yellow': 'var(--yellow)'
         };
-           console.log(`kaknker3`);
+         
             backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
-           console.log(`kaknker4`);
     });
     
     socket.on('round_result', (data) => {
