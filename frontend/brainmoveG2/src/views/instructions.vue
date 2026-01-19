@@ -73,7 +73,7 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
 </script>
 
 <template>
-    <main class="c-content-wrapper u-viewport-height-80 u-justify-center">
+    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
         <div class="c-mascot__container">
             <img src="../assets/img/mascot3.png" alt="BrainMove Mascot" class="c-mascot" />
         </div>

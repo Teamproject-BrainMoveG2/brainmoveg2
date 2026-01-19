@@ -21,7 +21,7 @@ defineProps({
     <div class="c-smallPotjeCard">
         <div class="c-smallPotjeCard__section">
             <div class="c-smallPotjeCard__color" :style="{ backgroundColor: color }"></div>
-            <p class="small-body">{{ name }}</p>
+            <p class="c-smallPotjeCard__name small-body">{{ name }}</p>
         </div>
         <div class="c-smallPotjeCard__section c-smallPotjeCard__section--battery">
             <p class="small-body">{{ battery }}%</p>
@@ -40,6 +40,14 @@ defineProps({
     align-items: center;
     border-radius: var(--radius-s);
 }
+
+@media (max-width: 380px) {
+    .c-smallPotjeCard__name {
+        display: none;
+    }
+    
+}
+
 
 .c-smallPotjeCard__section {
     display: flex;

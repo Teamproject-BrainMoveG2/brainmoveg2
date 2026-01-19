@@ -46,12 +46,11 @@ onMounted(() => {
 
 <template>
   <main class="c-content-wrapper">
-
+     <div class="c-title">
+        <h1>POTJES OPSTELLEN</h1> 
+    </div>
     <div class="c-mascot__container">
       <img src="../assets/img/macot2.png" alt="BrainMove Mascot" class="c-mascot" />
-    </div>
-    <div class="c-title">
-        <h1>POTJES OPSTELLEN</h1> 
     </div>
    
     <InstructionList :instructions="instructions" />
@@ -68,7 +67,6 @@ onMounted(() => {
             />
         </div>
     </div>
-    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
   </main>
 </template>
 
@@ -77,6 +75,7 @@ onMounted(() => {
 .c-title{
     text-align: left;
     width: 100%;
+    padding: var(--spacing-07) 0;
   }
 
 

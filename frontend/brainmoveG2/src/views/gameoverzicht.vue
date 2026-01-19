@@ -1,14 +1,23 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Clock, RotateCw, Target, Trophy } from 'lucide-vue-next';
+import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 import StatCard from '../components/cards/StatCard.vue';
+import ScoreboardRow from '../components/ScoreboardRow.vue';
+import ScoreCircle from '../components/ScoreCircle.vue';
 
 const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
+const activeTab = ref('speloverzicht');
+const scoreboardData = ref([
+  { position: 1, name: 'Alice', score: 6500, isPlayer: false },
+  { position: 2, name: 'Bob', score: 6200, isPlayer: false },
+  { position: 3, name: 'Charlie', score: 6000, isPlayer: false },
+  { position: 4, name: 'You', score: 5454, isPlayer: true },
+]);
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -35,14 +44,36 @@ const accuracy = computed(() => {
     return Math.round((gameStats.value.correct_hits / total) * 100);
 });
 
+const playerScore = computed(() => {
+    const player = scoreboardData.value.find(row => row.isPlayer);
+    return player ? player.score : 0;
+});
+
+
+const openContent = (tabName) => {
+    activeTab.value = tabName;
+};
+
 </script>
 
 <template>
     <div class="c-overzichttab">
-        <button class="c-tabGame" onclick="openCity(event, 'scoreboard')">Scoreboard</button>
-        <button class="c-tabGame" onclick="openCity(event, 'speloverzicht')">Speloverzicht</button>
+        <button 
+            class="c-tabGame body-large" 
+            :class="{ 'c-tabGame--active': activeTab === 'scoreboard' }"
+            @click="openContent('scoreboard')"
+        >
+            Scoreboard
+        </button>
+        <button 
+            class="c-tabGame body-large" 
+            :class="{ 'c-tabGame--active': activeTab === 'speloverzicht' }"
+            @click="openContent('speloverzicht')"
+        >
+            Speloverzicht
+        </button>
     </div>
-    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main v-show="activeTab === 'speloverzicht'" class="c-content-wrapper">
         <div class="c-title-div">
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
@@ -85,9 +116,174 @@ const accuracy = computed(() => {
         </div>
         <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
+    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
+        <div class="c-title-div">
+            <h1>Game name</h1>
+        </div>
+        <ScoreCircle :score="playerScore" />
+        <div class="c-leaderboard">
+            <div class="c-leaderboard__head">
+                <p class="c-leaderboard__head-title">scoreboard</p>
+                <Info class="c-leaderboard__head-icon"/>
+            </div>
+            <table class="c-table">
+                <thead>
+                    <tr class="c-table__headings">
+                        <th >POS.</th>
+                        <th >Naam</th>
+                        <th >score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ScoreboardRow
+                      v-for="(row, index) in scoreboardData"
+                      :key="index"
+                      :position="row.position"
+                      :name="row.name"
+                      :score="row.score"
+                      :is-player="row.isPlayer"
+                    />
+                </tbody>
+            </table>
+        </div>
+        <RouterLink :class="buttonClass" :to="``">Opnieuw spelen</RouterLink>
+    </main>
 </template>
 
 <style>
+
+.c-table{
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.c-table__headings {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-04);
+    border-bottom: 2px solid var(--grey-95);
+    font-size: var(--font-size-5);
+    line-height: var(--font-size-6);
+    font-family: "Bebas Neue", sans-serif;
+    gap: var(--spacing-07);
+    text-decoration: none;
+}
+
+th {
+    font-weight: normal;
+}
+
+th:nth-child(1),
+th:nth-child(3) {
+    width: auto;
+    flex-shrink: 0;
+}
+
+th:nth-child(2) {
+    flex-grow: 1;
+    text-align: left;
+}
+
+td:nth-child(1),
+td:nth-child(3) {
+    width: auto;
+    flex-shrink: 0;
+}
+
+td:nth-child(2) {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.c-table__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-05) var(--spacing-04) ;
+    border-bottom: 2px solid var(--grey-15);
+    gap: var(--spacing-04);
+
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: var(--font-size-3); 
+    line-height: 1.5rem;
+    font-weight: var(--font-weight-regular);
+    letter-spacing: 0;
+}
+
+.c-table__row:nth-child(3) {
+    border: none;
+}
+
+.c-table__row:nth-child(1) .c-table__trophy, .c-table__row:nth-child(1) .c-table__trophy-icon {
+
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+}
+
+.c-table__row:nth-child(3) .c-table__trophy, .c-table__row:nth-child(3) .c-table__trophy-icon {
+
+    border-color: var(--accent-orange-dark);
+    color: var(--accent-orange-dark);
+}
+
+.c-table__row--player{
+
+    background-color: var(--primary-light);
+    border-radius: var(--radius);
+    border: none;
+
+}
+
+.c-table__trophy {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-02);
+    border: 1px solid var(--grey-85);
+    padding: var(--spacing-02) var(--spacing-03);
+    border-radius: var(--radius-s);
+}
+
+.c-table__trophy--player {
+    border: none;
+    
+}
+
+.c-table__trophy-icon {
+    width: .875rem;
+    height: .875rem;
+} 
+
+.c-leaderboard {
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    width: 100%;
+    box-sizing: border-box;
+    gap: var(--spacing-04);
+    border-radius: var(--radius-s);
+}
+
+.c-leaderboard__head {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+    padding: 0 var(--spacing-04);
+}
+
+.c-leaderboard__head-title{
+    font-size: var(--font-size-5);
+    line-height: var(--font-size-6);
+    font-family: "Bebas Neue", sans-serif;
+
+}
+
+.c-leaderboard__head-icon{
+    width: 1.5rem;
+    height: 1.5rem;
+    
+}
 
 .c-overzichttab {
     padding: 0 var(--spacing-06);
@@ -96,22 +292,40 @@ const accuracy = computed(() => {
   align-items: center;
   max-width: 26.25rem;
   margin: 0 auto;
-  margin-top: 2rem;
+  padding-top: 2rem;
+  margin-bottom: 2rem;
+  
 
 
   @media (min-width: 768px) {
 
     max-width: 500px;
-    gap: var(--spacing-08);
+   
 
   }
 
   @media (min-width: 1024px) {
 
       max-width: 550px;
-      gap: var(--spacing-09);
+    
 
   }
+}
+
+.c-tabGame{
+    background: none;
+    cursor: pointer;
+    outline: inherit;
+    padding-bottom: var(--spacing-05);
+    border: none;
+    border-bottom: 3px solid var(--grey-15);
+    text-align: center;
+    width: 100%;
+    transition: border-color 0.2s ease;
+}
+
+.c-tabGame--active{
+    border-bottom: 3px solid var(--primary);
 }
 
 .c-title-div {
@@ -126,6 +340,7 @@ const accuracy = computed(() => {
     gap: 16px;
     margin-top: var(--spacing-xlarge);
     width: 100%;
+  
 }
 
 .c-results-container {
