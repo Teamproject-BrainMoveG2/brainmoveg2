@@ -42,10 +42,10 @@ defineProps({
     gap: var(--spacing-05);
 }
 
-/* Wrap difficulty options on small screens */
+
 @media (max-width: 410px) {
     .c-setting-options {
-        gap: var(--spacing-03);
+        flex-wrap: wrap;
     }
 }
 

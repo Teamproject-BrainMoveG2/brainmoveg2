@@ -1,9 +1,7 @@
 <script setup>
 import PotjeCard from '../components/cards/PotjeCard.vue';
 import InstructionList from '../components/lijst/InstructionList.vue';
-import { ref, onMounted } from 'vue';
-
-const Ip = `${window.location.hostname}:8000`;
+import { useCones } from '../composables/useCones';
 
 //hard coded instructions for setting up the potjes
 const instructions = [
@@ -17,30 +15,7 @@ const instructions = [
     }
 ];
 
-const cones = ref([]);
-
-// Color mapping from English to Dutch
-const colorToDutch = {
-    'red': 'Rood',
-    'blue': 'Blauw',
-    'green': 'Groen',
-    'yellow': 'Geel',
-    'orange': 'Oranje'
-};
-
-const fetchCones = async () => {
-    try {
-        const response = await fetch(`http://${Ip}/cones`);
-        const data = await response.json();
-        cones.value = data;
-    } catch (error) {
-        console.error('Error fetching cones:', error);
-    }
-};
-
-onMounted(() => {
-    fetchCones();
-});
+const { cones, colorToDutch } = useCones();
 
 </script>
 
