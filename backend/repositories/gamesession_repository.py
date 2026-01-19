@@ -21,6 +21,6 @@ class GameSessionRepository:
     
     @staticmethod
     def get_player_rank(settings, session_id):
-        sql = "SELECT RANK() OVER (ORDER BY score DESC) AS rank FROM spelsessie WHERE spelsessie_id = %s"
+        sql = "WITH ranked_sessions AS (SELECT spelsessie_id, username, score, RANK() OVER (ORDER BY score DESC) AS rank FROM spelsessie) SELECT spelsessie_id, username, score, rank FROM ranked_sessions WHERE spelsessie_id = %s;"
         params = [session_id]
         return Database.get_one_row(sql, params=params, settings=settings)
