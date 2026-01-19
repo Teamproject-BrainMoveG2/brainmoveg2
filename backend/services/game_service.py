@@ -12,9 +12,11 @@ import socketio
 import logging
 import asyncio
 
+TOO_LATE = {1: 5000, 2: 4000, 3: 3000}
 TOO_LATE_MS = 5000
 maxRounds = 10
 maxCones = 4
+difficulty = 1
 connectedCones = []
 roundList = []
 currentRoundStartTime = None
@@ -28,13 +30,15 @@ class GameService:
 
 
     async def start_game(self, username: str, mode_id: int, difficulty_id: int, aantal_rondes: int, aantal_kleuren: int, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> str:
-        global session_id, maxRounds, maxCones
+        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
         maxRounds = aantal_rondes
         maxCones = aantal_kleuren
+        difficulty = difficulty_id
+        TOO_LATE_MS = TOO_LATE.get(difficulty_id, 5000)
         try:
             session_id = GameSessionRepository.create_session(
                 settings=settings,
