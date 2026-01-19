@@ -24,7 +24,7 @@ const getColorValue = (color) => {
 const route = useRoute();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
-const rounds = ref(1);
+const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
 
