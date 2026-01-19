@@ -38,7 +38,7 @@ class ScoreEntry(BaseModel):
 class GameOverStats(BaseModel):
     total_rounds: int = 10
     total_time_ms: int
-    niveau: int | None
+    niveau: str | None
     rounds: list[Round] = []
     correct_hits: int
     wrong_hits: int

@@ -134,7 +134,7 @@ class GameService:
             top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=3)
             if top_scores is None:
                 top_scores = []
-            niveau = scoreService.calculate_level(playerScore.score)
+            niveau = scoreService.calculate_level(playerScore.score, settings)
             gameoverStats = GameOverStats(
                 total_rounds=len(roundList),
                 total_time_ms=totalTimeMs,

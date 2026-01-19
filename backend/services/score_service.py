@@ -15,7 +15,7 @@ class ScoreService:
         score = SCORE_MULTIPLIER * (ACCURACY_WEIGHT * accuracy + REACTION_WEIGHT * MAX_REACTION_TIME_MS/average_reaction_speed)
         return score
     
-    def calculate_level(self, score: float) -> int:
+    def calculate_level(self, score: float, settings: config.Settings) -> str:
         niveau = 0
         if score >= 1500:
             niveau = 5
@@ -30,8 +30,8 @@ class ScoreService:
         else:
             niveau = 0
 
-        niveau_text = NiveauRepository.get_niveau_by_id(None, niveau)
-        return niveau_text
+        niveau_text = NiveauRepository.get_niveau_by_id(settings, niveau)
+        return niveau_text["name"]
 
     def get_top_scores(self, settings: config.Settings, mode_id: int, limit: int = 3) -> list[dict]:
         top_scores = GameSessionRepository.get_top_scores(settings, mode_id, limit=limit)
