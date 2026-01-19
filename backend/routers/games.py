@@ -31,9 +31,9 @@ async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Setting
     return {"message":result}
 
 @router.post("/hit")
-async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service)):
+async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service), buzzer_service = Depends(get_buzzer_service)):
     try:
-        await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings)
+        await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings, buzzer_service)
     except ValueError as ve:
         logger.error(f"Error recording cone hit: {ve}")
         raise HTTPException(status_code=400, detail="No round is in progress.")
