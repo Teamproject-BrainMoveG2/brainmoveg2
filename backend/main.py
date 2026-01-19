@@ -2,14 +2,15 @@ import config
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_sio
-from dependencies import get_settings
+from dependencies import get_sio, get_settings, get_score_service
 from models.testmodels import *
 from repositories.ronde_repository import RondeRepository
 from models.models import *
 from routers import cones, games, modes
 import logging
 import socketio
+
+from services.score_service import ScoreService
 logging.basicConfig(level=logging.INFO)  # Sets global log level
 logger = logging.getLogger(__name__)  # Module-specific logger
 
@@ -47,6 +48,10 @@ async def test_database_connection(settings: Annotated[config.Settings, Depends(
     except Exception as e:
         return 500
     
+@app.get("/test-score")
+async def test_score_service(score: ScoreDTO, score_service: ScoreService = Depends(get_score_service)):
+    score = score_service.calculate_score(total_rounds=score.total_rounds, correct_hits=score.correct_hits, average_reaction_speed=score.average_reaction_speed)
+    return {"calculated_score": score}
 @app.post("/ingest")
 async def ingest_data(data: TestModel, response_model=StatusResponse):
     print("Data received:", data)

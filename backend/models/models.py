@@ -30,6 +30,10 @@ class ConeDTO(BaseModel):
 class ConeStatusDTO(BaseModel):
     cone_id: int
     battery_percentage: int
+class ScoreEntry(BaseModel):
+    username: str
+    score: float
+    place: int
 
 class GameOverStats(BaseModel):
     total_rounds: int = 10
@@ -38,7 +42,11 @@ class GameOverStats(BaseModel):
     wrong_hits: int
     missed_hits: int
     average_reaction_speed_ms: float
+    score: float
+    top_scores: list[ScoreEntry] = []
 
 
-
-
+class GameStartDTO(BaseModel):
+    username: str
+    mode_id: int
+    difficulty_id: int

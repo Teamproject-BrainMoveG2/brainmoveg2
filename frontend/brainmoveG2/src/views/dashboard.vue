@@ -3,7 +3,7 @@ import GameCard from '../components/cards/GameCard.vue';
 </script>
 
 <template>
-    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
+    <main class="c-content-wrapper">
         <div class="c-title">
             <h1>Kies je gamemode</h1>
         </div>

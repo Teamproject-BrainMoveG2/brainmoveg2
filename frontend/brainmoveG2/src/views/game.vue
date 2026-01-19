@@ -125,7 +125,7 @@ onUnmounted(() => {
       <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
     </div>
   </header>
-    <main class="c-content-wrapper u-viewport-height u-justify-center" :style="{ backgroundColor: backgroundColor }">
+    <main class="c-content-wrapper" :style="{ backgroundColor: backgroundColor }">
         <!-- Countdown Overlay -->
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
