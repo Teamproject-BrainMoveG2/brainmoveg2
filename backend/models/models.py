@@ -38,6 +38,7 @@ class GameOverStats(BaseModel):
     wrong_hits: int
     missed_hits: int
     average_reaction_speed_ms: float
+    score: float
 
 
 

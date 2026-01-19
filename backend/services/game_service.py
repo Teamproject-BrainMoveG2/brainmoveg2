@@ -1,11 +1,13 @@
 from models.models import Round, RoundResult, Cone, GameOverStats
 from datetime import datetime, timezone
 from services.cone_service import ConeService 
+from services.score_service import ScoreService
 from fastapi import Depends
 import random
 import socketio
 import logging
 import asyncio
+
 TOO_LATE_MS = 5000
 maxRounds = 10
 connectedCones = []
@@ -43,7 +45,7 @@ class GameService:
         else:
             self.logger.warning("Cannot start a new round while another is in progress.")
     
-    async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService) -> None:
+    async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService) -> None:
 
         global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones
         if len(roundList) >= maxRounds:
@@ -84,13 +86,17 @@ class GameService:
 
             for r in roundList:
                 self.logger.info(r)
+            playerScore = scoreService.calculate_score(
+                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList)
+            )
             gameoverStats = GameOverStats(
                 total_rounds=len(roundList),
                 total_time_ms=totalTimeMs,
                 correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
                 wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
                 missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
-                average_reaction_speed_ms=totalTimeMs / len(roundList)
+                average_reaction_speed_ms=totalTimeMs / len(roundList),
+                score=playerScore
             )
             # Reset game state
             roundList = []
