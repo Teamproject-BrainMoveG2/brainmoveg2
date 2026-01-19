@@ -1,5 +1,6 @@
 from services.cone_service import ConeService
 from services.game_service import GameService
+from services.score_service import ScoreService
 from fastapi import Depends, Request
 import socketio
 from functools import lru_cache
@@ -9,6 +10,8 @@ async def get_game_service() -> GameService:
     return GameService()
 async def get_cone_service() -> ConeService:
     return ConeService()
+async def get_score_service() -> ScoreService:
+    return ScoreService()
 
 async def get_sio(request:Request) -> socketio.AsyncServer:
     return request.app.state.sio
