@@ -57,6 +57,9 @@ class GameService:
             if connectedCones is None or len(connectedCones) == 0:
                 self.logger.warning("No connected cones available to start a new round.")
                 raise Exception("No connected cones available to start a new round.")
+            elif len(connectedCones) < maxCones:
+                self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
+                raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
                 
             currentRoundStartTime = datetime.now(timezone.utc)
             currentCone = random.choice(connectedCones)
