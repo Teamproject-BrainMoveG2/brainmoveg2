@@ -37,6 +37,7 @@ export function useCones() {
     });
     socket.on('disconnect', () => {
       console.log('Socket disconnected');
+      fetchCones();
     });
   };
 
