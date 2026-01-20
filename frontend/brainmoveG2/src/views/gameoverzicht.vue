@@ -11,9 +11,7 @@ const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
-const activeTab = ref('speloverzicht');
-
-
+const activeTab = ref('scoreboard');
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
@@ -140,7 +138,7 @@ const openContent = (tabName) => {
     </main>
     <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
         <div class="c-title-div">
-            <h1>Game name</h1>
+            <h1>Proficiat!</h1>
         </div>
         <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
         <div class="c-leaderboard">
