@@ -11,16 +11,35 @@ const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
-const activeTab = ref('speloverzicht');
-const scoreboardData = ref([
-  { position: 1, name: 'Alice', score: 6500, isPlayer: false },
-  { position: 2, name: 'Bob', score: 6200, isPlayer: false },
-  { position: 3, name: 'Charlie', score: 6000, isPlayer: false },
-  { position: 4, name: 'You', score: 5454, isPlayer: true },
-]);
+const activeTab = ref('scoreboard');
 
 // Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
+
+// Computed leaderboard for ScoreboardRow
+const scoreboardData = computed(() => {
+    if (!gameStats.value) return [];
+    const topScores = Array.isArray(gameStats.value.top_scores) ? gameStats.value.top_scores : [];
+    const player = gameStats.value.score;
+    let rows = topScores.map(entry => ({
+        position: entry.place,
+        name: entry.username,
+        score: Math.round(entry.score),
+        isPlayer: player && entry.username === player.username && Math.round(entry.score) === Math.round(player.score)
+    }));
+    // Add player if not in top_scores
+    if (player && !rows.some(r => r.name === player.username && r.position === player.place)) {
+        rows.push({
+            position: player.place,
+            name: player.username,
+            score: Math.round(player.score),
+            isPlayer: true
+        });
+    }
+    // Sort by position (place)
+    rows.sort((a, b) => a.position - b.position);
+    return rows;
+});
 
 onMounted(() => {
     // Get the game stats from navigation state
@@ -43,6 +62,7 @@ const accuracy = computed(() => {
     if (total === 0) return 0;
     return Math.round((gameStats.value.correct_hits / total) * 100);
 });
+
 
 const playerScore = computed(() => {
     const player = scoreboardData.value.find(row => row.isPlayer);
@@ -98,8 +118,8 @@ const openContent = (tabName) => {
             />
             
             <StatCard 
-                label="Niveau" 
-                value="PRO"
+                label="Rank" 
+                :value="gameStats ? gameStats.niveau : ''"
                 :icon="Trophy"
             />
         </div>
@@ -118,9 +138,9 @@ const openContent = (tabName) => {
     </main>
     <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
         <div class="c-title-div">
-            <h1>Game name</h1>
+            <h1>Proficiat!</h1>
         </div>
-        <ScoreCircle :score="playerScore" />
+        <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
         <div class="c-leaderboard">
             <div class="c-leaderboard__head">
                 <p class="c-leaderboard__head-title">scoreboard</p>
@@ -135,13 +155,13 @@ const openContent = (tabName) => {
                     </tr>
                 </thead>
                 <tbody>
-                    <ScoreboardRow
-                      v-for="(row, index) in scoreboardData"
-                      :key="index"
-                      :position="row.position"
-                      :name="row.name"
-                      :score="row.score"
-                      :is-player="row.isPlayer"
+                    <ScoreboardRow 
+                        v-for="row in scoreboardData" 
+                        :key="row.position + '-' + row.name" 
+                        :position="row.position" 
+                        :name="row.name" 
+                        :score="row.score" 
+                        :is-player="row.isPlayer"
                     />
                 </tbody>
             </table>
@@ -196,64 +216,6 @@ td:nth-child(2) {
     flex-grow: 1;
     text-align: left;
 }
-
-.c-table__row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-05) var(--spacing-04) ;
-    border-bottom: 2px solid var(--grey-15);
-    gap: var(--spacing-04);
-
-    font-family: "Source Sans Pro", sans-serif;
-    font-size: var(--font-size-3); 
-    line-height: 1.5rem;
-    font-weight: var(--font-weight-regular);
-    letter-spacing: 0;
-}
-
-.c-table__row:nth-child(3) {
-    border: none;
-}
-
-.c-table__row:nth-child(1) .c-table__trophy, .c-table__row:nth-child(1) .c-table__trophy-icon {
-
-    border-color: var(--accent-orange);
-    color: var(--accent-orange);
-}
-
-.c-table__row:nth-child(3) .c-table__trophy, .c-table__row:nth-child(3) .c-table__trophy-icon {
-
-    border-color: var(--accent-orange-dark);
-    color: var(--accent-orange-dark);
-}
-
-.c-table__row--player{
-
-    background-color: var(--primary-light);
-    border-radius: var(--radius);
-    border: none;
-
-}
-
-.c-table__trophy {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-02);
-    border: 1px solid var(--grey-85);
-    padding: var(--spacing-02) var(--spacing-03);
-    border-radius: var(--radius-s);
-}
-
-.c-table__trophy--player {
-    border: none;
-    
-}
-
-.c-table__trophy-icon {
-    width: .875rem;
-    height: .875rem;
-} 
 
 .c-leaderboard {
     display: flex;
