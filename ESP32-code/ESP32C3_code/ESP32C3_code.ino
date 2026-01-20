@@ -220,6 +220,20 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
 }
 
 // Buzzer code
+void beep(int times, int duration_ms, int pause_ms)
+{
+  for (int i = 0; i < times; i++)
+  {
+    digitalWrite(BUZZER_PIN, HIGH);
+    delay(duration_ms);
+    digitalWrite(BUZZER_PIN, LOW);
+    if (i < times - 1)
+    {
+      delay(pause_ms);
+    }
+  }
+}
+
 void trigger_buzzer_pattern(String pattern, int duration)
 {
   if (pattern == "single")
