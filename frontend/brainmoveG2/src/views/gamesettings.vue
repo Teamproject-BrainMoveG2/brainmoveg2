@@ -24,7 +24,7 @@ const getColorValue = (color) => {
 const route = useRoute();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
-const rounds = ref(1);
+const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
 
@@ -44,6 +44,25 @@ const selectDifficulty = (difficulty) => {
 };
 
 onMounted(fetchGames);
+
+function getInstructionsRoute() {
+    return {
+        name: 'instructions',
+        params: { id: gameId.value },
+        query: {
+            username: username.value,
+            mode_id: Number(gameId.value),
+            difficulty_id: difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1,
+            aantal_rondes: rounds.value,
+            aantal_kleuren: colors.value
+        }
+    };
+}
+
+function printInstructionsRoute(e) {
+    const routeObj = getInstructionsRoute();
+    console.log('RouterLink to:', JSON.stringify(routeObj, null, 2));
+}
 
 </script>
 
@@ -86,20 +105,12 @@ onMounted(fetchGames);
         
         <RouterLink
             :class="buttonClass"
-            :to="{
-                name: 'instructions',
-                params: { id: gameId },
-                state: {
-                    username: username,
-                    mode_id: Number(gameId),
-                    difficulty_id: difficulties.findIndex(d => d.id === selectedDifficulty) + 1,
-                    aantal_rondes: rounds,
-                    aantal_kleuren: colors
-                }
-            }"
+            :to="getInstructionsRoute()"
+            @click.native="printInstructionsRoute"
         >
             Ga door
         </RouterLink>
+    
     </main>
 </template>
 

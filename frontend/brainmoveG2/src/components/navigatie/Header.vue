@@ -56,7 +56,6 @@ export default {
       return route.name === 'game';
     });
 
-
     // Use shared composable for cones logic
     const { warningCones, colorToDutch } = useCones();
 
@@ -77,6 +76,7 @@ export default {
 
 <template>
   <header class="c-header">
+    <div class="c-header__content">
     <!-- Game header layout -->
     <div v-if="isGame" class="c-game-header">
       <button @click="stopGame" class="c-stop-button" aria-label="Stop game">
@@ -91,7 +91,7 @@ export default {
       <Bell />
       <span v-if="warningCones.length > 0" class="c-bell-notification"></span>
     </button>
-
+    
     <!-- Back button for other pages -->
     <button v-else @click="goBack" class="c-back-button" aria-label="Ga terug">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,7 +106,7 @@ export default {
       :colorToDutch="colorToDutch"
       @close="closePopup"
     />
-
+  </div>
   </header>
 </template>
 
@@ -115,8 +115,31 @@ export default {
   z-index: 100;
   padding: var(--spacing-06);
   display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.c-header__content {
+  width: 100%;
+  display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 26.25rem;
+
+
+  @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+
+  }
 }
 
 .c-bell-notification {

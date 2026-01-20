@@ -17,10 +17,11 @@ const currentColor = ref('');
 const backgroundColor = ref('var(--grey-2)');
 const showResultOverlay = ref(false);
 const roundResult = ref('');
+const totalRounds = ref(0);
 let socket = null;
 
-// Get settings from router state
-const settings = (typeof window !== 'undefined' && window.history.state && window.history.state.state) ? window.history.state.state : {};
+const settings = route.query;
+console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
 
 const startCountdown = () => {
     const interval = setInterval(() => {
@@ -47,10 +48,10 @@ const startGame = async () => {
             },
             body: JSON.stringify({
                 username: settings.username || 'speler',
-                mode_id: settings.mode_id || 1,
-                difficulty_id: settings.difficulty_id || 1,
-                aantal_rondes: settings.aantal_rondes || 1,
-                aantal_kleuren: settings.aantal_kleuren || 1
+                mode_id: settings.mode_id,
+                difficulty_id: settings.difficulty_id,
+                aantal_rondes: settings.aantal_rondes,
+                aantal_kleuren: settings.aantal_kleuren
             })
         });
         const data = await response.json();
@@ -71,10 +72,10 @@ const connectSocket = () => {
         console.log('Round started:', data);
         currentRound.value = data.round;
         currentColor.value = data.color;
-        
+        totalRounds.value = data.max_rounds;
         // Hide result overlay when new round starts
         showResultOverlay.value = false;
-        
+      
         // Change background color based on received color
         const colorMap = {
             'blue': 'var(--blue)',
@@ -83,7 +84,8 @@ const connectSocket = () => {
             'red': 'var(--red)',
             'yellow': 'var(--yellow)'
         };
-        backgroundColor.value = colorMap[data.color.toLowerCase()] || 'var(--grey-2)';
+         
+            backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
     });
     
     socket.on('round_result', (data) => {
@@ -137,7 +139,7 @@ onUnmounted(() => {
       <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
     </div>
   </header>
-    <main class="c-content-wrapper" :style="{ backgroundColor: backgroundColor }">
+    <main class="u-viewport-height" :style="{ backgroundColor: backgroundColor }">
         <!-- Countdown Overlay -->
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
@@ -167,7 +169,7 @@ onUnmounted(() => {
   z-index: 100;
   padding: var(--spacing-06);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   background-color: var(--white);
 }
@@ -177,6 +179,21 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+    max-width: 26.25rem;
+
+   @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+
+  }
 }
 
 .c-stop-button {

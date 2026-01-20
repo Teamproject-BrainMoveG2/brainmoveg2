@@ -7,6 +7,7 @@ import instructions from '../views/instructions.vue';
 import Game from '../views/game.vue';
 import gameoverzicht from '../views/gameoverzicht.vue';
 import info from '../views/info.vue';
+import resultaten from '../views/resultaten.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,6 +58,12 @@ const router = createRouter({
       path: '/info',
       name: 'info',
       component: info,
+      meta: { showNavbar: true, showHeader: false }, 
+    },
+    {
+      path: '/resultaten',
+      name: 'resultaten',
+      component: resultaten,
       meta: { showNavbar: true, showHeader: false }, 
     }
   ],

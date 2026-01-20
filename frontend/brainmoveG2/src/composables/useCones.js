@@ -1,8 +1,10 @@
 import { ref, computed, onMounted } from 'vue';
+import io from 'socket.io-client';
 
 export function useCones() {
   const cones = ref([]);
   const Ip = `${window.location.hostname}:8000`;
+  let socket = null;
 
   const colorToDutch = {
     'red': 'Rood',
@@ -22,8 +24,25 @@ export function useCones() {
     }
   };
 
+  const connectSocket = () => {
+    if (socket) return;
+    socket = io(`http://${Ip}`);
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+    });
+    socket.on('cone_update', () => {
+      
+      fetchCones();
+      
+    });
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+  };
+
   onMounted(() => {
     fetchCones();
+    connectSocket();
   });
 
   // Show cones in popup if disconnected OR battery < 25
@@ -35,6 +54,7 @@ export function useCones() {
     cones,
     colorToDutch,
     warningCones,
-    fetchCones
+    fetchCones,
+    connectSocket
   };
 }
