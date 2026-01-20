@@ -52,27 +52,3 @@ class BuzzerService:
             duration_ms=150
         )
     
-    def trigger_buzzer_for_feedback(self, cone_id: int, cone_color: str, 
-                                   result: str) -> bool:
-        """
-        Trigger different buzzer patterns based on result
-        
-        Args:
-            cone_id: ID of the cone
-            cone_color: Color of the cone
-            result: "goed" (correct), "fout" (wrong), "gemist" (missed)
-        """
-        patterns = {
-            "goed": ("triple", 100),      # Success: triple beep
-            "fout": ("long", 300),         # Wrong: long beep
-            "gemist": ("single", 200),     # Missed: single long beep
-        }
-        
-        pattern, duration = patterns.get(result, ("single", 100))
-        
-        return self.trigger_buzzer(
-            cone_id=cone_id,
-            cone_color=cone_color,
-            buzzer_pattern=pattern,
-            duration_ms=duration
-        )
