@@ -41,14 +41,14 @@ const selectTab = (tabValue) => {
     outline: inherit;
     padding-bottom: var(--spacing-05);
     border: none;
-    border-bottom: 3px solid var(--grey-15);
+    border-bottom: 2px solid var(--grey-15);
     text-align: center;
     width: 100%;
     transition: border-color 0.2s ease;
 }
 
 .c-tab--active{
-    border-bottom: 3px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
 }
 
 </style>
