@@ -37,12 +37,20 @@
       return [];
     }
 
-    if (selectedMode.value === 'all') {
-      return data.value.data;
+    let filtered = data.value.data;
+
+    // Filter by gamemode
+    if (selectedMode.value !== 'all') {
+      filtered = filtered.filter(item => item.spelmodus_id == selectedMode.value);
     }
 
-    // Filter by the selected mode using spelmodus_id (now included from backend)
-    return data.value.data.filter(item => item.spelmodus_id == selectedMode.value);
+    // Filter by username (case-insensitive, partial match)
+    if (searchQuery.value && searchQuery.value.trim() !== '') {
+      const query = searchQuery.value.trim().toLowerCase();
+      filtered = filtered.filter(item => item.username && item.username.toLowerCase().includes(query));
+    }
+
+    return filtered;
   });
 
   async function fetchDataToday() {
