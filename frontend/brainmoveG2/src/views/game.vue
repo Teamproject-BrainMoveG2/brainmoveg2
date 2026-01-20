@@ -169,7 +169,7 @@ onUnmounted(() => {
   z-index: 100;
   padding: var(--spacing-06);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   background-color: var(--white);
 }
@@ -179,6 +179,21 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+    max-width: 26.25rem;
+
+   @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+
+  }
 }
 
 .c-stop-button {

@@ -7,6 +7,7 @@ const route = useRoute()
 
 <template>
   <nav class="c-navbar">
+    <div class="c-navbar__content">
     <router-link to="/dashboard" class="c-navbar__item small-body" :class="{ active: route.path === '/dashboard' }">
       <Home :size="24" />
       <span class="c-navbar__text">Home</span>
@@ -21,6 +22,7 @@ const route = useRoute()
       <Info :size="24" />
       <span class="c-navbar__text">Info</span>
     </router-link>
+  </div>
   </nav>
 </template>
 
@@ -38,6 +40,28 @@ const route = useRoute()
   padding-bottom: 0;
   z-index: 100;
   border-radius: var(--radius);
+}
+
+.c-navbar__content {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  max-width: 26.25rem;
+
+  @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+
+  }
 }
 
 
