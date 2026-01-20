@@ -30,6 +30,16 @@ async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Setting
         raise HTTPException(status_code=400, detail=str(e))
     return {"message":result}
 
+@router.post("/stop")
+async def stop_game(settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service)):
+    logger.info("Stopping the current game.")
+    try:
+        await game_service.stop_game(sio, cone_service, settings)
+    except Exception as e:
+        logger.error(f"Error stopping game: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message":"Game stopped successfully."}
+
 @router.post("/hit")
 async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service)):
     try:

@@ -58,6 +58,18 @@ class GameService:
         await self.new_round(sio, coneService)
         return "Game started!"
     
+    async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
+        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id
+        if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
+            self.logger.warning("No game in progress to stop.")
+            raise Exception("No game in progress to stop.")
+        
+        roundList = []
+        totalTimeMs = 0
+        currentRoundStartTime = None
+        currentCone = None
+        return
+    
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService):
         global currentRoundStartTime, currentCone, maxCones
         if (currentRoundStartTime is None and currentCone is None):
