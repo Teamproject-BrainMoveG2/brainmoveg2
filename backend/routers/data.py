@@ -29,37 +29,61 @@ router = APIRouter(
 async def get_today_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = GameSessionRepository.get_sessions_today(settings)
+        if data:
+            avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
+            avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
+        else:
+            avg_reaction_speed = 0
+            avg_accuracy = 0
     except Exception as e:
         logger.error(f"Error retrieving today's data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    return {"data": data}
-
+    return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 @router.get("/week")
 async def get_week_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = GameSessionRepository.get_sessions_thisweek(settings)
+        if data:
+            avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
+            avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
+        else:
+            avg_reaction_speed = 0
+            avg_accuracy = 0
+
     except Exception as e:
         logger.error(f"Error retrieving this week's data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    return {"data": data}
+    return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
 @router.get("/month")
 async def get_month_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = GameSessionRepository.get_sessions_thismonth(settings)
+        if data:
+            avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
+            avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
+        else:
+            avg_reaction_speed = 0
+            avg_accuracy = 0
     except Exception as e:
         logger.error(f"Error retrieving this month's data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    return {"data": data}
+    return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
 @router.get("/alltime")
 async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = GameSessionRepository.get_sessions_alltime(settings)
+        if data:
+            avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
+            avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
+        else:
+            avg_reaction_speed = 0
+            avg_accuracy = 0
     except Exception as e:
         logger.error(f"Error retrieving all-time data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    return {"data": data}
+    return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
 @router.get("/excel")
 async def get_excel_data(settings: Annotated[config.Settings, Depends(get_settings)], start: date, end: date = None, exportService: ExportService = Depends(get_export_service)):
