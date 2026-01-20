@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from services.cone_service import ConeService
 from services.game_service import GameService
-from dependencies import get_cone_service, get_sio
+from dependencies import get_cone_service, get_mqtt_service, get_sio
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
 
@@ -21,8 +21,9 @@ router = APIRouter(
 )
 
 @router.post("/status")
-async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depends(get_cone_service), sio: socketio.AsyncServer = Depends(get_sio)):
+async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depends(get_cone_service), sio: socketio.AsyncServer = Depends(get_sio), mqtt_service = Depends(get_mqtt_service)):
     await cone_service.register_cone(cone, sio)
+    mqtt_service.connect()
     logger.info(f"Cone status received: {cone}")
     return {"message": f"Cone {cone.cone_id} status recorded."}
 

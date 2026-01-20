@@ -41,6 +41,9 @@ int groenLed = A2;
 const char* url = "http://10.42.0.1:8000/"; // <-- RPi hotspot IP
 
 void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
   Serial.begin(115200);
   delay(200);
 
@@ -48,18 +51,13 @@ void setup() {
   pinMode(roodLed, OUTPUT);
   pinMode(groenLed, OUTPUT);
   pinMode(blauwLed, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
-
-  digitalWrite(BUZZER_PIN, LOW);
 
   // I2C + sensor init
   Wire.begin();
-  digitalWrite(BUZZER_PIN, LOW); // reassert low before sensor init
 
   if (!lox.begin()) {
     Serial.println("Failed to boot VL53L0X");
     // Fail-safe: led indicatie en stop
-    digitalWrite(BUZZER_PIN, LOW);
     while (true) { delay(1000); }
   }
 
@@ -89,18 +87,8 @@ void setup() {
   lees_batterij();
 }
 
-
 void loop()
 {
-  // Wifi code
-  wifi();
-
-  // buzzer code
-  // beep(2, 100, 100);
-  // delay(1000);
-  // beep(1, 500, 100);
-  // delay(2000);
-
   // MQTT
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -118,17 +106,6 @@ void loop()
   }
 }
 
-// Buzzer code
-void beep(int times, int on_ms, int off_ms)
-{
-  for (int i = 0; i < times; i++)
-  {
-    digitalWrite(BUZZER_PIN, HIGH);
-    delay(on_ms);
-    digitalWrite(BUZZER_PIN, LOW);
-    delay(off_ms);
-  }
-}
 // TOF code
 void tof()
 {
@@ -168,30 +145,7 @@ void tof()
   }
 }
 
-
-// Wifi code
-void wifi()
-{
-  // Serial.print(WiFi.status());
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    // Serial.println("\nVerbonden! IP-adres: ");
-
-    // HTTPClient http;
-    // String hitUrl = String(url) + "cone/connect";
-    // http.addHeader("Content-Type", "application/json"); // JSON content-type
-
-    // String payload = String("{\"batterij\":\"") + bat_procent + "\"}";
-    // int code = http.POST(payload); // POST request
-
-    // http.end();
-  }
-  else
-  {
-    Serial.print(".");
-    // delay(100);
-  }
-}
+// Batterij code
 void lees_batterij() {
   uint32_t Vsum_mV = 0;
   for (int i = 0; i < 16; i++) Vsum_mV += analogReadMilliVolts(batterij); // mV op ADC pin (gekalibreerd)
@@ -213,19 +167,17 @@ void lees_batterij() {
   http.begin(statusUrl);
   http.addHeader("Content-Type", "application/json");
 
-
   String payload =
   String("{\"cone_id\":\"") + KLEUR +
   String("\",\"battery_percentage\":") + bat_procent +
   String("}");
 
-
   int code = http.POST(payload);
-
 
   http.end();
 }
 
+// RGB code
 void setRgb(bool rOn, bool gOn, bool bOn) {
   digitalWrite(roodLed,  rOn ? LOW : HIGH);
   digitalWrite(groenLed, gOn ? LOW : HIGH);
@@ -264,6 +216,21 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   if (action == "beep")
   {
     trigger_buzzer_pattern(pattern, duration);
+  }
+}
+
+// Buzzer code
+void beep(int times, int duration_ms, int pause_ms)
+{
+  for (int i = 0; i < times; i++)
+  {
+    digitalWrite(BUZZER_PIN, HIGH);
+    delay(duration_ms);
+    digitalWrite(BUZZER_PIN, LOW);
+    if (i < times - 1)
+    {
+      delay(pause_ms);
+    }
   }
 }
 
