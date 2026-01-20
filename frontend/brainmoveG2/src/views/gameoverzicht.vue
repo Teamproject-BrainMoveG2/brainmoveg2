@@ -3,9 +3,11 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
+
 import StatCard from '../components/cards/StatCard.vue';
 import ScoreboardRow from '../components/ScoreboardRow.vue';
 import ScoreCircle from '../components/ScoreCircle.vue';
+import TabSwitcher from '../components/TabSwitcher.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -77,22 +79,13 @@ const openContent = (tabName) => {
 </script>
 
 <template>
-    <div class="c-overzichttab">
-        <button 
-            class="c-tabGame body-large" 
-            :class="{ 'c-tabGame--active': activeTab === 'scoreboard' }"
-            @click="openContent('scoreboard')"
-        >
-            Scoreboard
-        </button>
-        <button 
-            class="c-tabGame body-large" 
-            :class="{ 'c-tabGame--active': activeTab === 'speloverzicht' }"
-            @click="openContent('speloverzicht')"
-        >
-            Speloverzicht
-        </button>
-    </div>
+    <TabSwitcher
+      v-model:activeTab="activeTab"
+      :tabs="[
+        { label: 'Scoreboard', value: 'scoreboard' },
+        { label: 'Speloverzicht', value: 'speloverzicht' }
+      ]"
+    />
     <main v-show="activeTab === 'speloverzicht'" class="c-content-wrapper">
         <div class="c-title-div">
             <h1>Speloverzicht</h1>
@@ -272,22 +265,6 @@ td:nth-child(2) {
     
 
   }
-}
-
-.c-tabGame{
-    background: none;
-    cursor: pointer;
-    outline: inherit;
-    padding-bottom: var(--spacing-05);
-    border: none;
-    border-bottom: 3px solid var(--grey-15);
-    text-align: center;
-    width: 100%;
-    transition: border-color 0.2s ease;
-}
-
-.c-tabGame--active{
-    border-bottom: 3px solid var(--primary);
 }
 
 .c-title-div {
