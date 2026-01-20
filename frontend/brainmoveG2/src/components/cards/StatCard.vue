@@ -68,7 +68,6 @@ const props = defineProps({
 .c-stat-value {
     font-family: "Bebas Neue", sans-serif;
     font-size: 32px;
-    font-weight: 700;
     line-height: 40px;
     color: var(--text-primary);
     margin: 0;
