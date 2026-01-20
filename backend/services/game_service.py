@@ -113,7 +113,7 @@ class GameService:
         
         reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
         totalTimeMs += reaction_speed_ms
-        if reaction_speed_ms > TOO_LATE_MS:
+        if reaction_speed_ms > TOO_LATE_MS and session_mode_id != 2:
             round_result = RoundResult.GEMIST
         elif coneObject.cone_id != currentCone.cone_id:
             round_result = RoundResult.FOUT
@@ -153,6 +153,9 @@ class GameService:
                 score=playerScore.score
             )
             
+            for r in roundList:
+                RondeRepository.create_ronde(settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+            
             player_rank = GameSessionRepository.get_player_rank(settings, session_id)
             playerScore.place = player_rank["rank"]
             if player_rank['rank'] <= 3:
@@ -176,9 +179,6 @@ class GameService:
                 top_scores=top_scores
             )
             gameoverStats.score = playerScore
-            for r in roundList:
-                RondeRepository.create_ronde(settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
-            
 
             # Reset game state
             roundList = []
