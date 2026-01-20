@@ -1,4 +1,5 @@
 from services.cone_service import ConeService
+from services.export_service import ExportService
 from services.game_service import GameService
 from services.score_service import ScoreService
 from services.mqtt_service import MQTTService
@@ -17,6 +18,9 @@ async def get_cone_service() -> ConeService:
 
 async def get_score_service() -> ScoreService:
     return ScoreService()
+
+async def get_export_service() -> ExportService:
+    return ExportService()
 
 # async def get_mqtt_service(settings: Annotated[config.Settings, Depends(get_settings)]) -> MQTTService:
 #     mqtt = MQTTService(
