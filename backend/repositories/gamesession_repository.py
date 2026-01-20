@@ -47,3 +47,9 @@ class GameSessionRepository:
     def get_sessions_alltime(settings):
         sql = "SELECT spelsessie.spelsessie_id, username, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id GROUP BY spelsessie.spelsessie_id, username, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
+    
+    @staticmethod
+    def get_sessions_in_date_range(settings, start_date, end_date):
+        sql = "SELECT spelsessie.spelsessie_id, username, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent, gestart_op as datum FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) BETWEEN %s AND %s GROUP BY spelsessie.spelsessie_id, username, moeilijkheid.naam, score"
+        params = [start_date, end_date]
+        return Database.get_rows(sql, params=params, settings=settings)
