@@ -3,19 +3,109 @@
   import TabSwitcher from '../components/TabSwitcher.vue';
   import StatCard from '../components/cards/StatCard.vue';
   import { Clock } from 'lucide-vue-next';
-  import { ref } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import ResultTableRow from '../components/ResultTableRow.vue';
   import ResultSelect from '../components/ResultSelect.vue';
   import ResultSearch from '../components/ResultSearch.vue';
   import ExportButton from '../components/ExportButton.vue';
+  import { useGames } from '../composables/useGames';
+
+  const { modes, fetchGames } = useGames();
   const selectedMode = ref('all');
   const searchQuery = ref('');
-  const selectOptions = [
-    { label: 'Alle Gamemodes', value: 'all' }
-  ];
+
+  const gameOptions = computed(() => {
+    const options = [{ label: 'Alle Gamemodes', value: 'all' }];
+    if (Array.isArray(modes.value)) {
+      modes.value.forEach(game => {
+        options.push({ label: game.naam, value: game.spelmodus_id });
+      });
+    }
+    return options;
+  });
+
   function onSearch() {
     // Implement search logic here
   }
+
+  const activeTab = ref('Vandaag');
+  const data = ref(null);
+  const Ip = `${window.location.hostname}:8000`;
+
+  const filteredData = computed(() => {
+    if (!data.value || !data.value.data) {
+      return [];
+    }
+
+    if (selectedMode.value === 'all') {
+      return data.value.data;
+    }
+
+    // Filter by the selected mode using spelmodus_id (now included from backend)
+    return data.value.data.filter(item => item.spelmodus_id == selectedMode.value);
+  });
+
+  async function fetchDataToday() {
+    try {
+      const response = await fetch(`http://${Ip}/data/today`);
+      if (!response.ok) throw new Error('Failed to fetch modes');
+      data.value = await response.json();
+    } catch (e) {
+      data.value = [];
+    }
+  }
+
+  async function fetchDataWeek() {
+    try {
+      const response = await fetch(`http://${Ip}/data/week`);
+      if (!response.ok) throw new Error('Failed to fetch modes');
+      data.value = await response.json();
+    } catch (e) {
+      data.value = [];
+    }
+  }
+
+  async function fetchDataMonth() {
+    try {
+      const response = await fetch(`http://${Ip}/data/month`);
+      if (!response.ok) throw new Error('Failed to fetch modes');
+      data.value = await response.json();
+    } catch (e) {
+      data.value = [];
+    }
+  }
+
+  async function fetchDataAlltime() {
+    try {
+      const response = await fetch(`http://${Ip}/data/alltime`);
+      if (!response.ok) throw new Error('Failed to fetch modes');
+      data.value = await response.json();
+    } catch (e) {
+      data.value = [];
+    }
+  }
+
+  function handleTabSelect(tabValue) {
+    switch (tabValue) {
+      case 'Vandaag':
+        fetchDataToday();
+        break;
+      case 'Week':
+        fetchDataWeek();
+        break;
+      case 'Maand':
+        fetchDataMonth();
+        break;
+      case 'Begin':
+        fetchDataAlltime();
+        break;
+    }
+  }
+
+  onMounted(() => {
+    fetchDataToday();
+    fetchGames();
+  });
 </script>
 
 <template>
@@ -36,26 +126,27 @@
         { label: 'Maand', value: 'Maand' },
         { label: 'Begin', value: 'Begin' }
       ]"
+      @select="handleTabSelect"
     />
     <main class="c-content-wrapper">
-      <div class="c-result-grid">
+      <div class="c-result-grid" v-if="data">
       <StatCard 
         label="Gem. accuracy" 
-        :value="`76`"
+        :value="`${Math.round(data.avg_accuracy)}`"
         
         />
       <StatCard 
         label="Avg. snelheid" 
-        :value="`250MS`"
+        :value="`${Math.round(data.avg_reaction_speed)}MS`"
         :icon="Clock"
       />
     </div>
     <div class="c-resultaten-filter">
       <h2>Resultaten:</h2>
-      <ResultSelect v-model="selectedMode" :options="selectOptions" />
+      <ResultSelect v-model="selectedMode" :options="gameOptions" />
       <ResultSearch v-model="searchQuery" placeholder="Gebruiker zoeken..." @search="onSearch" />
   </div>
-  <div class="c-table--resultaten-wrapper">
+  <div class="c-table--resultaten-wrapper" v-if="data && data.data">
   <table class="c-table c-table--resultaten">
   <thead>
     <tr class="c-table__headings">
@@ -66,9 +157,13 @@
     </tr>
   </thead>
   <tbody>
-    <ResultTableRow name="Name1" accuracy="54%" reaction="950ms" difficulty="Intense" />
-    <ResultTableRow name="Name2" accuracy="73%" reaction="650ms" difficulty="Challenging" />
-    <ResultTableRow name="Name3" accuracy="35%" reaction="135ms" difficulty="Relaxed" />
+    <ResultTableRow 
+      v-for="item in filteredData" 
+      :key="item.spelsessie_id"
+      :name="item.username" 
+      :accuracy="`${Math.round(item.accuracy_percent)}%`" 
+      :reaction="`${Math.round(item.avg_reactietijd_ms)}ms`" 
+      :difficulty="item.naam" />
   </tbody>
 </table>
 </div>
@@ -131,7 +226,7 @@
   width: 100%;
 }
 
-::v-deep .c-tab {
+:deep(.c-tab) {
   font-size: var(--font-size-3);
 }
 
