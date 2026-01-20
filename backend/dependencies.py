@@ -21,16 +21,8 @@ async def get_score_service() -> ScoreService:
 
 async def get_export_service() -> ExportService:
     return ExportService()
-
-# async def get_mqtt_service(settings: Annotated[config.Settings, Depends(get_settings)]) -> MQTTService:
-#     mqtt = MQTTService(
-#         broker_host=settings.mqtt_broker,
-#         broker_port=settings.mqtt_port,
-#         username=settings.mqtt_username,
-#         password=settings.mqtt_password
-#     )
-#     mqtt.connect()
-#     return mqtt
+async def get_mqtt_service(request: Request) -> MQTTService:
+    return request.app.state.mqtt
 
 async def get_buzzer_service() -> BuzzerService:
     return BuzzerService()

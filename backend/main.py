@@ -2,13 +2,14 @@ import config
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_sio, get_settings, get_score_service
+from dependencies import get_sio, get_settings, get_score_service, get_mqtt_service
 from models.testmodels import *
 from repositories.ronde_repository import RondeRepository
 from models.models import *
 from routers import cones, games, modes, data
 import logging
 import socketio
+from services.mqtt_service import MQTTService
 
 from services.score_service import ScoreService
 logging.basicConfig(level=logging.INFO)  # Sets global log level
@@ -31,6 +32,15 @@ app.include_router(router=modes.router, dependencies=[Depends(get_sio)])
 app.include_router(router=cones.router, dependencies=[Depends(get_sio)])
 app.include_router(router=data.router, dependencies=[Depends(get_sio)])
 app.mount("/socket.io", sio_app)
+
+settings = get_settings()
+
+mqtt = MQTTService(settings.mqtt_broker, settings.mqtt_port, settings.mqtt_username, settings.mqtt_password)
+mqtt.connect()
+logger.info("MQTT Service connected and assigned to app state.")
+app.state.mqtt = mqtt
+
+
 
 @app.get("/", response_model=str)
 async def hello_world():
