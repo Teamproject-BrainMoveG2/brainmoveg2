@@ -54,3 +54,7 @@ class GameStartDTO(BaseModel):
     difficulty_id: int
     aantal_rondes: int
     aantal_kleuren: int
+
+class ExportDateDTO(BaseModel):
+    startDate: datetime.datetime
+    endDate: datetime.datetime

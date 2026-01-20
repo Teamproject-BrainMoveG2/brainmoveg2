@@ -55,10 +55,10 @@ class GameService:
             self.logger.error(f"Error creating game session: {e}")
             raise Exception("Error creating game session: " + str(e))
 
-        await self.new_round(sio, coneService, buzzer_service)
+        await self.new_round(sio, coneService)
         return "Game started!"
     
-    async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzer_service=None):
+    async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService):
         global currentRoundStartTime, currentCone, maxCones
         if (currentRoundStartTime is None and currentCone is None):
             connectedCones = coneService.get_active_cones(maxCones)
@@ -73,8 +73,8 @@ class GameService:
             currentCone = random.choice(connectedCones)
 
             # Trigger buzzer on the selected cone
-            if buzzer_service:
-                buzzer_service.trigger_buzzer_for_round_start(currentCone)
+            # if buzzer_service:
+            #     buzzer_service.trigger_buzzer_for_round_start(currentCone)
         
             self.logger.info(f"New round started. Hit cone {currentCone}!")
             await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
@@ -136,7 +136,14 @@ class GameService:
                 ended_on=datetime.now(timezone.utc),
                 score=playerScore.score
             )
-            top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=3)
+            
+            player_rank = GameSessionRepository.get_player_rank(settings, session_id)
+            playerScore.place = player_rank["rank"]
+            if player_rank['rank'] <= 3:
+                top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=4)
+                top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+            else:
+                top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=3)
             if top_scores is None:
                 top_scores = []
             niveau = scoreService.calculate_level(playerScore.score, settings)
@@ -152,12 +159,10 @@ class GameService:
                 score=playerScore,
                 top_scores=top_scores
             )
+            gameoverStats.score = playerScore
             for r in roundList:
                 RondeRepository.create_ronde(settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
             
-            player_rank = GameSessionRepository.get_player_rank(settings, session_id)
-            playerScore.place = player_rank["rank"]
-            gameoverStats.score = playerScore
 
             # Reset game state
             roundList = []
@@ -167,4 +172,4 @@ class GameService:
             await sio.emit('game_over', gameoverStats.model_dump_json())
         else:
             await asyncio.sleep(1)  # brief pause before next round
-            await self.new_round(sio, coneService, buzzer_service)
+            await self.new_round(sio, coneService)

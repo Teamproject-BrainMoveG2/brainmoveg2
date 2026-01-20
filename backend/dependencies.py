@@ -18,18 +18,18 @@ async def get_cone_service() -> ConeService:
 async def get_score_service() -> ScoreService:
     return ScoreService()
 
-async def get_mqtt_service(settings: Annotated[config.Settings, Depends(get_settings)]) -> MQTTService:
-    mqtt = MQTTService(
-        broker_host=settings.mqtt_broker,
-        broker_port=settings.mqtt_port,
-        username=settings.mqtt_username,
-        password=settings.mqtt_password
-    )
-    mqtt.connect()
-    return mqtt
+# async def get_mqtt_service(settings: Annotated[config.Settings, Depends(get_settings)]) -> MQTTService:
+#     mqtt = MQTTService(
+#         broker_host=settings.mqtt_broker,
+#         broker_port=settings.mqtt_port,
+#         username=settings.mqtt_username,
+#         password=settings.mqtt_password
+#     )
+#     mqtt.connect()
+#     return mqtt
 
-async def get_buzzer_service(mqtt_service: MQTTService = Depends(get_mqtt_service)) -> BuzzerService:
-    return BuzzerService(mqtt_service)
+async def get_buzzer_service() -> BuzzerService:
+    return BuzzerService()
 
 async def get_sio(request: Request) -> socketio.AsyncServer:
     return request.app.state.sio
