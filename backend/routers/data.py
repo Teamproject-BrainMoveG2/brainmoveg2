@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Optional
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 import socketio
 import config
@@ -28,7 +29,7 @@ router = APIRouter(
 @router.get("/today")
 async def get_today_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
-        data = GameSessionRepository.get_sessions_today(settings)
+        data = await run_in_threadpool(GameSessionRepository.get_sessions_today, settings)
         if data:
             avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
             avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
@@ -42,7 +43,7 @@ async def get_today_data(settings: Annotated[config.Settings, Depends(get_settin
 @router.get("/week")
 async def get_week_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
-        data = GameSessionRepository.get_sessions_thisweek(settings)
+        data = await run_in_threadpool(GameSessionRepository.get_sessions_thisweek, settings)
         if data:
             avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
             avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
@@ -58,7 +59,7 @@ async def get_week_data(settings: Annotated[config.Settings, Depends(get_setting
 @router.get("/month")
 async def get_month_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
-        data = GameSessionRepository.get_sessions_thismonth(settings)
+        data = await run_in_threadpool(GameSessionRepository.get_sessions_thismonth, settings)
         if data:
             avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
             avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
@@ -73,7 +74,7 @@ async def get_month_data(settings: Annotated[config.Settings, Depends(get_settin
 @router.get("/alltime")
 async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
-        data = GameSessionRepository.get_sessions_alltime(settings)
+        data = await run_in_threadpool(GameSessionRepository.get_sessions_alltime, settings)
         if data:
             avg_reaction_speed = sum(session['avg_reactietijd_ms'] for session in data) / len(data)
             avg_accuracy = sum(session['accuracy_percent'] for session in data) / len(data)
@@ -87,9 +88,9 @@ async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_sett
 
 @router.get("/excel")
 async def get_excel_data(settings: Annotated[config.Settings, Depends(get_settings)], start: date, end: date = None, exportService: ExportService = Depends(get_export_service)):
-    data = GameSessionRepository.get_sessions_in_date_range(settings, start, end)
+    data = await run_in_threadpool(GameSessionRepository.get_sessions_in_date_range, settings, start, end)
     logger.info(f"Exporting data from {start} to {end}: {data}")
-    file_path = exportService.export_data_to_excel(data)
+    file_path = await run_in_threadpool(exportService.export_data_to_excel, data)
     date_range = start.strftime('%Y%m%d') + '_to_' + end.strftime('%Y%m%d')
     filename = f'brainmove_export_{date_range}.xlsx'
 
