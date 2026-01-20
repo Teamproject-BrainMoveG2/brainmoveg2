@@ -1,8 +1,9 @@
+from services.mqtt_service import MQTTService
 import config
 from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from services.game_service import GameService
-from dependencies import get_cone_service, get_game_service, get_score_service, get_settings, get_sio, get_buzzer_service
+from dependencies import get_cone_service, get_game_service, get_mqtt_service, get_score_service, get_settings, get_sio, get_buzzer_service
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
 from models.models import Cone, ConeDTO, GameStartDTO
@@ -21,19 +22,19 @@ router = APIRouter(
 )
 
 @router.post("/start")
-async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), buzzer_service = Depends(get_buzzer_service)):
+async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Settings, Depends(get_settings)], mqtt_service: MQTTService = Depends(get_mqtt_service), game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), buzzer_service = Depends(get_buzzer_service)):
     logger.info("Starting a new game via API.")
     try:
-        result = await game_service.start_game(gameStart.username, gameStart.mode_id, gameStart.difficulty_id, gameStart.aantal_rondes, gameStart.aantal_kleuren, sio, cone_service, settings, buzzer_service)
+        result = await game_service.start_game(gameStart.username, gameStart.mode_id, gameStart.difficulty_id, gameStart.aantal_rondes, gameStart.aantal_kleuren, sio, cone_service, settings, buzzer_service, mqtt_service)
     except Exception as e:
         logger.error(f"Error starting game: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     return {"message":result}
 
 @router.post("/hit")
-async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service), buzzer_service = Depends(get_buzzer_service)):
+async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], mqtt_service: MQTTService = Depends(get_mqtt_service), game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service), buzzer_service = Depends(get_buzzer_service)):
     try:
-        await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings, buzzer_service)
+        await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings, buzzer_service, mqtt_service)
     except ValueError as ve:
         logger.error(f"Error recording cone hit: {ve}")
         raise HTTPException(status_code=400, detail="No round is in progress.")

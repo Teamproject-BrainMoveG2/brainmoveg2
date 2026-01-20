@@ -12,9 +12,9 @@
 
 Adafruit_VL53L0X lox;
 
-static bool tofArmed = true;            // mag er een nieuwe hit komen?
-static const uint16_t HIT_MM = 150;     // detectiedrempel
-static const uint16_t RELEASE_MM = 180; // loslaat-drempel (hysteresis)
+static bool tofArmed = true;                 // mag er een nieuwe hit komen?
+static const uint16_t HIT_MM = 150;          // detectiedrempel
+static const uint16_t RELEASE_MM = 180;      // loslaat-drempel (hysteresis)
 static unsigned long lastHitMs = 0;
 static const unsigned long HIT_COOLDOWN_MS = 300; // extra bescherming tegen dubbel triggeren
 
@@ -38,10 +38,12 @@ int roodLed = A1;
 int blauwLed = D3;
 int groenLed = A2;
 
-const char *url = "http://10.42.0.1:8000/"; // <-- RPi hotspot IP
+const char* url = "http://10.42.0.1:8000/"; // <-- RPi hotspot IP
 
-void setup()
-{
+void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
   Serial.begin(115200);
   delay(200);
 
@@ -49,23 +51,14 @@ void setup()
   pinMode(roodLed, OUTPUT);
   pinMode(groenLed, OUTPUT);
   pinMode(blauwLed, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
-
-  digitalWrite(BUZZER_PIN, LOW);
 
   // I2C + sensor init
   Wire.begin();
-  digitalWrite(BUZZER_PIN, LOW); // reassert low before sensor init
 
-  if (!lox.begin())
-  {
+  if (!lox.begin()) {
     Serial.println("Failed to boot VL53L0X");
     // Fail-safe: led indicatie en stop
-    digitalWrite(BUZZER_PIN, LOW);
-    while (true)
-    {
-      delay(1000);
-    }
+    while (true) { delay(1000); }
   }
 
   // WiFi init (met timeout)
@@ -74,41 +67,28 @@ void setup()
   Serial.print("Verbinden met WiFi");
 
   uint32_t t0 = millis();
-  while (WiFi.status() != WL_CONNECTED && (millis() - t0) < 10000)
-  {
+  while (WiFi.status() != WL_CONNECTED && (millis() - t0) < 10000) {
     Serial.print(".");
     delay(250);
   }
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
+  if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("\nWiFi OK, IP=%s RSSI=%d\n",
                   WiFi.localIP().toString().c_str(),
                   WiFi.RSSI());
-  }
-  else
-  {
+  } else {
     Serial.println("\nWiFi FAIL (timeout)");
     // Hier kan je beslissen: verder zonder WiFi, of resetten, of blijven proberen.
   }
-  // MQTT code
+  //MQTT code
   setup_mqtt();
 
-  // batterij code
+  //batterij code
   lees_batterij();
 }
 
 void loop()
 {
-  // Wifi code
-  wifi();
-
-  // buzzer code
-  // beep(2, 100, 100);
-  // delay(1000);
-  // beep(1, 500, 100);
-  // delay(2000);
-
   // MQTT
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -118,48 +98,32 @@ void loop()
 
   // TOF code
   tof();
-
+ 
   unsigned long now = millis();
-  if (now - lastBatteryMs >= BATTERY_INTERVAL_MS)
-  {
+  if (now - lastBatteryMs >= BATTERY_INTERVAL_MS) {
     lastBatteryMs = now;
     lees_batterij();
   }
 }
 
-// Buzzer code
-void beep(int times, int on_ms, int off_ms)
-{
-  for (int i = 0; i < times; i++)
-  {
-    digitalWrite(BUZZER_PIN, HIGH);
-    delay(on_ms);
-    digitalWrite(BUZZER_PIN, LOW);
-    delay(off_ms);
-  }
-}
 // TOF code
 void tof()
 {
   VL53L0X_RangingMeasurementData_t measure;
   lox.rangingTest(&measure, false);
 
-  bool valid = (measure.RangeStatus != 4); // jouw "geldige meting" check
+  bool valid = (measure.RangeStatus != 4);   // jouw "geldige meting" check
   uint16_t d = measure.RangeMilliMeter;
 
-  if (valid)
-  {
+  if (valid) {
     Serial.print("Distance (mm): ");
     Serial.println(d);
-  }
-  else
-  {
+  } else {
     Serial.println("Out of range");
   }
 
   // Re-arm: pas als er echt niets meer dichtbij is (of meting ongeldig)
-  if (!valid || d > RELEASE_MM)
-  {
+  if (!valid || d > RELEASE_MM) {
     tofArmed = true;
   }
 
@@ -181,34 +145,10 @@ void tof()
   }
 }
 
-// Wifi code
-void wifi()
-{
-  // Serial.print(WiFi.status());
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    // Serial.println("\nVerbonden! IP-adres: ");
-
-    // HTTPClient http;
-    // String hitUrl = String(url) + "cone/connect";
-    // http.addHeader("Content-Type", "application/json"); // JSON content-type
-
-    // String payload = String("{\"batterij\":\"") + bat_procent + "\"}";
-    // int code = http.POST(payload); // POST request
-
-    // http.end();
-  }
-  else
-  {
-    Serial.print(".");
-    // delay(100);
-  }
-}
-void lees_batterij()
-{
+// Batterij code
+void lees_batterij() {
   uint32_t Vsum_mV = 0;
-  for (int i = 0; i < 16; i++)
-    Vsum_mV += analogReadMilliVolts(batterij); // mV op ADC pin (gekalibreerd)
+  for (int i = 0; i < 16; i++) Vsum_mV += analogReadMilliVolts(batterij); // mV op ADC pin (gekalibreerd)
 
   float Vadc = (Vsum_mV / 16.0f) / 1000.0f; // V op ADC pin
   float Vbat = 2.0f * Vadc;                 // 1/2 spanningsdeler -> batterijspanning
@@ -221,48 +161,42 @@ void lees_batterij()
   Serial.printf("batterij=%d%%\n", bat_procent);
   Serial.printf("Vadc=%.3fV\nVbat=%.3fV\n", Vadc, Vbat);
   setLedByBattery(bat_procent);
-
+ 
   HTTPClient http;
   String statusUrl = String(url) + "cones/status";
   http.begin(statusUrl);
   http.addHeader("Content-Type", "application/json");
 
   String payload =
-      String("{\"cone_id\":\"") + KLEUR +
-      String("\",\"battery_percentage\":") + bat_procent +
-      String("}");
+  String("{\"cone_id\":\"") + KLEUR +
+  String("\",\"battery_percentage\":") + bat_procent +
+  String("}");
 
   int code = http.POST(payload);
 
   http.end();
 }
 
-void setRgb(bool rOn, bool gOn, bool bOn)
-{
-  digitalWrite(roodLed, rOn ? LOW : HIGH);
+// RGB code
+void setRgb(bool rOn, bool gOn, bool bOn) {
+  digitalWrite(roodLed,  rOn ? LOW : HIGH);
   digitalWrite(groenLed, gOn ? LOW : HIGH);
   digitalWrite(blauwLed, bOn ? LOW : HIGH);
 }
 
-void setLedByBattery(int percent)
-{
+void setLedByBattery(int percent) {
   percent = constrain(percent, 0, 100);
 
-  if (percent >= 60)
-  {
-    setRgb(false, true, false); // groen
-  }
-  else if (percent >= 25)
-  {
-    setRgb(true, true, false); // geel (rood+groen)
-  }
-  else
-  {
-    setRgb(true, false, false); // rood
+  if (percent >= 60) {
+    setRgb(false, true, false);   // groen
+  } else if (percent >= 25) {
+    setRgb(true, true, false);    // geel (rood+groen)
+  } else {
+    setRgb(true, false, false);   // rood
   }
 }
 
-// MQTT code
+//MQTT code
 void setup_mqtt()
 {
   mqtt_topic_buzzer = String("brainmove/cones/") + KLEUR + "/buzzer";
@@ -285,6 +219,7 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   }
 }
 
+// Buzzer code
 void trigger_buzzer_pattern(String pattern, int duration)
 {
   if (pattern == "single")

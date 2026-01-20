@@ -36,6 +36,7 @@ settings = get_settings()
 
 mqtt = MQTTService(settings.mqtt_broker, settings.mqtt_port, settings.mqtt_username, settings.mqtt_password)
 mqtt.connect()
+logger.info("MQTT Service connected and assigned to app state.")
 app.state.mqtt = mqtt
 
 
