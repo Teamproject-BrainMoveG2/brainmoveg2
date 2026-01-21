@@ -1,4 +1,5 @@
 from typing import Optional
+from fastapi.concurrency import run_in_threadpool
 from typing_extensions import Annotated
 from services.mqtt_service import MQTTService
 import config
@@ -47,7 +48,7 @@ class GameService:
         difficulty = difficulty_id
         TOO_LATE_MS = TOO_LATE.get(difficulty_id, 5000)
         try:
-            session_id = GameSessionRepository.create_session(
+            session_id = await run_in_threadpool(GameSessionRepository.create_session,
                 settings=settings,
                 username=username,
                 mode_id=mode_id,
@@ -89,7 +90,7 @@ class GameService:
 
             # Trigger buzzer on the selected cone
             if buzzerService:
-                buzzerService.trigger_buzzer_for_round_start(currentCone, mqtt_service)
+                await run_in_threadpool(buzzerService.trigger_buzzer_for_round_start, currentCone, mqtt_service)
         
             self.logger.info(f"New round started. Hit cone {currentCone}!")
             await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
@@ -146,7 +147,8 @@ class GameService:
             playerScore.score = scoreService.calculate_score(
                 total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList)
             )
-            GameSessionRepository.end_session(
+            await run_in_threadpool(
+                GameSessionRepository.end_session,
                 settings=settings,
                 session_id=session_id,
                 ended_on=datetime.now(timezone.utc),
@@ -154,15 +156,15 @@ class GameService:
             )
             
             for r in roundList:
-                RondeRepository.create_ronde(settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+                await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
             
-            player_rank = GameSessionRepository.get_player_rank(settings, session_id)
+            player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
             playerScore.place = player_rank["rank"]
             if player_rank['rank'] <= 3:
-                top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=4)
+                top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
                 top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
             else:
-                top_scores = scoreService.get_top_scores(settings, session_mode_id, limit=3)
+                top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
             if top_scores is None:
                 top_scores = []
             niveau = scoreService.calculate_level(playerScore.score, settings)
