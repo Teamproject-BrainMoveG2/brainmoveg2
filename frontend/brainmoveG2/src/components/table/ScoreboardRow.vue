@@ -1,6 +1,5 @@
 <script setup>
 import { Trophy, Medal } from 'lucide-vue-next';
-import { computed } from 'vue';
 
 const props = defineProps({
   position: {

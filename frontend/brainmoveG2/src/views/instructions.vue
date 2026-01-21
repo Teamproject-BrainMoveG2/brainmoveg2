@@ -33,7 +33,6 @@ function startGameAndGo() {
     });
 }
 
-// Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 </script>

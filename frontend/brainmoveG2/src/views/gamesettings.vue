@@ -1,7 +1,7 @@
 <script setup>
 import { useCones } from '../composables/useCones';
 import { useGameColors } from '../composables/useGameColors';
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ref,onMounted, computed } from 'vue';
 import SettingContainer from '../components/SettingContainer.vue';
 import DifficultyButton from '../components/buttons/DifficultyButton.vue';
@@ -22,6 +22,7 @@ const getColorValue = (color) => {
 };
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
 const rounds = ref(10);
@@ -59,17 +60,18 @@ function getInstructionsRoute() {
     };
 }
 
-function printInstructionsRoute(e) {
-    const routeObj = getInstructionsRoute();
-    console.log('RouterLink to:', JSON.stringify(routeObj, null, 2));
-}
-
 const limitedCones = computed(() => {
     if (!Array.isArray(cones.value)) return [];
     const num = typeof colors.value === 'number' ? colors.value : 0;
     const sorted = [...cones.value].sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
     return sorted.slice(0, num);
 });
+
+function goToInstructions() {
+    if (username.value) {
+        router.push(getInstructionsRoute());
+    }
+}
 
 </script>
 
@@ -93,7 +95,7 @@ const limitedCones = computed(() => {
                 <CounterButton v-model="rounds" :min="1" />
             </SettingContainer>
             <SettingContainer title="Aantal kleuren">
-                <CounterButton v-model="colors" :min="1" :max="4"/>
+                <CounterButton v-model="colors" :min="2" :max="4"/>
             </SettingContainer>
         </div>
         <SettingContainer title="Gebruikersnaam">
@@ -110,13 +112,13 @@ const limitedCones = computed(() => {
             />
         </SettingContainer>
         
-        <RouterLink
+        <button
             :class="buttonClass"
-            :to="getInstructionsRoute()"
-            @click.native="printInstructionsRoute"
+            :disabled="!username"
+            @click="goToInstructions"
         >
             Ga door
-        </RouterLink>
+        </button>
     
     </main>
 </template>

@@ -24,7 +24,7 @@ function closePopup() {
 }
 
 async function handleDownload() {
-  // Always parse selectedDate to a Date object, even if it's a string
+  
   let endDateObj = selectedDate.value;
   if (!(endDateObj instanceof Date) || isNaN(endDateObj)) {
     endDateObj = new Date(endDateObj);
