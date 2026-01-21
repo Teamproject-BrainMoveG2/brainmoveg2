@@ -20,6 +20,14 @@ const roundResult = ref('');
 const totalRounds = ref(0);
 let socket = null;
 
+const colorMap = {
+            'blue': 'var(--blue)',
+            'green': 'var(--accent-green)',
+            'orange': 'var(--accent-orange)',
+            'red': 'var(--red)',
+            'yellow': 'var(--yellow)'
+        };
+
 const settings = route.query;
 console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
 
@@ -78,7 +86,7 @@ const startGame = async () => {
     }
 };
 
-const connectSocket = () => {
+const connectSocketColorGames = () => {
     socket = io(`http://${Ip}`);
     
     socket.on('connect', () => {
@@ -93,21 +101,19 @@ const connectSocket = () => {
 
         showResultOverlay.value = false;
       
-     
-        const colorMap = {
-            'blue': 'var(--blue)',
-            'green': 'var(--accent-green)',
-            'orange': 'var(--accent-orange)',
-            'red': 'var(--red)',
-            'yellow': 'var(--yellow)'
-        };
-         
-            backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
+        backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
+    });
+
+    socket.on('user_round_start', (data) => {
+        // Show a message or overlay indicating the user is playing
+        console.log('Round result:', data);
+        roundResult.value = "bezig met spelen";
+        showResultOverlay.value = true;
+        backgroundColor.value = 'var(--grey-2)';
     });
     
     socket.on('round_result', (data) => {
         console.log('Round result:', data);
-
         roundResult.value = data.result;
         showResultOverlay.value = true;
    
@@ -133,9 +139,47 @@ const connectSocket = () => {
     });
 };
 
+const connectSocketMemoryGames = () => {
+    socket = io(`http://${Ip}`);
+
+    socket.on('connect', () => {
+        console.log('Socket connected:', socket.id);
+    });
+
+    socket.on('round_start', (data) => {
+        console.log('Round started:', data);
+        currentRound.value = data.round;
+        currentColor.value = data.color;
+        totalRounds.value = data.max_rounds;
+
+        showResultOverlay.value = false;
+      
+        backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
+    });
+
+    
+
+    socket.on('game_over', (data) => {
+        console.log('Game over:', data);
+        setTimeout(() => {
+            const gameStats = JSON.parse(data);
+            router.push({
+                name: 'gameoverzicht',
+                params: { id: gameId.value },
+                state: { gameStats }
+            });
+        }, 2000);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Socket disconnected');
+    });
+};
+
 onMounted(() => {
     startCountdown();
-    connectSocket();
+    connectSocketColorGames();
+    
 });
 
 onUnmounted(() => {
@@ -308,6 +352,7 @@ onUnmounted(() => {
     font-size: var(--font-size-22);
     font-weight: var(--font-weight-bold);
     animation: resultPulse 0.5s ease-in-out;
+    color: var(--white); 
 }
 
 .c-result-goed {
