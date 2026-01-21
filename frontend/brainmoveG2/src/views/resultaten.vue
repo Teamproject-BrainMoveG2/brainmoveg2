@@ -181,7 +181,7 @@
       :name="item.username" 
       :accuracy="`${Math.round(item.accuracy_percent)}%`" 
       :reaction="`${Math.round(item.avg_reactietijd_ms)}ms`" 
-      :difficulty="!item.naam || item.naam === '0' ? 'geen' : item.naam" />
+      :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
   </tbody>
 </table>
 </div>

@@ -56,7 +56,7 @@ function getInstructionsRoute() {
         query: {
             username: username.value,
             mode_id: Number(gameId.value),
-            difficulty_id: isGameIdThree.value ? 0 : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
+            difficulty_id: isGameIdThree.value ? null : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
             aantal_rondes: rounds.value,
             aantal_kleuren: colors.value
         }

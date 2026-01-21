@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
-import PopupCloseButton from '../buttons/PopupCloseButton.vue';
+import CloseButton from '../buttons/CloseButton.vue';
 import { VDatePicker } from 'vuetify/components';
 import { useDate } from 'vuetify';
 
@@ -63,7 +63,7 @@ async function handleDownload() {
     <div class="c-popup" @click.stop>
       <div class="c-popup__header">
         <h2 class="c-popup__title">Vanaf wanneer wilt u exporteren?</h2>
-        <PopupCloseButton @close="closePopup" />
+        <CloseButton @close="closePopup" />
       </div>
       <div class="c-popup__content">
         <label for="export-date">Kies een datum:</label>
