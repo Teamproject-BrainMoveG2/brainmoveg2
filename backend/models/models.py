@@ -58,7 +58,7 @@ class GameOverStats(BaseModel):
 class GameStartDTO(BaseModel):
     username: str
     mode_id: int
-    difficulty_id: int
+    difficulty_id: int | None
     aantal_rondes: int
     aantal_kleuren: int
 

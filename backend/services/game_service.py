@@ -51,6 +51,10 @@ class GameService:
         session_username = username
         session_mode_id = mode_id
         difficulty = difficulty_id
+        if difficulty_id not in [1, 2, 3]:
+            if session_mode_id == 1 or session_mode_id == 2:
+                raise Exception("Invalid difficulty_id for selected mode. difficulty_id: " + str(difficulty_id))
+            difficulty_id = None
         TOO_LATE_MS = TOO_LATE.get(difficulty_id, 5000)
         try:
             session_id = await run_in_threadpool(GameSessionRepository.create_session,
@@ -60,6 +64,7 @@ class GameService:
                 difficulty_id=difficulty_id,
                 started_on=datetime.now(timezone.utc),
             )
+            self.logger.info(f"Game session created with ID: {session_id}")
         except Exception as e:
             self.logger.error(f"Error creating game session: {e}")
             raise Exception("Error creating game session: " + str(e))
@@ -68,7 +73,7 @@ class GameService:
         return "Game started!"
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
-        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id
+        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones
         if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
             self.logger.warning("No game in progress to stop.")
             raise Exception("No game in progress to stop.")
@@ -77,6 +82,8 @@ class GameService:
         totalTimeMs = 0
         currentRoundStartTime = None
         currentCone = None
+        currentCones = []
+        userCones = []
         return
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
@@ -163,6 +170,16 @@ class GameService:
                     else:
                         self.logger.info("Memory Game wrong, game over.")
                         self.logger.info("user: " + str(userCones) + " expected: " + str(currentCones))
+                        round_result = RoundResult.FOUT
+                        new_round = MemoryGameRound(
+                            number=len(roundList) + 1,
+                            sequence=[c.cone_id for c in currentCones],
+                            user_sequence=[c.cone_id for c in userCones],
+                            result=round_result,
+                            reaction_speed_ms=reaction_speed_ms
+                        )
+                        roundList.append(new_round)
+
                         for r in roundList:
                             self.logger.info(r)
                         playerScore = ScoreEntry(
@@ -220,8 +237,9 @@ class GameService:
             else:
                 raise ValueError("All cones for this round have already been hit. id: " + str(cone))
             
-        
         else:
+            self.logger.info(f"session_id {session_id}")
+            self.logger.info(f"Recording hit for cone {cone} in session {session_id}.")
             if len(roundList) >= maxRounds:
                 raise ValueError("Maximum number of rounds reached.")
             connectedCones = coneService.get_active_cones()
@@ -269,6 +287,8 @@ class GameService:
                 playerScore.score = scoreService.calculate_score(
                     total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
                 )
+                self.logger.info("session id: " + str(session_id))
+
                 await run_in_threadpool(
                     GameSessionRepository.end_session,
                     settings=settings,
@@ -276,19 +296,26 @@ class GameService:
                     ended_on=datetime.now(timezone.utc),
                     score=playerScore.score
                 )
+                self.logger.info("session id: " + str(session_id))
                 
                 for r in roundList:
                     await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
-                
+                self.logger.info("session id: " + str(session_id))
                 player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
+                self.logger.info("player rank: " + str(player_rank))
                 playerScore.place = player_rank["rank"]
-                if player_rank['rank'] <= 3:
-                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
-                    top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
-                else:
-                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
-                if top_scores is None:
+                try:
+                    if player_rank['rank'] <= 3:
+                        top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                        top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                    else:
+                        top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                    if top_scores is None:
+                        top_scores = []
+                except Exception as e:
                     top_scores = []
+                    self.logger.error(f"Error retrieving top scores: {e}")
+                    
                 niveau = scoreService.calculate_level(playerScore.score, settings)
                 gameoverStats = GameOverStats(
                     total_rounds=len(roundList),
