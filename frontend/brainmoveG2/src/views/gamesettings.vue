@@ -2,7 +2,7 @@
 import { useCones } from '../composables/useCones';
 import { useGameColors } from '../composables/useGameColors';
 import { useRoute, RouterLink } from 'vue-router';
-import { ref,onMounted } from 'vue';
+import { ref,onMounted, computed } from 'vue';
 import SettingContainer from '../components/SettingContainer.vue';
 import DifficultyButton from '../components/buttons/DifficultyButton.vue';
 import CounterButton from '../components/buttons/CounterButton.vue';
@@ -64,6 +64,13 @@ function printInstructionsRoute(e) {
     console.log('RouterLink to:', JSON.stringify(routeObj, null, 2));
 }
 
+const limitedCones = computed(() => {
+    if (!Array.isArray(cones.value)) return [];
+    const num = typeof colors.value === 'number' ? colors.value : 0;
+    const sorted = [...cones.value].sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
+    return sorted.slice(0, num);
+});
+
 </script>
 
 <template>
@@ -94,7 +101,7 @@ function printInstructionsRoute(e) {
         </SettingContainer>
         <SettingContainer title="Gebruikte kleuren" layout="grid">
             <SmallPotjeCard 
-                v-for="cone in cones.slice(0, colors)" 
+                v-for="cone in limitedCones" 
                 :key="cone.cone_id"
                 :name="colorToDutch[cone.color] || cone.color" 
                 :color="getColorValue(cone.color)"

@@ -1,6 +1,4 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-
 const props = defineProps({
   activeTab: {
     type: String,
@@ -13,9 +11,10 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:activeTab']);
+const emit = defineEmits(['update:activeTab', 'select']);
 
 const selectTab = (tabValue) => {
+  emit('select', tabValue);
   emit('update:activeTab', tabValue);
 };
 </script>
@@ -26,7 +25,7 @@ const selectTab = (tabValue) => {
       v-for="tab in tabs"
       :key="tab.value"
       class="c-tab body-large"
-      :class="{ 'c-tab--active': activeTab === tab.value }"
+      :class="{ 'is-active': activeTab === tab.value }"
       @click="selectTab(tab.value)"
     >
       {{ tab.label }}
@@ -47,7 +46,7 @@ const selectTab = (tabValue) => {
     transition: border-color 0.2s ease;
 }
 
-.c-tab--active{
+.c-tab.is-active{
     border-bottom: 2px solid var(--primary);
 }
 
