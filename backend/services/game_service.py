@@ -75,8 +75,8 @@ class GameService:
         return
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global currentRoundStartTime, currentCone, maxCones
-        if (currentRoundStartTime is None and currentCone is None):
+        global currentRoundStartTime, currentCone, maxCones, session_mode_id
+        if session_mode_id == 3:
             connectedCones = coneService.get_active_cones(maxCones)
             if connectedCones is None or len(connectedCones) == 0:
                 self.logger.warning("No connected cones available to start a new round.")
@@ -84,20 +84,33 @@ class GameService:
             elif len(connectedCones) < maxCones:
                 self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
                 raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-                
+            await sio.emit('round_start', {'color': None, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+
+            self.logger.info("New round started in reflex mode. No cone to hit!")
             currentRoundStartTime = datetime.now(timezone.utc)
-            currentCone = random.choice(connectedCones)
-
-            # Trigger buzzer on the selected cone
-            if buzzerService:
-                await run_in_threadpool(buzzerService.trigger_buzzer_for_round_start, currentCone, mqtt_service)
-        
-            self.logger.info(f"New round started. Hit cone {currentCone}!")
-            await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
-
         else:
-            self.logger.warning("Cannot start a new round while another is in progress.")
-    
+            if (currentRoundStartTime is None and currentCone is None):
+                connectedCones = coneService.get_active_cones(maxCones)
+                if connectedCones is None or len(connectedCones) == 0:
+                    self.logger.warning("No connected cones available to start a new round.")
+                    raise Exception("No connected cones available to start a new round.")
+                elif len(connectedCones) < maxCones:
+                    self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
+                    raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
+                    
+                currentCone = random.choice(connectedCones)
+
+                # Trigger buzzer on the selected cone
+                if buzzerService:
+                    await run_in_threadpool(buzzerService.trigger_buzzer_for_round_start, currentCone, mqtt_service)
+            
+                currentRoundStartTime = datetime.now(timezone.utc)
+                self.logger.info(f"New round started. Hit cone {currentCone}!")
+                await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+
+            else:
+                self.logger.warning("Cannot start a new round while another is in progress.")
+        
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
 
         global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id
@@ -145,7 +158,7 @@ class GameService:
                 place=0
             )
             playerScore.score = scoreService.calculate_score(
-                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList)
+                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
             )
             await run_in_threadpool(
                 GameSessionRepository.end_session,
