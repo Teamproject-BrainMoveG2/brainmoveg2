@@ -42,7 +42,7 @@ const iconMap = {
             </div>
         </div>
         <div class="c-game-card__clock">
-            <img :src="iconMap[icon]" :alt="`${icon} icon`" v-if="iconMap[icon]" />
+            <img :src="`/svg/${icon}.svg`" :alt="`${icon} icon`" />
         </div>
     </router-link>
 </template>
