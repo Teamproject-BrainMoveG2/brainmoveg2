@@ -2,8 +2,8 @@
 
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import CloseButton from '../components/buttons/CloseButton.vue';
 import io from 'socket.io-client';
-import { X } from 'lucide-vue-next';
 
 const Ip = `${window.location.hostname}:8000`;
 const route = useRoute();
@@ -37,6 +37,23 @@ const startCountdown = () => {
             }, 1000);
         }
     }, 1000);
+};
+
+const stopGame = async () => {
+    try {
+        await fetch(`http://${Ip}/games/stop`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error('Error stopping game:', error);
+    }
+    if (socket) {
+        socket.disconnect();
+    }
+    router.push({ name: 'dashboard' });
 };
 
 const startGame = async () => {
@@ -132,10 +149,7 @@ onUnmounted(() => {
 <template>
     <header class="c-header">
     <div class="c-game-header">
-      <button @click="stopGame" class="c-stop-button" aria-label="Stop game">
-        <X :size="24" />
-        <span>Stoppen</span>
-      </button>
+     <CloseButton @close="stopGame"/>
       <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
     </div>
   </header>

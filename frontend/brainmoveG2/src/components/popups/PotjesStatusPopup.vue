@@ -1,10 +1,10 @@
 <script>
-import PopupCloseButton from '../buttons/PopupCloseButton.vue';
+import CloseButton from '../buttons/CloseButton.vue';
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 
 export default {
   name: 'PotjesStatusPopup',
-  components: { PopupCloseButton, SmallPotjeCard },
+  components: {CloseButton, SmallPotjeCard },
   props: {
     show: {
       type: Boolean,
@@ -34,7 +34,7 @@ export default {
     <div class="c-popup" @click.stop>
       <div class="c-popup__header">
         <h2 class="c-popup__title">Potjes Status</h2>
-        <PopupCloseButton @close="onClose" />
+        <CloseButton @close="onClose" />
       </div>
       <div class="c-popup__content">
         <template v-if="warningCones.length > 0">
