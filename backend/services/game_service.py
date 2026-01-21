@@ -31,6 +31,8 @@ totalTimeMs = 0
 session_id = None
 session_username = ""
 session_mode_id = 0
+difficulty_modifier = 0
+memory_game_delay_colors_ms = 500
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
@@ -38,7 +40,7 @@ class GameService:
 
 
     async def start_game(self, username: str, mode_id: int, difficulty_id: int, aantal_rondes: int, aantal_kleuren: int, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> str:
-        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id
+        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
@@ -55,6 +57,13 @@ class GameService:
             if session_mode_id == 1 or session_mode_id == 2:
                 raise Exception("Invalid difficulty_id for selected mode. difficulty_id: " + str(difficulty_id))
             difficulty_id = None
+        if session_mode_id == 2:
+            if difficulty_id == 1:
+                difficulty_modifier = 0
+            elif difficulty_id == 2:
+                difficulty_modifier = 2
+            elif difficulty_id == 3:
+                difficulty_modifier = 4
         TOO_LATE_MS = TOO_LATE.get(difficulty_id, 5000)
         try:
             session_id = await run_in_threadpool(GameSessionRepository.create_session,
@@ -87,7 +96,7 @@ class GameService:
         return
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList
+        global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList, difficulty_modifier
         if session_mode_id == 2:
             connectedCones = coneService.get_active_cones(maxCones)
             self.logger.info(f"Starting new round in memory mode. connected cones: {connectedCones}")
@@ -97,7 +106,8 @@ class GameService:
             elif len(connectedCones) < maxCones:
                 self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
                 raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-            for i in range(0, len(roundList) + 1):
+            amountOfColors = len(roundList) + 1 + difficulty_modifier
+            for i in range(0, amountOfColors):
                 if i == 0:
                     self.logger.info(f"connected cones: {connectedCones}, choosing first cone for memory game")
                     randomCone = random.choice(connectedCones)
@@ -105,7 +115,10 @@ class GameService:
                     self.logger.info(f"connected cones: {connectedCones}, choosing new cone excluding last cone {currentCones[i-1]}")
                     randomCone = random.choice([c for c in connectedCones if c != currentCones[i-1]])
                 currentCones.append(randomCone)
-                await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+                await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1})
+                if i < amountOfColors - 1:
+                    await asyncio.sleep(memory_game_delay_colors_ms / 1000)
+
             await sio.emit('user_round_start', "Go")
             self.logger.info("New round started in reflex mode. No cone to hit!")
             currentRoundStartTime = datetime.now(timezone.utc)
