@@ -210,6 +210,7 @@ class GameService:
                         playerScore.score = scoreService.calculate_score(
                             total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
                         )
+                        self.logger.info("ending session")
                         await run_in_threadpool(
                             GameSessionRepository.end_session,
                             settings=settings,
