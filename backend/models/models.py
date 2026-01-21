@@ -13,6 +13,13 @@ class Round(BaseModel):
     result: RoundResult
     cone_id: int
 
+class MemoryGameRound(BaseModel):
+    number: int
+    sequence: list[int]
+    user_sequence: list[int]
+    result: RoundResult
+    reaction_speed_ms: int
+
 class Cone(BaseModel):
     cone_id: int
     color: str
@@ -39,7 +46,7 @@ class GameOverStats(BaseModel):
     total_rounds: int = 10
     total_time_ms: int
     niveau: str | None
-    rounds: list[Round] = []
+    rounds: list[Round] | list[MemoryGameRound] = []
     correct_hits: int
     wrong_hits: int
     missed_hits: int
@@ -51,7 +58,7 @@ class GameOverStats(BaseModel):
 class GameStartDTO(BaseModel):
     username: str
     mode_id: int
-    difficulty_id: int
+    difficulty_id: int | None
     aantal_rondes: int
     aantal_kleuren: int
 
