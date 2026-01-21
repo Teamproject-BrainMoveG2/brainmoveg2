@@ -24,7 +24,7 @@ router = APIRouter(
 @router.post("/status")
 async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depends(get_cone_service), sio: socketio.AsyncServer = Depends(get_sio), mqtt_service = Depends(get_mqtt_service)):
     await cone_service.register_cone(cone, sio)
-    # await run_in_threadpool(mqtt_service.connect)
+    await run_in_threadpool(mqtt_service.connect)
     logger.info(f"Cone status received: {cone}")
     return {"message": f"Cone {cone.cone_id} status recorded."}
 
