@@ -12,11 +12,13 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 
 
 <template>
-  <Header v-if="showHeader" />
-  <div :style="showNavbar ? 'padding-bottom: 100px;' : ''">
-      <RouterView :key="route.fullPath" />
-  </div>
-  <Navbar v-if="showNavbar" />
+  <v-app>
+    <Header v-if="showHeader" />
+    <div :style="showNavbar ? 'padding-bottom: 100px;' : ''">
+        <RouterView :key="route.fullPath" />
+    </div>
+    <Navbar v-if="showNavbar" />
+  </v-app>
 </template>
 
 <style>

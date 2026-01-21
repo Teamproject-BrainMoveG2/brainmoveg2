@@ -5,9 +5,9 @@ import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 
 import StatCard from '../components/cards/StatCard.vue';
-import ScoreboardRow from '../components/ScoreboardRow.vue';
+import ScoreboardRow from '../components/table/ScoreboardRow.vue';
 import ScoreCircle from '../components/ScoreCircle.vue';
-import TabSwitcher from '../components/TabSwitcher.vue';
+import TabSwitcher from '../components/tabs/TabSwitcher.vue';
 
 const route = useRoute();
 const router = useRouter();
