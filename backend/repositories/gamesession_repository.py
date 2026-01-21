@@ -29,23 +29,23 @@ class GameSessionRepository:
     
     @staticmethod
     def get_sessions_today(settings):
-        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) = CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
+        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) = CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
     
     @staticmethod
     def get_sessions_thisweek(settings):
-        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY) AND DATE(spelsessie.gestart_op) <= CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
+        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY) AND DATE(spelsessie.gestart_op) <= CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
     
     
     @staticmethod
     def get_sessions_thismonth(settings):
-        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND DATE(spelsessie.gestart_op) <= CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
+        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND DATE(spelsessie.gestart_op) <= CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
     
     @staticmethod
     def get_sessions_alltime(settings):
-        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie INNER JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
+        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
     
     @staticmethod
