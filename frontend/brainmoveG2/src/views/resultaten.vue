@@ -1,14 +1,28 @@
 <script setup>
   import { Download } from 'lucide-vue-next';
-  import TabSwitcher from '../components/TabSwitcher.vue';
+  import TabSwitcher from '../components/tabs/TabSwitcher.vue';
   import StatCard from '../components/cards/StatCard.vue';
   import { Clock } from 'lucide-vue-next';
   import { ref, onMounted, computed } from 'vue';
-  import ResultTableRow from '../components/ResultTableRow.vue';
+  import ResultTableRow from '../components/table/ResultTableRow.vue';
   import ResultSelect from '../components/ResultSelect.vue';
   import ResultSearch from '../components/ResultSearch.vue';
-  import ExportButton from '../components/ExportButton.vue';
+  import ExportButton from '../components/buttons/ExportButton.vue';
   import { useGames } from '../composables/useGames';
+  import ExportPopup from '../components/popups/ExportPopup.vue';
+  import { useDate } from 'vuetify';
+  // Export popup state
+  const showExportPopup = ref(false);
+  const exportInitialDate = ref(new Date());
+
+  function openExportPopup() {
+    showExportPopup.value = true;
+  }
+  function closeExportPopup() {
+    showExportPopup.value = false;
+  }
+
+  const adapter = useDate();
 
   const { modes, fetchGames } = useGames();
   const selectedMode = ref('all');
@@ -23,10 +37,6 @@
     }
     return options;
   });
-
-  function onSearch() {
-    // Implement search logic here
-  }
 
   const activeTab = ref('Vandaag');
   const data = ref(null);
@@ -121,7 +131,7 @@
     <div class="c-header__content">
       <div class="c-header__title-wrapper">
         <h1>Resultaten</h1>
-        <ExportButton :icon="Download" label="Exporteer" />
+        <ExportButton :icon="Download" label="Exporteer" @click="openExportPopup" />
       </div>
       <p class="small-body">Bekijk het totale aantal resultaten </p>
     </div>
@@ -171,11 +181,16 @@
       :name="item.username" 
       :accuracy="`${Math.round(item.accuracy_percent)}%`" 
       :reaction="`${Math.round(item.avg_reactietijd_ms)}ms`" 
-      :difficulty="item.naam" />
+      :difficulty="!item.naam || item.naam === '0' ? 'geen' : item.naam" />
   </tbody>
 </table>
 </div>
-    </main>
+</main>
+<ExportPopup
+  :show="showExportPopup"
+  :initialDate="exportInitialDate"
+  @close="closeExportPopup"
+/>
 </template>
 
 <style scoped>

@@ -23,7 +23,11 @@ async function fetchTutorial() {
     }
 }
 
-onMounted(fetchTutorial);
+onMounted(() => {
+    fetchTutorial();
+    console.log('Route params:', route.params);
+    console.log('Route query:', route.query);
+});
 
 function startGameAndGo() {
     router.push({
@@ -33,7 +37,6 @@ function startGameAndGo() {
     });
 }
 
-// Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 </script>
@@ -49,7 +52,6 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
         <InstructionList :instructions="tutorial.steps" :color="colorVariant" />
         <button :class="buttonClass" @click="startGameAndGo">Spel starten!</button>
     </main>
-
 </template>
 
 <style scoped>

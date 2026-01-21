@@ -1,7 +1,7 @@
 <script setup>
 import { useCones } from '../composables/useCones';
 import { useGameColors } from '../composables/useGameColors';
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ref,onMounted, computed } from 'vue';
 import SettingContainer from '../components/SettingContainer.vue';
 import DifficultyButton from '../components/buttons/DifficultyButton.vue';
@@ -22,8 +22,10 @@ const getColorValue = (color) => {
 };
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
+const isGameIdThree = computed(() => String(gameId.value) === '3');
 const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
@@ -40,7 +42,9 @@ const { modes, fetchGames } = useGames();
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 const selectDifficulty = (difficulty) => {
-    selectedDifficulty.value = difficulty;
+    if (!isGameIdThree.value) {
+        selectedDifficulty.value = difficulty;
+    }
 };
 
 onMounted(fetchGames);
@@ -52,16 +56,11 @@ function getInstructionsRoute() {
         query: {
             username: username.value,
             mode_id: Number(gameId.value),
-            difficulty_id: difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1,
+            difficulty_id: isGameIdThree.value ? 0 : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
             aantal_rondes: rounds.value,
             aantal_kleuren: colors.value
         }
     };
-}
-
-function printInstructionsRoute(e) {
-    const routeObj = getInstructionsRoute();
-    console.log('RouterLink to:', JSON.stringify(routeObj, null, 2));
 }
 
 const limitedCones = computed(() => {
@@ -71,6 +70,12 @@ const limitedCones = computed(() => {
     return sorted.slice(0, num);
 });
 
+function goToInstructions() {
+    if (username.value) {
+        router.push(getInstructionsRoute());
+    }
+}
+
 </script>
 
 <template>
@@ -79,21 +84,22 @@ const limitedCones = computed(() => {
             <h1>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.naam || '' }}</h1>
             <p>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.description || '' }}</p>
         </div>
-        <SettingContainer title="Kies je moeilijkheidsgraad">
-                <DifficultyButton
-                    v-for="difficulty in difficulties"
-                    :key="difficulty.id"
-                    :difficulty="difficulty"
-                    :is-active="selectedDifficulty === difficulty.id"
-                    @select="selectDifficulty(difficulty.id)"
-                />
+        <SettingContainer v-if="!isGameIdThree" title="Kies je moeilijkheidsgraad">
+            <DifficultyButton
+                v-for="difficulty in difficulties"
+                :key="difficulty.id"
+                :difficulty="difficulty"
+                :is-active="selectedDifficulty === difficulty.id"
+                :disabled="isGameIdThree"
+                @select="selectDifficulty(difficulty.id)"
+            />
         </SettingContainer>
         <div class="c-setting-section--extra">
             <SettingContainer title="Aantal Rondes">
                 <CounterButton v-model="rounds" :min="1" />
             </SettingContainer>
             <SettingContainer title="Aantal kleuren">
-                <CounterButton v-model="colors" :min="1" :max="4"/>
+                <CounterButton v-model="colors" :min="2" :max="4"/>
             </SettingContainer>
         </div>
         <SettingContainer title="Gebruikersnaam">
@@ -110,13 +116,13 @@ const limitedCones = computed(() => {
             />
         </SettingContainer>
         
-        <RouterLink
+        <button
             :class="buttonClass"
-            :to="getInstructionsRoute()"
-            @click.native="printInstructionsRoute"
+            :disabled="!username"
+            @click="goToInstructions"
         >
             Ga door
-        </RouterLink>
+        </button>
     
     </main>
 </template>

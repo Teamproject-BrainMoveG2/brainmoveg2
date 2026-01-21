@@ -5,7 +5,7 @@ import { useCones } from '../../composables/useCones';
 import { Bell, X } from 'lucide-vue-next';
 
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
-import PotjesStatusPopup from './PotjesStatusPopup.vue';
+import PotjesStatusPopup from '../popups/PotjesStatusPopup.vue';
 
 export default {
   name: 'Header',

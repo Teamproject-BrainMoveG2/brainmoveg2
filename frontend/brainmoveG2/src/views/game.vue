@@ -28,11 +28,11 @@ const startCountdown = () => {
         if (countdownValue.value > 1) {
             countdownValue.value--;
         } else if (countdownValue.value === 1) {
-            countdownValue.value = 0; // Show "GO!"
+            countdownValue.value = 0; 
             setTimeout(() => {
                 showCountdown.value = false;
                 clearInterval(interval);
-                // Start the game after countdown
+  
                 startGame();
             }, 1000);
         }
@@ -73,10 +73,10 @@ const connectSocket = () => {
         currentRound.value = data.round;
         currentColor.value = data.color;
         totalRounds.value = data.max_rounds;
-        // Hide result overlay when new round starts
+
         showResultOverlay.value = false;
       
-        // Change background color based on received color
+     
         const colorMap = {
             'blue': 'var(--blue)',
             'green': 'var(--accent-green)',
@@ -90,18 +90,18 @@ const connectSocket = () => {
     
     socket.on('round_result', (data) => {
         console.log('Round result:', data);
-        // Show result overlay
+
         roundResult.value = data.result;
         showResultOverlay.value = true;
-        // Reset background after result
+   
         backgroundColor.value = 'var(--grey-2)';
     });
     
     socket.on('game_over', (data) => {
         console.log('Game over:', data);
-        // Wait for 2 seconds to show the final result overlay before navigating
+     
         setTimeout(() => {
-            // Parse the JSON string and navigate to game overview page with stats
+          
             const gameStats = JSON.parse(data);
             router.push({
                 name: 'gameoverzicht',
@@ -140,7 +140,6 @@ onUnmounted(() => {
     </div>
   </header>
     <main class="u-viewport-height" :style="{ backgroundColor: backgroundColor }">
-        <!-- Countdown Overlay -->
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
                 {{ countdownValue }}
@@ -149,8 +148,6 @@ onUnmounted(() => {
                 GO!
             </div>
         </div>
-
-        <!-- Result Overlay -->
         <div v-if="showResultOverlay" class="c-result-overlay">
             <div class="c-result-text" :class="`c-result-${roundResult}`">
                 {{ roundResult.toUpperCase() }}

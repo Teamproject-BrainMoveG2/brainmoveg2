@@ -1,10 +1,10 @@
 <script>
-import { X } from 'lucide-vue-next';
+import PopupCloseButton from '../buttons/PopupCloseButton.vue';
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 
 export default {
   name: 'PotjesStatusPopup',
-  components: { X, SmallPotjeCard },
+  components: { PopupCloseButton, SmallPotjeCard },
   props: {
     show: {
       type: Boolean,
@@ -34,9 +34,7 @@ export default {
     <div class="c-popup" @click.stop>
       <div class="c-popup__header">
         <h2 class="c-popup__title">Potjes Status</h2>
-        <button @click="onClose" class="c-popup__close" aria-label="Sluit popup">
-          <X :size="24" />
-        </button>
+        <PopupCloseButton @close="onClose" />
       </div>
       <div class="c-popup__content">
         <template v-if="warningCones.length > 0">
@@ -73,8 +71,9 @@ export default {
   z-index: 1000;
   padding: var(--spacing-04);
 }
+
 .c-popup {
-  background: var(--grey-5);
+  background: var(--white);
   border-radius: var(--radius-s);
   padding: var(--spacing-05);
   max-width: 500px;
@@ -95,22 +94,7 @@ export default {
   color: var(--grey-85);
   margin: 0;
 }
-.c-popup__close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--grey-85);
-  padding: var(--spacing-02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease;
-  border-radius: var(--radius-s);
-}
-.c-popup__close:hover {
-  color: var(--primary);
-  background-color: var(--grey-15);
-}
+
 .c-popup__content {
   display: flex;
   flex-direction: column;

@@ -28,7 +28,8 @@ const handleInput = (event) => {
             :value="modelValue"
             @input="handleInput"
             class="c-input small-body" 
-            :placeholder="placeholder" 
+            :placeholder="placeholder"
+            :required="$route.name === 'gamesettings'"
         />
     </form>
 </template>

@@ -3,7 +3,6 @@ import PotjeCard from '../components/cards/PotjeCard.vue';
 import InstructionList from '../components/lijst/InstructionList.vue';
 import { useCones } from '../composables/useCones';
 
-//hard coded instructions for setting up the potjes
 const instructions = [
     {
         number: 1,
