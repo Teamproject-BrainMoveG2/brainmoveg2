@@ -32,7 +32,7 @@ session_id = None
 session_username = ""
 session_mode_id = 0
 difficulty_modifier = 0
-memory_game_delay_colors_ms = 500
+memory_game_delay_colors = 1
 game_started = False
 class GameService:
     def __init__(self):
@@ -124,10 +124,9 @@ class GameService:
                 currentCones.append(randomCone)
                 await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1})
                 if i < amountOfColors - 1:
-                    await asyncio.sleep(memory_game_delay_colors_ms / 1000)
+                    await asyncio.sleep(memory_game_delay_colors)
 
             await sio.emit('user_round_start', "Go")
-            self.logger.info("New round started in reflex mode. No cone to hit!")
             currentRoundStartTime = datetime.now(timezone.utc)
         else:
             if (currentRoundStartTime is None and currentCone is None):
