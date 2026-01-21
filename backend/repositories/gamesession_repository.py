@@ -21,10 +21,10 @@ class GameSessionRepository:
         return Database.get_rows(sql, params=params, settings=settings)
     
     @staticmethod
-    def get_player_rank(settings, session_id):
+    def get_player_rank(settings, session_id, mode_id):
         # Corrected for older MySQL: Use subquery instead of CTE and RANK()
-        sql = "SELECT spelsessie_id, username, score, (SELECT COUNT(*) + 1 FROM spelsessie s2 WHERE s2.score > s1.score) AS `rank` FROM spelsessie s1 WHERE spelsessie_id = %s"
-        params = [session_id]
+        sql = "SELECT spelsessie_id, username, score, (SELECT COUNT(*) + 1 FROM spelsessie s2 WHERE s2.spelmodus_id = s1.spelmodus_id AND s2.score > s1.score) AS `rank` FROM spelsessie s1 WHERE spelsessie_id = %s AND spelmodus_id = %s"
+        params = [session_id, mode_id]
         return Database.get_one_row(sql, params=params, settings=settings)
     
     @staticmethod

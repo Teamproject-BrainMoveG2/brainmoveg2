@@ -20,7 +20,7 @@ class ScoreService:
         return score
     
     def calculate_level(self, score: float, settings: config.Settings) -> str:
-        niveau = 0
+        niveau = 1
         if score >= 1500:
             niveau = 5
         elif score >= 1200:

@@ -21,6 +21,11 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+@router.get("/status")
+async def get_game_status(game_service: GameService = Depends(get_game_service)):
+    status = await game_service.get_game_in_progress()
+    return {"game_in_progress": status}
+
 @router.post("/start")
 async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Settings, Depends(get_settings)], mqtt_service: MQTTService = Depends(get_mqtt_service), game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), buzzer_service = Depends(get_buzzer_service)):
     logger.info("Starting a new game via API.")
