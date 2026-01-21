@@ -33,16 +33,19 @@ session_username = ""
 session_mode_id = 0
 difficulty_modifier = 0
 memory_game_delay_colors_ms = 500
+game_started = False
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
         self.logger.info("GameService initialized.")
-
+    async def get_game_in_progress(self) -> bool:
+        global game_started
+        return game_started
 
     async def start_game(self, username: str, mode_id: int, difficulty_id: int, aantal_rondes: int, aantal_kleuren: int, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> str:
-        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier
+        global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier, game_started
         self.logger.info("Game started.")
-        if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
+        if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None or game_started:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
         if mode_id == 2 and aantal_kleuren < 2:
@@ -79,6 +82,7 @@ class GameService:
             raise Exception("Error creating game session: " + str(e))
 
         await self.new_round(sio, coneService, buzzerService, mqtt_service)
+        game_started = True
         return "Game started!"
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
@@ -93,6 +97,7 @@ class GameService:
         currentCone = None
         currentCones = []
         userCones = []
+        game_started = False
         return
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
@@ -146,7 +151,7 @@ class GameService:
                 self.logger.warning("Cannot start a new round while another is in progress.")
         
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started
         if session_mode_id == 2:
             connectedCones = coneService.get_active_cones()
             coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
@@ -245,6 +250,7 @@ class GameService:
                         currentCone = None
                         userCones = []
                         currentCones = []
+                        game_started = False
                         await sio.emit('game_over', gameoverStats.model_dump_json())
 
             else:
@@ -349,6 +355,7 @@ class GameService:
                 totalTimeMs = 0
                 currentRoundStartTime = None
                 currentCone = None
+                game_started = False
                 await sio.emit('game_over', gameoverStats.model_dump_json())
             else:
                 await asyncio.sleep(1)  # brief pause before next round
