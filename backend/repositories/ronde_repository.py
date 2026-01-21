@@ -9,6 +9,12 @@ class RondeRepository:
         return Database.execute_sql(sql, params, settings)
     
     @staticmethod
+    def create_memory_ronde(settings, sessie_id, ronde_nummer, reactietijd_ms, aantal_kleuren, uitkomst):
+        sql = "INSERT INTO spelronde (spelsessie_id, ronde_nummer, reactietijd_ms, aantal_kleuren, uitkomst) VALUES (%s, %s, %s, %s, %s)"
+        params = [sessie_id, ronde_nummer,  reactietijd_ms, aantal_kleuren, uitkomst]
+        return Database.execute_sql(sql, params, settings)
+    
+    @staticmethod
     def get_ronde_by_id(settings, ronde_id):
         sql = "SELECT * FROM spelronde WHERE id = %s"
         params = [ronde_id]

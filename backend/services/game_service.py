@@ -3,7 +3,7 @@ from fastapi.concurrency import run_in_threadpool
 from typing_extensions import Annotated
 from services.mqtt_service import MQTTService
 import config
-from models.models import Round, RoundResult, Cone, GameOverStats, ScoreEntry
+from models.models import Round, RoundResult, Cone, GameOverStats, ScoreEntry, MemoryGameRound
 from datetime import datetime, timezone
 from services.cone_service import ConeService 
 from services.score_service import ScoreService
@@ -20,9 +20,11 @@ TOO_LATE = {1: 5000, 2: 4000, 3: 3000}
 TOO_LATE_MS = 5000
 maxRounds = 10
 maxCones = 4
-difficulty = 1
+difficulty = None
 connectedCones = []
 roundList = []
+currentCones = []
+userCones = []
 currentRoundStartTime = None
 currentCone = None
 totalTimeMs = 0
@@ -41,6 +43,9 @@ class GameService:
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None:
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
+        if mode_id == 2 and aantal_kleuren < 2:
+            self.logger.warning("Memory mode requires at least 2 colors.")
+            raise Exception("Memory mode requires at least 2 colors.")
         maxRounds = aantal_rondes
         maxCones = aantal_kleuren
         session_username = username
@@ -75,17 +80,26 @@ class GameService:
         return
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global currentRoundStartTime, currentCone, maxCones, session_mode_id
-        if session_mode_id == 3:
+        global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList
+        if session_mode_id == 2:
             connectedCones = coneService.get_active_cones(maxCones)
+            self.logger.info(f"Starting new round in memory mode. connected cones: {connectedCones}")
             if connectedCones is None or len(connectedCones) == 0:
                 self.logger.warning("No connected cones available to start a new round.")
                 raise Exception("No connected cones available to start a new round.")
             elif len(connectedCones) < maxCones:
                 self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
                 raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-            await sio.emit('round_start', {'color': None, 'round': len(roundList) + 1, "max_rounds": maxRounds})
-
+            for i in range(0, len(roundList) + 1):
+                if i == 0:
+                    self.logger.info(f"connected cones: {connectedCones}, choosing first cone for memory game")
+                    randomCone = random.choice(connectedCones)
+                else:
+                    self.logger.info(f"connected cones: {connectedCones}, choosing new cone excluding last cone {currentCones[i-1]}")
+                    randomCone = random.choice([c for c in connectedCones if c != currentCones[i-1]])
+                currentCones.append(randomCone)
+                await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+            await sio.emit('user_round_start', "Go")
             self.logger.info("New round started in reflex mode. No cone to hit!")
             currentRoundStartTime = datetime.now(timezone.utc)
         else:
@@ -112,95 +126,190 @@ class GameService:
                 self.logger.warning("Cannot start a new round while another is in progress.")
         
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-
-        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id
-        if len(roundList) >= maxRounds:
-            raise ValueError("Maximum number of rounds reached.")
-        connectedCones = coneService.get_active_cones()
-        coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
-        if coneObject is None:
-            raise Exception("Cone with id " + str(cone) + " not found among connected cones.")
-        if currentRoundStartTime is None or currentCone is None:
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty
+        if session_mode_id == 2:
+            connectedCones = coneService.get_active_cones()
+            coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
             if coneObject is None:
-                raise ValueError("No round has been started. cone id: unknown")
-            raise ValueError("No round has been started. id: " + str(cone))
-        
-        reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
-        totalTimeMs += reaction_speed_ms
-        if reaction_speed_ms > TOO_LATE_MS and session_mode_id != 2:
-            round_result = RoundResult.GEMIST
-        elif coneObject.cone_id != currentCone.cone_id:
-            round_result = RoundResult.FOUT
-        else:
-            round_result = RoundResult.GOED
-        
-        new_round = Round(
-            number=len(roundList) + 1,
-            reaction_speed_ms=reaction_speed_ms,
-            result=round_result,
-            cone_id=coneObject.cone_id
-        )
-        await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
-        
-        roundList.append(new_round)
-        
-        currentRoundStartTime = None 
-        currentCone = None 
-        self.logger.info(f"Round {new_round.number} recorded: {new_round}")
-        if len(roundList) >= maxRounds:
-            self.logger.info("Max rounds reached. Game over. rounds:")
+                raise Exception("Cone with id " + str(cone) + " not found among connected cones.")
+            if currentRoundStartTime is None or currentCones is None:
+                if coneObject is None:
+                    raise ValueError("No round has been started. cone id: unknown")
+                raise ValueError("No round has been started. id: " + str(cone))
+           
 
-            for r in roundList:
-                self.logger.info(r)
-            playerScore = ScoreEntry(
-                username=session_username,
-                score=0.0,
-                place=0
-            )
-            playerScore.score = scoreService.calculate_score(
-                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
-            )
-            await run_in_threadpool(
-                GameSessionRepository.end_session,
-                settings=settings,
-                session_id=session_id,
-                ended_on=datetime.now(timezone.utc),
-                score=playerScore.score
-            )
-            
-            for r in roundList:
-                await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
-            
-            player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
-            playerScore.place = player_rank["rank"]
-            if player_rank['rank'] <= 3:
-                top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
-                top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+            if len(userCones) < len(currentCones):
+                userCones.append(coneObject)
+                if len(userCones) == len(currentCones):
+                    reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
+                    totalTimeMs += reaction_speed_ms
+                    if userCones == currentCones:
+                        round_result = RoundResult.GOED
+                        new_round = MemoryGameRound(
+                            number=len(roundList) + 1,
+                            sequence=[c.cone_id for c in currentCones],
+                            user_sequence=[c.cone_id for c in userCones],
+                            result=round_result,
+                            reaction_speed_ms=reaction_speed_ms
+                        )
+                        await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
+                        roundList.append(new_round)
+                        currentRoundStartTime = None 
+                        currentCones = [] 
+                        userCones = []
+                        self.logger.info(f"Round {new_round.number} recorded: {new_round}")
+                        await asyncio.sleep(1)  # brief pause before next round
+                        await self.new_round(sio, coneService, buzzerService, mqtt_service)
+                    else:
+                        self.logger.info("Memory Game wrong, game over.")
+                        self.logger.info("user: " + str(userCones) + " expected: " + str(currentCones))
+                        for r in roundList:
+                            self.logger.info(r)
+                        playerScore = ScoreEntry(
+                            username=session_username,
+                            score=0.0,
+                            place=0
+                        )
+                        playerScore.score = scoreService.calculate_score(
+                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                        )
+                        await run_in_threadpool(
+                            GameSessionRepository.end_session,
+                            settings=settings,
+                            session_id=session_id,
+                            ended_on=datetime.now(timezone.utc),
+                            score=playerScore.score
+                        )
+                    
+                        for r in roundList:
+                            await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
+                          
+                        player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
+                        playerScore.place = player_rank["rank"]
+                        if player_rank['rank'] <= 3:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                            top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                        else:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                        if top_scores is None:
+                            top_scores = []
+                        niveau = scoreService.calculate_level(playerScore.score, settings)
+                        gameoverStats = GameOverStats(
+                            total_rounds=len(roundList),
+                            total_time_ms=totalTimeMs,
+                            niveau=niveau,
+                            correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                            wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                            missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                            average_reaction_speed_ms=totalTimeMs / len(roundList),
+                            rounds=roundList,
+                            score=playerScore,
+                            top_scores=top_scores
+                        )
+                        gameoverStats.score = playerScore
+
+                        # Reset game state
+                        roundList = []
+                        totalTimeMs = 0
+                        currentRoundStartTime = None
+                        currentCone = None
+                        userCones = []
+                        currentCones = []
+                        await sio.emit('game_over', gameoverStats.model_dump_json())
+
             else:
-                top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
-            if top_scores is None:
-                top_scores = []
-            niveau = scoreService.calculate_level(playerScore.score, settings)
-            gameoverStats = GameOverStats(
-                total_rounds=len(roundList),
-                total_time_ms=totalTimeMs,
-                niveau=niveau,
-                correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
-                wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
-                missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
-                average_reaction_speed_ms=totalTimeMs / len(roundList),
-                rounds=roundList,
-                score=playerScore,
-                top_scores=top_scores
-            )
-            gameoverStats.score = playerScore
-
-            # Reset game state
-            roundList = []
-            totalTimeMs = 0
-            currentRoundStartTime = None
-            currentCone = None
-            await sio.emit('game_over', gameoverStats.model_dump_json())
+                raise ValueError("All cones for this round have already been hit. id: " + str(cone))
+            
+        
         else:
-            await asyncio.sleep(1)  # brief pause before next round
-            await self.new_round(sio, coneService, buzzerService, mqtt_service)
+            if len(roundList) >= maxRounds:
+                raise ValueError("Maximum number of rounds reached.")
+            connectedCones = coneService.get_active_cones()
+            coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
+            if coneObject is None:
+                raise Exception("Cone with id " + str(cone) + " not found among connected cones.")
+            if currentRoundStartTime is None or currentCone is None:
+                if coneObject is None:
+                    raise ValueError("No round has been started. cone id: unknown")
+                raise ValueError("No round has been started. id: " + str(cone))
+            
+            reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
+            totalTimeMs += reaction_speed_ms
+            if reaction_speed_ms > TOO_LATE_MS and session_mode_id != 3:
+                round_result = RoundResult.GEMIST
+            elif coneObject.cone_id != currentCone.cone_id:
+                round_result = RoundResult.FOUT
+            else:
+                round_result = RoundResult.GOED
+            
+            new_round = Round(
+                number=len(roundList) + 1,
+                reaction_speed_ms=reaction_speed_ms,
+                result=round_result,
+                cone_id=coneObject.cone_id
+            )
+            await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
+            
+            roundList.append(new_round)
+            
+            currentRoundStartTime = None 
+            currentCone = None 
+            self.logger.info(f"Round {new_round.number} recorded: {new_round}")
+
+            if len(roundList) >= maxRounds:
+                self.logger.info("Max rounds reached. Game over. rounds:")
+
+                for r in roundList:
+                    self.logger.info(r)
+                playerScore = ScoreEntry(
+                    username=session_username,
+                    score=0.0,
+                    place=0
+                )
+                playerScore.score = scoreService.calculate_score(
+                    total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                )
+                await run_in_threadpool(
+                    GameSessionRepository.end_session,
+                    settings=settings,
+                    session_id=session_id,
+                    ended_on=datetime.now(timezone.utc),
+                    score=playerScore.score
+                )
+                
+                for r in roundList:
+                    await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+                
+                player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
+                playerScore.place = player_rank["rank"]
+                if player_rank['rank'] <= 3:
+                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                    top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                else:
+                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                if top_scores is None:
+                    top_scores = []
+                niveau = scoreService.calculate_level(playerScore.score, settings)
+                gameoverStats = GameOverStats(
+                    total_rounds=len(roundList),
+                    total_time_ms=totalTimeMs,
+                    niveau=niveau,
+                    correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                    wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                    missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                    average_reaction_speed_ms=totalTimeMs / len(roundList),
+                    rounds=roundList,
+                    score=playerScore,
+                    top_scores=top_scores
+                )
+                gameoverStats.score = playerScore
+
+                # Reset game state
+                roundList = []
+                totalTimeMs = 0
+                currentRoundStartTime = None
+                currentCone = None
+                await sio.emit('game_over', gameoverStats.model_dump_json())
+            else:
+                await asyncio.sleep(1)  # brief pause before next round
+                await self.new_round(sio, coneService, buzzerService, mqtt_service)
