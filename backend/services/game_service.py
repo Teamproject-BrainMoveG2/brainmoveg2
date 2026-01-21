@@ -60,6 +60,8 @@ class GameService:
             if session_mode_id == 1 or session_mode_id == 2:
                 raise Exception("Invalid difficulty_id for selected mode. difficulty_id: " + str(difficulty_id))
             difficulty_id = None
+        if session_mode_id == 3:
+            difficulty_id = None
         if session_mode_id == 2:
             if difficulty_id == 1:
                 difficulty_modifier = 0
@@ -219,7 +221,7 @@ class GameService:
                         for r in roundList:
                             await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
                           
-                        player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
+                        player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
                         playerScore.place = player_rank["rank"]
                         if player_rank['rank'] <= 3:
                             top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
@@ -320,7 +322,7 @@ class GameService:
                 for r in roundList:
                     await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
                 self.logger.info("session id: " + str(session_id))
-                player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id)
+                player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
                 self.logger.info("player rank: " + str(player_rank))
                 playerScore.place = player_rank["rank"]
                 try:
