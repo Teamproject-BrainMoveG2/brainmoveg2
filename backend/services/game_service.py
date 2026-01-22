@@ -200,6 +200,7 @@ class GameService:
                             result=round_result,
                             reaction_speed_ms=reaction_speed_ms
                         )
+                        await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
                         roundList.append(new_round)
 
                         for r in roundList:
