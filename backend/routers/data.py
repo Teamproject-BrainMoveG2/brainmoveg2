@@ -1,19 +1,13 @@
 from datetime import date
-from typing import Optional
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
-import socketio
 import config
 from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
-from services.cone_service import ConeService
 from services.export_service import ExportService
-from services.game_service import GameService
-from dependencies import get_cone_service, get_export_service, get_settings, get_sio
-from repositories.mode_repository import ModeRepository
-from repositories.tutorial_repository import TutorialRepository
+from dependencies import get_export_service, get_settings, get_sio
 from repositories.gamesession_repository import GameSessionRepository
-from models.models import Cone, ConeStatusDTO, ExportDateDTO, SessionData
+from models.models import SessionData
 import logging
 
 
@@ -86,7 +80,7 @@ async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_sett
         raise HTTPException(status_code=400, detail=str(e))
     return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
-@router.get("/excel")
+@router.get("/excel", response_model=FileResponse)
 async def get_excel_data(settings: Annotated[config.Settings, Depends(get_settings)], start: date, end: date = None, exportService: ExportService = Depends(get_export_service)):
     data = await run_in_threadpool(GameSessionRepository.get_sessions_in_date_range, settings, start, end)
     logger.info(f"Exporting data from {start} to {end}: {data}")

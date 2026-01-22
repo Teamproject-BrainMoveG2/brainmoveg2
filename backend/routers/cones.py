@@ -1,14 +1,8 @@
 from fastapi.concurrency import run_in_threadpool
 import socketio
-import config
-from typing_extensions import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from services.cone_service import ConeService
-from services.game_service import GameService
 from dependencies import get_cone_service, get_mqtt_service, get_sio
-from repositories.mode_repository import ModeRepository
-from repositories.tutorial_repository import TutorialRepository
-
 from models.models import ConeStatusDTO, StatusMessage
 import logging
 

@@ -4,12 +4,9 @@ from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from services.game_service import GameService
 from dependencies import get_cone_service, get_game_service, get_mqtt_service, get_score_service, get_settings, get_sio, get_buzzer_service
-from repositories.mode_repository import ModeRepository
-from repositories.tutorial_repository import TutorialRepository
-from models.models import Cone, ConeDTO, GameStartDTO, GameStatus, StatusMessage
+from models.models import ConeDTO, GameStartDTO, GameStatus, StatusMessage
 from services.cone_service import ConeService
 import logging
-
 from services.score_service import ScoreService
 
 logger = logging.getLogger(__name__)

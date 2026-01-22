@@ -2,12 +2,10 @@ from fastapi.concurrency import run_in_threadpool
 import config
 from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
-from services.game_service import GameService
 from dependencies import get_game_service, get_settings, get_sio
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
-
-from models.models import Cone, GameMode, ModeTutorial
+from models.models import GameMode, ModeTutorial
 import logging
 
 logger = logging.getLogger(__name__)
