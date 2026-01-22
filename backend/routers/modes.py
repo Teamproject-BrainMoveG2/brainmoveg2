@@ -7,7 +7,7 @@ from dependencies import get_game_service, get_settings, get_sio
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
 
-from models.models import Cone
+from models.models import Cone, GameMode, ModeTutorial
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,12 +19,12 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/")
+@router.get("/",  response_model=list[GameMode])
 async def get_game_modes(settings: Annotated[config.Settings, Depends(get_settings)],):
     modes = await run_in_threadpool(ModeRepository.get_all_modes, settings)
     return modes
 
-@router.get("/{mode_id}/tutorial")
+@router.get("/{mode_id}/tutorial", response_model=ModeTutorial)
 async def get_tutorial_for_mode(mode_id: int, settings: Annotated[config.Settings, Depends(get_settings)],):
     mode = await run_in_threadpool(ModeRepository.get_mode_by_id, settings, mode_id)
     steps = await run_in_threadpool(TutorialRepository.get_rondes_by_mode_id, settings, mode_id)

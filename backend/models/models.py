@@ -88,3 +88,17 @@ class SessionData(BaseModel):
 
 class GameStatus(BaseModel):
     game_in_progress: bool
+
+class GameMode(BaseModel):
+    spelmodus_id: int
+    naam: str
+    description: str | None
+    image: str | None
+    icon: str | None
+
+class Tutorial(BaseModel):
+    number: int
+    description: str
+class ModeTutorial(BaseModel):
+    image: str | None
+    steps: list[Tutorial]
