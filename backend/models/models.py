@@ -69,3 +69,18 @@ class ExportDateDTO(BaseModel):
 
 class StatusMessage(BaseModel):
     message: str
+
+
+class Session(BaseModel):
+    spelsessie_id: int
+    username: str
+    spelmodus_id: int
+    naam: str | None
+    score: int
+    avg_reactietijd_ms: float
+    accuracy_percent: float
+
+class SessionData(BaseModel):
+    avg_reaction_speed: float
+    avg_accuracy: float
+    data: list[Session]

@@ -13,7 +13,7 @@ from dependencies import get_cone_service, get_export_service, get_settings, get
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
 from repositories.gamesession_repository import GameSessionRepository
-from models.models import Cone, ConeStatusDTO, ExportDateDTO
+from models.models import Cone, ConeStatusDTO, ExportDateDTO, SessionData
 import logging
 
 
@@ -26,7 +26,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/today")
+@router.get("/today", response_model=SessionData)
 async def get_today_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = await run_in_threadpool(GameSessionRepository.get_sessions_today, settings)
@@ -40,7 +40,7 @@ async def get_today_data(settings: Annotated[config.Settings, Depends(get_settin
         logger.error(f"Error retrieving today's data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
-@router.get("/week")
+@router.get("/week", response_model=SessionData)
 async def get_week_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = await run_in_threadpool(GameSessionRepository.get_sessions_thisweek, settings)
@@ -56,7 +56,7 @@ async def get_week_data(settings: Annotated[config.Settings, Depends(get_setting
         raise HTTPException(status_code=400, detail=str(e))
     return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
-@router.get("/month")
+@router.get("/month", response_model=SessionData)
 async def get_month_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = await run_in_threadpool(GameSessionRepository.get_sessions_thismonth, settings)
@@ -71,7 +71,7 @@ async def get_month_data(settings: Annotated[config.Settings, Depends(get_settin
         raise HTTPException(status_code=400, detail=str(e))
     return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
-@router.get("/alltime")
+@router.get("/alltime", response_model=SessionData)
 async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_settings)]):
     try:
         data = await run_in_threadpool(GameSessionRepository.get_sessions_alltime, settings)
