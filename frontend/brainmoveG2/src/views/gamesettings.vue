@@ -29,6 +29,7 @@ const isGameIdThree = computed(() => String(gameId.value) === '3');
 const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
+const showErrors = ref(false);
 
 const difficulties = [
     { id: 'relaxed', label: 'Relaxed', color: 'green' },
@@ -78,7 +79,8 @@ const limitedCones = computed(() => {
 });
 
 function goToInstructions() {
-    if (username.value) {
+    showErrors.value = true;
+    if (username.value && connectedPotjesMismatch.value === false) {
         router.push(getInstructionsRoute());
     }
 }
@@ -110,12 +112,12 @@ function goToInstructions() {
             </SettingContainer>
         </div>
         <SettingContainer title="Gebruikersnaam">
-            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" />
+            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" :show-errors="showErrors" />
         </SettingContainer>
         <SettingContainer
             title="Gebruikte kleuren"
             layout="grid"
-            :showGridError="connectedPotjesMismatch"
+            :showGridError="showErrors && connectedPotjesMismatch"
             gridErrorMessage="Verbind het juiste aantal potjes"
         >
             <SmallPotjeCard 
@@ -132,7 +134,6 @@ function goToInstructions() {
         <button
             :class="buttonClass"
             @click="goToInstructions"
-            :disabled="connectedPotjesMismatch"
         >
             Ga door
         </button>

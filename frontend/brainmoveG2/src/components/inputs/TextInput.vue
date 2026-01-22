@@ -13,6 +13,10 @@ const props = defineProps({
     type: {
         type: String,
         default: 'text'
+    },
+    showErrors: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -23,7 +27,7 @@ const handleInput = (event) => {
 };
 
 const isInvalid = computed(() => {
-    return (!props.modelValue || props.modelValue.trim() === '') && (props.placeholder.toLowerCase().includes('gebruikersnaam'));
+    return props.showErrors && (!props.modelValue || props.modelValue.trim() === '') && (props.placeholder.toLowerCase().includes('gebruikersnaam'));
 });
 </script>
 
@@ -33,9 +37,8 @@ const isInvalid = computed(() => {
             :type="type"
             :value="modelValue"
             @input="handleInput"
-            class="c-input small-body" 
+            :class="['c-input', 'small-body', { 'c-input--error': isInvalid }]"
             :placeholder="placeholder"
-            :required="placeholder.toLowerCase().includes('gebruikersnaam')"
             maxlength="45"
         />
         <div v-if="isInvalid" class="c-input-error">Geef een gebruikersnaam</div>
@@ -66,7 +69,7 @@ const isInvalid = computed(() => {
     box-sizing: border-box;
 }
 
-.c-input:invalid {
+.c-input--error {
     border-color: var(--red);
 }
 
