@@ -31,7 +31,7 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
