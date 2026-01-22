@@ -65,3 +65,7 @@ class GameStartDTO(BaseModel):
 class ExportDateDTO(BaseModel):
     startDate: datetime.datetime
     endDate: datetime.datetime
+
+
+class StatusMessage(BaseModel):
+    message: str
