@@ -80,7 +80,7 @@ async def get_alltime_data(settings: Annotated[config.Settings, Depends(get_sett
         raise HTTPException(status_code=400, detail=str(e))
     return {"avg_reaction_speed": avg_reaction_speed, "avg_accuracy": avg_accuracy, "data": data}
 
-@router.get("/excel", response_model=FileResponse)
+@router.get("/excel", response_class=FileResponse)
 async def get_excel_data(settings: Annotated[config.Settings, Depends(get_settings)], start: date, end: date = None, exportService: ExportService = Depends(get_export_service)):
     data = await run_in_threadpool(GameSessionRepository.get_sessions_in_date_range, settings, start, end)
     logger.info(f"Exporting data from {start} to {end}: {data}")
