@@ -123,8 +123,7 @@ class GameService:
                     randomCone = random.choice([c for c in connectedCones if c != currentCones[i-1]])
                 currentCones.append(randomCone)
                 await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1})
-                if i < amountOfColors - 1:
-                    await asyncio.sleep(memory_game_delay_colors)
+                await asyncio.sleep(memory_game_delay_colors)
 
             await sio.emit('user_round_start', "Go")
             currentRoundStartTime = datetime.now(timezone.utc)

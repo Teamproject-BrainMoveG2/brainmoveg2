@@ -44,7 +44,7 @@ class ConeService:
         return conesWithStatus
 
     def get_active_cones(self, max_cones: int = None):
-        active_cones = [c for c in cones if c.battery_percentage is not None and (datetime.now() - c.last_status).total_seconds() < 60]
+        active_cones = [c for c in cones if c.battery_percentage is not None and (datetime.now() - c.last_status).total_seconds() < 600]
         if max_cones is not None:
             active_cones = active_cones[:max_cones]
         self.logger.debug(f"{datetime.now()} - Active cones retrieved: {active_cones}")
