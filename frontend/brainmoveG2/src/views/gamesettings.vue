@@ -68,7 +68,8 @@ function getInstructionsRoute() {
 const connectedPotjesMismatch = computed(() => {
     if (!Array.isArray(cones.value)) return false;
     const connectedCount = cones.value.filter(c => c.connected).length;
-    return connectedCount !== colors.value && colors.value > 0;
+    // Show error only when there are fewer connected potjes than selected colors
+    return connectedCount < colors.value && colors.value > 0;
 });
 
 const limitedCones = computed(() => {

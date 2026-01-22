@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
-import CloseButton from '../buttons/CloseButton.vue';
+import BasePopup from './BasePopup.vue';
 import { VDatePicker } from 'vuetify/components';
 
 const props = defineProps({
@@ -57,70 +57,26 @@ async function handleDownload() {
 </script>
 
 <template>
-  <div v-if="show" class="c-popup-overlay" @click="closePopup">
-    <div class="c-popup" @click.stop>
-      <div class="c-popup__header">
-        <h2 class="c-popup__title">Vanaf wanneer wilt u exporteren?</h2>
-        <CloseButton @close="closePopup" />
-      </div>
-      <div class="c-popup__content">
-        <label for="export-date">Kies een datum:</label>
-        <VDatePicker
-          v-model="selectedDate"
-          :max="new Date().toISOString().substr(0, 10)"
-          hide-title="true"
-          id="export-date"
-          style="width: 100%;;"
-        />
-        <button class="c-btn c-btn--primary" @click="handleDownload">Download</button>
-      </div>
-    </div>
-  </div>
+  <BasePopup 
+    :show="show" 
+    title="Vanaf wanneer wilt u exporteren?"
+    @close="closePopup"
+  >
+    <label for="export-date">Kies een datum:</label>
+    <VDatePicker
+      v-model="selectedDate"
+      :max="new Date().toISOString().substr(0, 10)"
+      hide-title="true"
+      id="export-date"
+      style="width: 100%;;"
+    />
+    <button class="c-btn c-btn--primary" @click="handleDownload">Download</button>
+  </BasePopup>
 </template>
 
 <style scoped>
-.c-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: start;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--spacing-04);
-}
-.c-popup {
-  background: var(--white);
-  border-radius: var(--radius-s);
-  padding: var(--spacing-05);
-  max-width: 700px;
-  width: 100%;
-  height: auto;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-.c-popup__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-05);
-}
-.c-popup__title {
-  font-size: var(--font-size-5);
-  font-weight: var(--font-weight-bold);
-  color: var(--grey-85);
-  margin: 0;
-}
-.c-popup__content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-03);
-}
 label {
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-baseline);
   font-size: 1rem;
 }
 </style>
