@@ -281,7 +281,7 @@ void reconnect_mqtt()
 {
   if (!mqttClient.connected())
   {
-    if (mqttClient.connect("ESP32"))
+    if (mqttClient.connect("ESP32-blue"))
     {
       mqttClient.subscribe(mqtt_topic_buzzer.c_str());
       Serial.println("MQTT Connected and subscribed to: " + mqtt_topic_buzzer);

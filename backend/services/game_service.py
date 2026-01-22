@@ -103,6 +103,16 @@ class GameService:
         game_started = False
         return
     
+    async def _schedule_new_round(self, sio, coneService, buzzerService, mqtt_service):
+        global game_started
+        await asyncio.sleep(1)  # brief pause before next round
+        # Check if game was stopped during the sleep
+        if game_started:
+            try:
+                await self.new_round(sio, coneService, buzzerService, mqtt_service)
+            except Exception as e:
+                self.logger.error(f"Error starting new round in background: {e}")
+    
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
         global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList, difficulty_modifier
         if session_mode_id == 2:
@@ -184,8 +194,7 @@ class GameService:
                         currentCones = [] 
                         userCones = []
                         self.logger.info(f"Round {new_round.number} recorded: {new_round}")
-                        await asyncio.sleep(1)  # brief pause before next round
-                        await self.new_round(sio, coneService, buzzerService, mqtt_service)
+                        asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
                     else:
                         self.logger.info("Memory Game wrong, game over.")
                         self.logger.info("user: " + str(userCones) + " expected: " + str(currentCones))
@@ -361,5 +370,4 @@ class GameService:
                 game_started = False
                 await sio.emit('game_over', gameoverStats.model_dump_json())
             else:
-                await asyncio.sleep(1)  # brief pause before next round
-                await self.new_round(sio, coneService, buzzerService, mqtt_service)
+                asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
