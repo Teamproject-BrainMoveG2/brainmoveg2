@@ -46,6 +46,10 @@ class GameService:
         global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier, game_started
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None or game_started:
+            self.logger.info("roundList: " + str(roundList))
+            self.logger.info("currentRoundStartTime: " + str(currentRoundStartTime))
+            self.logger.info("currentCone: " + str(currentCone))
+            self.logger.info("game_started: " + str(game_started))
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
         if mode_id == 2 and aantal_kleuren < 2:
@@ -88,7 +92,7 @@ class GameService:
         return "Game started!"
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
-        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones
+        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones, game_started
         if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
             self.logger.warning("No game in progress to stop.")
             raise Exception("No game in progress to stop.")
@@ -123,8 +127,7 @@ class GameService:
                     randomCone = random.choice([c for c in connectedCones if c != currentCones[i-1]])
                 currentCones.append(randomCone)
                 await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1})
-                if i < amountOfColors - 1:
-                    await asyncio.sleep(memory_game_delay_colors)
+                await asyncio.sleep(memory_game_delay_colors)
 
             await sio.emit('user_round_start', "Go")
             currentRoundStartTime = datetime.now(timezone.utc)
@@ -197,6 +200,7 @@ class GameService:
                             result=round_result,
                             reaction_speed_ms=reaction_speed_ms
                         )
+                        await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
                         roundList.append(new_round)
 
                         for r in roundList:
