@@ -46,6 +46,10 @@ class GameService:
         global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier, game_started
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None or game_started:
+            self.logger.info("roundList: " + str(roundList))
+            self.logger.info("currentRoundStartTime: " + str(currentRoundStartTime))
+            self.logger.info("currentCone: " + str(currentCone))
+            self.logger.info("game_started: " + str(game_started))
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
         if mode_id == 2 and aantal_kleuren < 2:
@@ -88,7 +92,7 @@ class GameService:
         return "Game started!"
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
-        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones
+        global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones, game_started
         if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
             self.logger.warning("No game in progress to stop.")
             raise Exception("No game in progress to stop.")
