@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
     title: {
         type: String,
         default: ''
@@ -7,6 +7,14 @@ defineProps({
     layout: {
         type: String,
         default: 'flex'
+    },
+    showGridError: {
+        type: Boolean,
+        default: false
+    },
+    gridErrorMessage: {
+        type: String,
+        default: ''
     }
 });
 </script>
@@ -16,11 +24,20 @@ defineProps({
         <p class="small-body" v-if="title">{{ title }}</p>
         <div :class="['c-setting-options', layout === 'grid' ? 'c-setting-options--grid' : '']">
             <slot></slot>
+            
         </div>
+        <p v-if="layout === 'grid' && showGridError" class="c-error-message">
+        {{ gridErrorMessage }}
+        </p>
     </div>
 </template>
 
 <style scoped>
+
+.c-error-message{
+   color: var(--red);
+   margin-top: var(--spacing-02);
+}
 
 .c-setting-section {
     width: 100%;

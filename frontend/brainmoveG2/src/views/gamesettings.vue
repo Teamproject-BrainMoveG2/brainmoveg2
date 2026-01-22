@@ -63,6 +63,13 @@ function getInstructionsRoute() {
     };
 }
 
+
+const connectedPotjesMismatch = computed(() => {
+    if (!Array.isArray(cones.value)) return false;
+    const connectedCount = cones.value.filter(c => c.connected).length;
+    return connectedCount !== colors.value && colors.value > 0;
+});
+
 const limitedCones = computed(() => {
     if (!Array.isArray(cones.value)) return [];
     const num = typeof colors.value === 'number' ? colors.value : 0;
@@ -105,7 +112,12 @@ function goToInstructions() {
         <SettingContainer title="Gebruikersnaam">
             <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" />
         </SettingContainer>
-        <SettingContainer title="Gebruikte kleuren" layout="grid">
+        <SettingContainer
+            title="Gebruikte kleuren"
+            layout="grid"
+            :showGridError="connectedPotjesMismatch"
+            gridErrorMessage="Verbind het juiste aantal potjes"
+        >
             <SmallPotjeCard 
                 v-for="cone in limitedCones" 
                 :key="cone.cone_id"
@@ -114,12 +126,13 @@ function goToInstructions() {
                 :battery="cone.battery_percentage"
                 :isConnected="cone.connected"
             />
+      
         </SettingContainer>
         
         <button
             :class="buttonClass"
-            :disabled="!username"
             @click="goToInstructions"
+            :disabled="connectedPotjesMismatch"
         >
             Ga door
         </button>
