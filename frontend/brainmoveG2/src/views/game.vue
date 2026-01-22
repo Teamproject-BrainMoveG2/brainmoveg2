@@ -105,9 +105,8 @@ const connectSocketColorGames = () => {
     });
 
     socket.on('user_round_start', (data) => {
-        // Show a message or overlay indicating the user is playing
         console.log('Round result:', data);
-        roundResult.value = "bezig met spelen";
+        roundResult.value = "Spel bezig";
         showResultOverlay.value = true;
         backgroundColor.value = 'var(--grey-2)';
     });
@@ -184,7 +183,7 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 1000;
   padding: var(--spacing-06);
   display: flex;
   justify-content: center;
@@ -248,7 +247,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 999;
 }
 
 .c-countdown-number {
@@ -307,13 +306,14 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    text-align: center;
+    z-index: 999;
 }
 
 .c-result-text {
     font-family: "Bebas Neue", sans-serif;
-    font-size: var(--font-size-22);
-    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-21);
+    line-height: var(--font-size-22);
     animation: resultPulse 0.5s ease-in-out;
     color: var(--white); 
 }

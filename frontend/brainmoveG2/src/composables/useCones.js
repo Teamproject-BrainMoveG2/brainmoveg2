@@ -46,7 +46,6 @@ export function useCones() {
     connectSocket();
   });
 
-  // Show cones in popup if disconnected OR battery < 25
   const warningCones = computed(() => {
     return cones.value.filter(cone => !cone.connected || cone.battery_percentage < 25);
   });
