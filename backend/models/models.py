@@ -84,3 +84,7 @@ class SessionData(BaseModel):
     avg_reaction_speed: float
     avg_accuracy: float
     data: list[Session]
+
+
+class GameStatus(BaseModel):
+    game_in_progress: bool

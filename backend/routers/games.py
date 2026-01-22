@@ -6,7 +6,7 @@ from services.game_service import GameService
 from dependencies import get_cone_service, get_game_service, get_mqtt_service, get_score_service, get_settings, get_sio, get_buzzer_service
 from repositories.mode_repository import ModeRepository
 from repositories.tutorial_repository import TutorialRepository
-from models.models import Cone, ConeDTO, GameStartDTO
+from models.models import Cone, ConeDTO, GameStartDTO, GameStatus, StatusMessage
 from services.cone_service import ConeService
 import logging
 
@@ -21,12 +21,12 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/status")
+@router.get("/status", response_model=GameStatus)
 async def get_game_status(game_service: GameService = Depends(get_game_service)):
     status = await game_service.get_game_in_progress()
     return {"game_in_progress": status}
 
-@router.post("/start")
+@router.post("/start", response_model=StatusMessage)
 async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Settings, Depends(get_settings)], mqtt_service: MQTTService = Depends(get_mqtt_service), game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), buzzer_service = Depends(get_buzzer_service)):
     logger.info("Starting a new game via API.")
     try:
@@ -36,7 +36,7 @@ async def start_game(gameStart: GameStartDTO, settings: Annotated[config.Setting
         raise HTTPException(status_code=400, detail=str(e))
     return {"message":result}
 
-@router.post("/stop")
+@router.post("/stop", response_model=StatusMessage)
 async def stop_game(settings: Annotated[config.Settings, Depends(get_settings)], game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service)):
     logger.info("Stopping the current game.")
     try:
@@ -46,7 +46,7 @@ async def stop_game(settings: Annotated[config.Settings, Depends(get_settings)],
         raise HTTPException(status_code=400, detail=str(e))
     return {"message":"Game stopped successfully."}
 
-@router.post("/hit")
+@router.post("/hit", response_model=StatusMessage)
 async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, Depends(get_settings)], mqtt_service: MQTTService = Depends(get_mqtt_service), game_service: GameService = Depends(get_game_service), sio=Depends(get_sio), cone_service: ConeService = Depends(get_cone_service), score_service: ScoreService = Depends(get_score_service), buzzer_service = Depends(get_buzzer_service)):
     try:
         await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings, buzzer_service, mqtt_service)
