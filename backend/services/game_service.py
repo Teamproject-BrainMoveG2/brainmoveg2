@@ -1,16 +1,13 @@
-from typing import Optional
 from fastapi.concurrency import run_in_threadpool
-from typing_extensions import Annotated
 from services.mqtt_service import MQTTService
 import config
-from models.models import Round, RoundResult, Cone, GameOverStats, ScoreEntry, MemoryGameRound
+from models.models import Round, RoundResult, GameOverStats, ScoreEntry, MemoryGameRound
 from datetime import datetime, timezone
 from services.cone_service import ConeService 
 from services.score_service import ScoreService
 from services.buzzer_service import BuzzerService
 from repositories.ronde_repository import RondeRepository
 from repositories.gamesession_repository import GameSessionRepository
-from fastapi import Depends
 import random
 import socketio
 import logging

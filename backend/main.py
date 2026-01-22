@@ -1,19 +1,15 @@
-import config
-from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_sio, get_settings, get_score_service, get_mqtt_service
+from dependencies import get_sio, get_settings
 from models.testmodels import *
-from repositories.ronde_repository import RondeRepository
 from models.models import *
 from routers import cones, games, modes, data
 import logging
 import socketio
 from services.mqtt_service import MQTTService
 
-from services.score_service import ScoreService
-logging.basicConfig(level=logging.INFO)  # Sets global log level
-logger = logging.getLogger(__name__)  # Module-specific logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 app = FastAPI(title="BrainMove", debug=True, description="BrainMove API", logger=logger)
@@ -41,33 +37,16 @@ logger.info("MQTT Service connected and assigned to app state.")
 app.state.mqtt = mqtt
 
 
-
 @app.get("/", response_model=str)
 async def hello_world():
     logger.info("Hello World endpoint called.")
     sio.emit('message', {'data': 'Hello, World!'})
     return 'Hello world'
 
-@app.get("/test-db")
-async def test_database_connection(settings: Annotated[config.Settings, Depends(get_settings)], response_model=StatusResponse):
-    try:
-        result = RondeRepository.get_ronde_by_id(settings, 1)
-        if result:
-            return 200
-        else:
-            return 500
-    except Exception as e:
-        return 500
-    
-@app.get("/test-score")
-async def test_score_service(score: ScoreDTO, score_service: ScoreService = Depends(get_score_service)):
-    score = score_service.calculate_score(total_rounds=score.total_rounds, correct_hits=score.correct_hits, average_reaction_speed=score.average_reaction_speed)
-    return {"calculated_score": score}
 @app.post("/ingest")
 async def ingest_data(data: TestModel, response_model=StatusResponse):
     print("Data received:", data)
     return {"status": "success", "data_received": data}
-
 
 @sio.event
 async def connect(sid, environ):
