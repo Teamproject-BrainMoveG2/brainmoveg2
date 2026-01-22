@@ -44,6 +44,7 @@ class BuzzerService:
     
     def trigger_buzzer_for_round_start(self, cone: ConeWithStatus, mqtt_service: Optional[MQTTService] = None) -> bool:
         """Trigger buzzer when a round starts (player should hit this cone)"""
+        self.logger.warning(f"Triggering round start buzzer for cone {cone.cone_id} ({cone.color})")
         return self.trigger_buzzer(
             cone_id=cone.cone_id,
             cone_color=cone.color,
