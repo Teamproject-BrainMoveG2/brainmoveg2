@@ -39,6 +39,12 @@ class ConeStatusDTO(BaseModel):
     cone_id: int
     battery_percentage: int
 
+class ConeStatus(BaseModel):
+    cone_id: int
+    color: str
+    battery_percentage: int | None
+    connected: bool
+
 class ScoreEntry(BaseModel):
     username: str
     score: float | None

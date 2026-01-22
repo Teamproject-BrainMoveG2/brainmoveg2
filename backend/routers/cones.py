@@ -3,7 +3,7 @@ import socketio
 from fastapi import APIRouter, Depends
 from services.cone_service import ConeService
 from dependencies import get_cone_service, get_mqtt_service, get_sio
-from models.models import ConeStatusDTO, StatusMessage
+from models.models import ConeStatusDTO, ConeStatus, StatusMessage
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ async def give_cone_status(cone: ConeStatusDTO, cone_service: ConeService = Depe
     logger.info(f"Cone status received: {cone}")
     return {"message": f"Cone {cone.cone_id} status recorded."}
 
-@router.get("/", response_model=list[ConeStatusDTO])
+@router.get("", response_model=list[ConeStatus])
 async def get_status_cones(cone_service: ConeService = Depends(get_cone_service)):
     cones = cone_service.get_cones()
     return cones
