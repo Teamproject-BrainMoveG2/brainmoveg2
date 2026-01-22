@@ -1,8 +1,9 @@
 <script setup>
+import { formatSnelheid } from '../../composables/useFormatSnelheid';
 const props = defineProps({
   name: { type: String, required: true },
   accuracy: { type: String, required: true },
-  reaction: { type: String, required: true },
+  reaction: { type: [String, Number], required: true },
   difficulty: { type: String, required: true }
 });
 </script>
@@ -11,7 +12,7 @@ const props = defineProps({
   <tr class="c-table__row">
     <td>{{ name }}</td>
     <td>{{ accuracy }}</td>
-    <td>{{ reaction }}</td>
+    <td>{{ formatSnelheid('snelheid', reaction) }}</td>
     <td>{{ difficulty }}</td>
   </tr>
 </template>

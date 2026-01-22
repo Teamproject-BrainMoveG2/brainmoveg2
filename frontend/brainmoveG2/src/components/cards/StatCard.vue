@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed } from 'vue';
+import { formatSnelheid } from '../../composables/useFormatSnelheid';
 
 const props = defineProps({
     label: {
@@ -25,6 +26,9 @@ const filledValue = computed(() => {
 const filledDashOffset = computed(() => {
     return circumference - (filledValue.value / 100) * circumference;
 });
+
+const displayValue = computed(() => formatSnelheid(props.label, props.value));
+
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const filledDashOffset = computed(() => {
         <div class="c-stats-content">
             <template v-if="icon">
                 <component :is="icon" class="c-stat-icon" />
-                <p class="c-stat-value">{{ value }}</p>
+                <p class="c-stat-value">{{ displayValue }}</p>
             </template>
             <template v-else>
                 <div class="c-stat-circle">

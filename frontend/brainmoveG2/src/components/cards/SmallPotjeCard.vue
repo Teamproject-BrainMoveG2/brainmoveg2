@@ -1,7 +1,7 @@
 <script setup>
 import { BatteryMedium } from 'lucide-vue-next';
-
-import { computed } from 'vue';
+import { toRef } from 'vue';
+import { useBattery } from '../../composables/useBattery';
 
 const props = defineProps({
     name: {
@@ -22,7 +22,7 @@ const props = defineProps({
     }
 });
 
-const isLowBattery = computed(() => props.battery < 25);
+const { isLowBattery, batteryIcon } = useBattery(toRef(props, 'battery'));
 </script>
 
 <template>
@@ -34,7 +34,7 @@ const isLowBattery = computed(() => props.battery < 25);
         <div class="c-smallPotjeCard__section c-smallPotjeCard__section--battery">
             <template v-if="isConnected">
                 <p class="small-body" :class="{ 'c-smallPotjeCard__percentage--low': isLowBattery }">{{ battery }}%</p>
-                <BatteryMedium class="c-battery-icon" :class="{ 'c-battery-icon--low-battery': isLowBattery }" />
+                <component :is="batteryIcon" class="c-battery-icon" :class="{ 'c-battery-icon--low-battery': isLowBattery }" />
             </template>
             <template v-else>
                 <p class="c-smallPotjeCard__connecting">Connecting...</p>

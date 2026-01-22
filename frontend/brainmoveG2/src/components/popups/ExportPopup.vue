@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue';
 import CloseButton from '../buttons/CloseButton.vue';
 import { VDatePicker } from 'vuetify/components';
-import { useDate } from 'vuetify';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -11,7 +10,6 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const selectedDate = ref(props.initialDate);
-const adapter = useDate();
 
 watch(() => props.show, (val) => {
   if (val) {

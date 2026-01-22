@@ -29,6 +29,7 @@ const isGameIdThree = computed(() => String(gameId.value) === '3');
 const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
+const showErrors = ref(false);
 
 const difficulties = [
     { id: 'relaxed', label: 'Relaxed', color: 'green' },
@@ -63,6 +64,13 @@ function getInstructionsRoute() {
     };
 }
 
+
+const connectedPotjesMismatch = computed(() => {
+    if (!Array.isArray(cones.value)) return false;
+    const connectedCount = cones.value.filter(c => c.connected).length;
+    return connectedCount !== colors.value && colors.value > 0;
+});
+
 const limitedCones = computed(() => {
     if (!Array.isArray(cones.value)) return [];
     const num = typeof colors.value === 'number' ? colors.value : 0;
@@ -71,7 +79,8 @@ const limitedCones = computed(() => {
 });
 
 function goToInstructions() {
-    if (username.value) {
+    showErrors.value = true;
+    if (username.value && connectedPotjesMismatch.value === false) {
         router.push(getInstructionsRoute());
     }
 }
@@ -95,7 +104,7 @@ function goToInstructions() {
             />
         </SettingContainer>
         <div class="c-setting-section--extra">
-            <SettingContainer title="Aantal Rondes">
+            <SettingContainer title="Aantal rondes" v-if="gameId !== '2'">
                 <CounterButton v-model="rounds" :min="1" />
             </SettingContainer>
             <SettingContainer title="Aantal kleuren">
@@ -103,9 +112,14 @@ function goToInstructions() {
             </SettingContainer>
         </div>
         <SettingContainer title="Gebruikersnaam">
-            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" />
+            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" :show-errors="showErrors" />
         </SettingContainer>
-        <SettingContainer title="Gebruikte kleuren" layout="grid">
+        <SettingContainer
+            title="Gebruikte kleuren"
+            layout="grid"
+            :showGridError="showErrors && connectedPotjesMismatch"
+            gridErrorMessage="Verbind het juiste aantal potjes"
+        >
             <SmallPotjeCard 
                 v-for="cone in limitedCones" 
                 :key="cone.cone_id"
@@ -114,11 +128,11 @@ function goToInstructions() {
                 :battery="cone.battery_percentage"
                 :isConnected="cone.connected"
             />
+      
         </SettingContainer>
         
         <button
             :class="buttonClass"
-            :disabled="!username"
             @click="goToInstructions"
         >
             Ga door
