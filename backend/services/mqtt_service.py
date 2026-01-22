@@ -74,13 +74,16 @@ class MQTTService:
     
     def publish(self, topic: str, payload: dict) -> bool:
         """Publish message to MQTT topic"""
-        if not self.connected:
+        if not self.client:
             logger.warning(f"MQTT not connected. Cannot publish to {topic}")
             return False
         
         try:
             message = json.dumps(payload)
-            self.client.publish(topic, message, qos=1)
+            msg_info = self.client.publish(topic, message, qos=1)
+            if msg_info.rc != mqtt.MQTT_ERR_SUCCESS:
+                logger.error(f"MQTT: Failed to queue message to {topic}, rc={msg_info.rc}")
+                return False
             logger.info(f"Published to {topic}: {message}")
             return True
         except Exception as e:
@@ -106,6 +109,12 @@ class MQTTService:
         if rc == 0:
             self.connected = True
             logger.info("MQTT: Connected successfully")
+            for topic in self._callbacks:
+                try:
+                    self.client.subscribe(topic, qos=1)
+                    logger.info(f"MQTT: Resubscribed to {topic} after connect")
+                except Exception as e:
+                    logger.error(f"MQTT: Failed to resubscribe to {topic}: {e}")
         else:
             logger.error(f"MQTT: Connection failed with code {rc}")
     

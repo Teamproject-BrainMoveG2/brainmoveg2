@@ -53,6 +53,7 @@ async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, De
     except Exception as e:
         logger.error(f"Error recording cone hit: {e}")
         raise HTTPException(status_code=400, detail=str(e))
+    logger.info("returning post hit")
     return {"message": f"Cone {cone.cone_id} hit recorded."}
 
 
