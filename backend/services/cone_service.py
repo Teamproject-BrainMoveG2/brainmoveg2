@@ -24,7 +24,7 @@ class ConeService:
                 self.logger.info(f"Cone updated: {c}")
                 await sio.emit('cone_update', jsonable_encoder(self.get_cones()))
                 break
-    def get_cones(self):
+    def get_cones(self) -> list[ConeWithStatus]:
         conesWithStatus = []
         for c in cones:
             if c.battery_percentage is not None and c.last_status is not None:

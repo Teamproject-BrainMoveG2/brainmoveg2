@@ -29,7 +29,7 @@ class GameSessionRepository:
     
     @staticmethod
     def get_sessions_today(settings):
-        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, AVG(spelronde.reactietijd_ms) AS avg_reactietijd_ms, SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) = CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
+        sql = "SELECT spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score, CAST(AVG(spelronde.reactietijd_ms) AS DECIMAL(10,2)) AS avg_reactietijd_ms, ROUND(SUM(CASE WHEN spelronde.uitkomst = 'goed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS accuracy_percent FROM spelsessie LEFT JOIN moeilijkheid ON spelsessie.moeilijkheid_id = moeilijkheid.moeilijkheid_id INNER JOIN spelronde ON spelsessie.spelsessie_id = spelronde.spelsessie_id WHERE DATE(spelsessie.gestart_op) = CURRENT_DATE GROUP BY spelsessie.spelsessie_id, username, spelsessie.spelmodus_id, moeilijkheid.naam, score"
         return Database.get_rows(sql, settings=settings)
     
     @staticmethod
