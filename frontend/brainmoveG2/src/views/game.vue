@@ -139,43 +139,6 @@ const connectSocketColorGames = () => {
     });
 };
 
-const connectSocketMemoryGames = () => {
-    socket = io(`http://${Ip}`);
-
-    socket.on('connect', () => {
-        console.log('Socket connected:', socket.id);
-    });
-
-    socket.on('round_start', (data) => {
-        console.log('Round started:', data);
-        currentRound.value = data.round;
-        currentColor.value = data.color;
-        totalRounds.value = data.max_rounds;
-
-        showResultOverlay.value = false;
-      
-        backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
-    });
-
-    
-
-    socket.on('game_over', (data) => {
-        console.log('Game over:', data);
-        setTimeout(() => {
-            const gameStats = JSON.parse(data);
-            router.push({
-                name: 'gameoverzicht',
-                params: { id: gameId.value },
-                state: { gameStats }
-            });
-        }, 2000);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Socket disconnected');
-    });
-};
-
 onMounted(() => {
     startCountdown();
     connectSocketColorGames();

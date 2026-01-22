@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 
@@ -10,7 +10,6 @@ import ScoreCircle from '../components/ScoreCircle.vue';
 import TabSwitcher from '../components/tabs/TabSwitcher.vue';
 
 const route = useRoute();
-const router = useRouter();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
 const activeTab = ref('scoreboard');
@@ -65,17 +64,6 @@ const accuracy = computed(() => {
     return Math.round((gameStats.value.correct_hits / total) * 100);
 });
 
-
-const playerScore = computed(() => {
-    const player = scoreboardData.value.find(row => row.isPlayer);
-    return player ? player.score : 0;
-});
-
-
-const openContent = (tabName) => {
-    activeTab.value = tabName;
-};
-
 </script>
 
 <template>
@@ -93,8 +81,8 @@ const openContent = (tabName) => {
         </div>
         <div class="c-stats-grid">
             <StatCard 
-                label="Avg. snelheid" 
-                :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}MS`"
+                label="Gem. snelheid" 
+                :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}`"
                 :icon="Clock"
             />
             
@@ -127,7 +115,7 @@ const openContent = (tabName) => {
                 <p>Gemist: {{ gameStats ? gameStats.missed_hits : 0 }}</p>
             </div>
         </div>
-        <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel opnieuw spelen!</RouterLink>
+        <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
     <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
         <div class="c-title-div">
@@ -159,7 +147,7 @@ const openContent = (tabName) => {
                 </tbody>
             </table>
         </div>
-        <RouterLink :class="buttonClass" :to="``">Opnieuw spelen</RouterLink>
+        <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
 </template>
 

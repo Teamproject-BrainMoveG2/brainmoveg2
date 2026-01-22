@@ -95,7 +95,7 @@ function goToInstructions() {
             />
         </SettingContainer>
         <div class="c-setting-section--extra">
-            <SettingContainer title="Aantal Rondes">
+            <SettingContainer title="Aantal rondes" v-if="gameId !== '2'">
                 <CounterButton v-model="rounds" :min="1" />
             </SettingContainer>
             <SettingContainer title="Aantal kleuren">

@@ -50,8 +50,8 @@ watch(() => props.score, (newScore) => {
     
 
 .c-scoreCircle {
-  width: 11.25rem;
-  height: 11.25rem;
+  width: 11.50rem;
+  height: 11.50rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -104,7 +104,7 @@ watch(() => props.score, (newScore) => {
 .c-scoreCircle__number {
   font-size: var(--font-size-10);
   line-height: var(--font-size-11);
-  margin-top: 2rem;
+  margin-top: 0.5rem;
   color: var(--primary);
 }
 </style>

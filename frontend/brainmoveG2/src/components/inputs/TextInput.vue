@@ -30,6 +30,7 @@ const handleInput = (event) => {
             class="c-input small-body" 
             :placeholder="placeholder"
             :required="$route.name === 'gamesettings'"
+            maxlength="45"
         />
     </form>
 </template>

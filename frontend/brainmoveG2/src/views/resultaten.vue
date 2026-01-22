@@ -10,7 +10,7 @@
   import ExportButton from '../components/buttons/ExportButton.vue';
   import { useGames } from '../composables/useGames';
   import ExportPopup from '../components/popups/ExportPopup.vue';
-  import { useDate } from 'vuetify';
+
   // Export popup state
   const showExportPopup = ref(false);
   const exportInitialDate = ref(new Date());
@@ -21,8 +21,6 @@
   function closeExportPopup() {
     showExportPopup.value = false;
   }
-
-  const adapter = useDate();
 
   const { modes, fetchGames } = useGames();
   const selectedMode = ref('all');
@@ -155,7 +153,7 @@
         />
       <StatCard 
         label="Avg. snelheid" 
-        :value="`${Math.round(data.avg_reaction_speed)}MS`"
+        :value="`${Math.round(data.avg_reaction_speed)}`"
         :icon="Clock"
       />
     </div>
@@ -168,7 +166,7 @@
   <table class="c-table c-table--resultaten">
   <thead>
     <tr class="c-table__headings">
-      <th>NAME</th>
+      <th>Naam</th>
       <th>ACCURATHEID</th>
       <th>GEM. REACTIE</th>
       <th>MOEILIJKHEID</th>
@@ -180,7 +178,7 @@
       :key="item.spelsessie_id"
       :name="item.username" 
       :accuracy="`${Math.round(item.accuracy_percent)}%`" 
-      :reaction="`${Math.round(item.avg_reactietijd_ms)}ms`" 
+      :reaction="`${Math.round(item.avg_reactietijd_ms)}`" 
       :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
   </tbody>
 </table>
@@ -221,6 +219,7 @@
 }
 
 .c-header__content {
+  padding: 0 var(--spacing-06);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -228,15 +227,19 @@
   gap: var(--spacing-03);
   color: var(--grey-85);
 
+  @media (max-width: 480px) {
+   
+    padding: 0;
 
+  }
    @media (min-width: 768px) {
-
+   
     max-width: 500px;
 
   }
 
   @media (min-width: 1024px) {
-
+     
       max-width: 550px;
 
   }
