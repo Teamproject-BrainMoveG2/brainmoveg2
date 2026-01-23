@@ -228,9 +228,6 @@ class GameService:
                             score=playerScore.score
                         )
                     
-                        for r in roundList:
-                            await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
-                          
                         player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
                         playerScore.place = player_rank["rank"]
                         if player_rank['rank'] <= 3:
@@ -254,8 +251,10 @@ class GameService:
                             top_scores=top_scores
                         )
                         gameoverStats.score = playerScore
+                        await sio.emit('game_over', gameoverStats.model_dump_json())
 
                         # Reset game state
+                        rounds_to_save = roundList.copy()
                         roundList = []
                         totalTimeMs = 0
                         currentRoundStartTime = None
@@ -263,7 +262,9 @@ class GameService:
                         userCones = []
                         currentCones = []
                         game_started = False
-                        await sio.emit('game_over', gameoverStats.model_dump_json())
+                        for r in rounds_to_save:
+                            await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
+                          
 
             else:
                 raise ValueError("All cones for this round have already been hit. id: " + str(cone))
@@ -329,8 +330,8 @@ class GameService:
                 )
                 self.logger.info("session id: " + str(session_id))
                 
-                for r in roundList:
-                    await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+
+
                 self.logger.info("session id: " + str(session_id))
                 player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
                 self.logger.info("player rank: " + str(player_rank))
@@ -361,13 +362,15 @@ class GameService:
                     top_scores=top_scores
                 )
                 gameoverStats.score = playerScore
+                await sio.emit('game_over', gameoverStats.model_dump_json())
 
-                # Reset game state
+                rounds_to_save = roundList.copy()
                 roundList = []
                 totalTimeMs = 0
                 currentRoundStartTime = None
                 currentCone = None
                 game_started = False
-                await sio.emit('game_over', gameoverStats.model_dump_json())
+                for r in rounds_to_save:
+                    await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
             else:
                 asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
