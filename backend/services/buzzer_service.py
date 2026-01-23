@@ -46,7 +46,7 @@ class BuzzerService:
         return self.trigger_buzzer(
             cone_id=cone.cone_id,
             cone_color=cone.color,
-            buzzer_pattern="long",
+            buzzer_pattern="double",
             duration_ms=150,
             mqtt_service=mqtt_service
         )
