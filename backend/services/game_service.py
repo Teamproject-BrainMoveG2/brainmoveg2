@@ -287,12 +287,14 @@ class GameService:
             if len(userCones) < len(currentCones):
                 userCones.append(coneObject)
                 if len(userCones) == len(currentCones): # if round complete
-                    if userCones == currentCones: # if correct , update condition
-                        self.logger.info("Merge Colors correct!")
+                    reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
+                    totalTimeMs += reaction_speed_ms
+                    if sorted([c.cone_id for c in userCones]) == sorted([c.cone_id for c in currentCones]):
+                        self.logger.info("Merge Colors correct!  userCones: " + str(userCones) + " currentCones: " + str(currentCones))
                         round_result = RoundResult.GOED
                     else:   
                         round_result = RoundResult.FOUT
-                        self.logger.info("Merge Colors wrong.")
+                        self.logger.info("Merge Colors wrong. userCones: " + str(userCones) + " currentCones: " + str(currentCones))
                     new_round = Round(
                     number=len(roundList) + 1,
                     reaction_speed_ms=reaction_speed_ms,
@@ -309,6 +311,65 @@ class GameService:
 
                     if len(roundList) >= maxRounds: #game over rounds reached
                         self.logger.info("Max rounds reached. Game over. rounds:")
+
+                        for r in roundList:
+                            self.logger.debug(r)
+                        playerScore = ScoreEntry(
+                            username=session_username,
+                            score=0.0,
+                            place=0
+                        )
+                        playerScore.score = scoreService.calculate_score(
+                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                        )
+                        self.logger.info("ending session")
+                        await run_in_threadpool(
+                            GameSessionRepository.end_session,
+                            settings=settings,
+                            session_id=session_id,
+                            ended_on=datetime.now(timezone.utc),
+                            score=playerScore.score
+                        )
+                    
+                        player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
+                        playerScore.place = player_rank["rank"]
+                        if player_rank['rank'] <= 3:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                            top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                        else:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                        if top_scores is None:
+                            top_scores = []
+                        niveau = scoreService.calculate_level(playerScore.score, settings)
+                        gameoverStats = GameOverStats(
+                            total_rounds=len(roundList),
+                            total_time_ms=totalTimeMs,
+                            niveau=niveau,
+                            correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                            wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                            missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                            average_reaction_speed_ms=totalTimeMs / len(roundList),
+                            rounds=roundList,
+                            score=playerScore,
+                            top_scores=top_scores
+                        )
+                        gameoverStats.score = playerScore
+                        await sio.emit('game_over', gameoverStats.model_dump_json())
+
+                        # Reset game state
+                        rounds_to_save = roundList.copy()
+                        roundList = []
+                        totalTimeMs = 0
+                        currentRoundStartTime = None
+                        currentCone = None
+                        userCones = []
+                        currentCones = []
+                        game_started = False
+                        for r in rounds_to_save:
+                            await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, None, r.result)
+                    else:
+                        self.logger.info("Merge Colors round complete, scheduling new round.")
+                        asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
 
                 
 
@@ -353,7 +414,7 @@ class GameService:
                 self.logger.info("Max rounds reached. Game over. rounds:")
 
                 for r in roundList:
-                    self.logger.info(r)
+                    self.logger.debug(r)
                 playerScore = ScoreEntry(
                     username=session_username,
                     score=0.0,
