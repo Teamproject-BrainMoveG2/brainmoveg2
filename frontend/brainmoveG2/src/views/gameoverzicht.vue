@@ -122,6 +122,7 @@ const accuracy = computed(() => {
             <h1>Proficiat!</h1>
         </div>
         <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
+        <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
         <div class="c-leaderboard">
             <div class="c-leaderboard__head">
                 <p class="c-leaderboard__head-title">scoreboard</p>
@@ -147,7 +148,6 @@ const accuracy = computed(() => {
                 </tbody>
             </table>
         </div>
-        <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
 </template>
 
@@ -235,7 +235,6 @@ td:nth-child(2) {
   align-items: center;
   max-width: 26.25rem;
   margin: 0 auto;
-  padding-top: 2rem;
   margin-bottom: 2rem;
   
 
@@ -243,6 +242,7 @@ td:nth-child(2) {
   @media (min-width: 768px) {
 
     max-width: 500px;
+    padding: 0;
    
 
   }
@@ -250,6 +250,7 @@ td:nth-child(2) {
   @media (min-width: 1024px) {
 
       max-width: 550px;
+       padding: 0;
     
 
   }

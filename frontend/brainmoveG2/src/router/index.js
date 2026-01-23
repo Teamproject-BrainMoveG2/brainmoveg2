@@ -52,19 +52,19 @@ const router = createRouter({
       path: '/gameoverzicht/:id',
       name: 'gameoverzicht',
       component: gameoverzicht,
-      meta: { showNavbar: true, showHeader: false }, 
+      meta: { showNavbar: true, showHeader: true }, 
     },
     {
       path: '/info',
       name: 'info',
       component: info,
-      meta: { showNavbar: true, showHeader: false }, 
+      meta: { showNavbar: true, showHeader: true }, 
     },
     {
       path: '/resultaten',
       name: 'resultaten',
       component: resultaten,
-      meta: { showNavbar: true, showHeader: false }, 
+      meta: { showNavbar: true, showHeader: true }, 
     }
   ],
 })

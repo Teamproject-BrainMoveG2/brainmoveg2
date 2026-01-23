@@ -38,11 +38,18 @@
 
   --blue: #183CDC;
   --blue-dark: #0D1F73;
-  --blue-dark-2: #0D1F73;
+
+  --purple: #a72fdb;
+  --purple-dark: #751f99;
+  --purple-light: #ecc7fa;
 
   --green: #18DC63;
 
   --brown: #844200;
+
+  --teal: #20B2AA;
+
+  --lime: #BFFF00;
 
   /* Font sizes */
   --font-size-1: .75rem;
@@ -203,10 +210,12 @@ p {
   max-width: 26.25rem;
   margin: 0 auto;
 
+
   @media (min-width: 768px) {
 
     max-width: 500px;
     gap: var(--spacing-08);
+    padding: 0;
 
   }
 
@@ -214,6 +223,7 @@ p {
 
       max-width: 550px;
       gap: var(--spacing-09);
+      padding: 0;
 
   }
 
@@ -310,6 +320,21 @@ p {
 .c-btn--orange:active {
   transform: translateY(0);
 }
+
+.c-btn--purple {
+  background-color: var(--purple);
+  color: var(--white);
+}
+
+.c-btn--purple:hover {
+  background-color: var(--purple-dark);
+  transform: translateY(-2px);
+}
+
+.c-btn--purple:active {
+  transform: translateY(0);
+}
+
 
 /* Responsive for larger screens */
 @media (min-width: 768px) {

@@ -25,13 +25,33 @@ const colorMap = {
             'green': 'var(--accent-green)',
             'orange': 'var(--accent-orange)',
             'red': 'var(--red)',
-            'yellow': 'var(--yellow)'
+            'yellow': 'var(--yellow)',
+            'purple': 'var(--purple)',
+            'brown': 'var(--brown)',
+            "teal": 'var(--teal)',
+            "green": 'var(--green)',
+            "lime": 'var(--lime)'
+
         };
 
 const settings = route.query;
 console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
 
-const startCountdown = () => {
+const startCountdown = async () => {
+    // Check if a game is already in progress
+    try {
+        const response = await fetch(`http://${Ip}/games/status`);
+        const status = await response.json();
+        if (status && status.game_in_progress) {
+            showCountdown.value = false;
+            roundResult.value = "spel bezig even geduld.";
+            showResultOverlay.value = true;
+            return;
+        }
+    } catch (error) {
+        // If status check fails, proceed as normal
+    }
+    showCountdown.value = true;
     const interval = setInterval(() => {
         if (countdownValue.value > 1) {
             countdownValue.value--;
@@ -40,7 +60,6 @@ const startCountdown = () => {
             setTimeout(() => {
                 showCountdown.value = false;
                 clearInterval(interval);
-  
                 startGame();
             }, 1000);
         }

@@ -16,7 +16,8 @@ const getColorValue = (color) => {
         'blue': 'var(--blue)',
         'green': 'var(--accent-green)',
         'yellow': 'var(--yellow)',
-        'orange': 'var(--accent-orange)'
+        'orange': 'var(--accent-orange)',
+        'purple': 'var(--purple)'
     };
     return colorMap[color] || 'var(--accent-green)';
 };
@@ -119,7 +120,7 @@ function goToInstructions() {
             title="Gebruikte kleuren"
             layout="grid"
             :showGridError="showErrors && connectedPotjesMismatch"
-            gridErrorMessage="Verbind het juiste aantal potjes"
+            gridErrorMessage="Niet genoeg verbonden potjes voor het aantal kleuren."
         >
             <SmallPotjeCard 
                 v-for="cone in limitedCones" 

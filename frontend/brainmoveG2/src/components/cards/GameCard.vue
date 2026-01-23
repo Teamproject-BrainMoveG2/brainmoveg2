@@ -72,6 +72,10 @@ const iconMap = {
     background-color: var(--primary-light);
 }
 
+.c-game-card:nth-child(4){
+    background-color: var(--purple-light);
+}
+
 .c-game-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -96,6 +100,10 @@ const iconMap = {
 
 .c-game-card:nth-child(3) .c-game-card__play-icon{
     color: var(--primary);
+}
+
+.c-game-card:nth-child(4) .c-game-card__play-icon{
+    color: var(--purple);
 }
 
 .c-game-card__text {

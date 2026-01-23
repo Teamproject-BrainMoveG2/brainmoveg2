@@ -51,7 +51,6 @@ const { cones, colorToDutch } = useCones();
 .c-title{
     text-align: left;
     width: 100%;
-    padding: var(--spacing-07) 0;
   }
 
 

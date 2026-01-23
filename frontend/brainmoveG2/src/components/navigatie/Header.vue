@@ -6,6 +6,7 @@ import { Bell, X } from 'lucide-vue-next';
 
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 import PotjesStatusPopup from '../popups/PotjesStatusPopup.vue';
+import { watch } from 'vue';
 
 export default {
   name: 'Header',
@@ -34,10 +35,6 @@ export default {
       router.back();
     };
 
-    const stopGame = () => {
-      router.push('/dashboard');
-    };
-
     const togglePopup = () => {
       showPopup.value = !showPopup.value;
     };
@@ -51,19 +48,12 @@ export default {
       return route.name === 'dashboard' || route.path === '/dashboard';
     });
 
-    // Check if current page is game (exact match only, not gamesettings)
-    const isGame = computed(() => {
-      return route.name === 'game';
-    });
-
     // Use shared composable for cones logic
     const { warningCones, colorToDutch } = useCones();
 
     return {
       goBack,
-      stopGame,
       isDashboard,
-      isGame,
       showPopup,
       togglePopup,
       closePopup,
@@ -77,28 +67,19 @@ export default {
 <template>
   <header class="c-header">
     <div class="c-header__content">
-    <!-- Game header layout -->
-    <div v-if="isGame" class="c-game-header">
-      <button @click="stopGame" class="c-stop-button" aria-label="Stop game">
-        <X :size="24" />
-        <span>Stoppen</span>
-      </button>
-      <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
-    </div>
-
-    <!-- Dashboard header -->
-    <button v-else-if="isDashboard" @click="togglePopup" class="c-bell-button" aria-label="Notificaties" style="position: relative;">
-      <Bell />
-      <span v-if="warningCones.length > 0" class="c-bell-notification"></span>
-    </button>
-    
     <!-- Back button for other pages -->
-    <button v-else @click="goBack" class="c-back-button" aria-label="Ga terug">
+    <button v-if="!isDashboard" @click="goBack" class="c-back-button" aria-label="Ga terug">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
 
+    <!-- Dashboard header -->
+    <button  @click="togglePopup" class="c-bell-button" aria-label="Notificaties" style="position: relative;">
+      <Bell />
+      <span v-if="warningCones.length > 0" class="c-bell-notification"></span>
+    </button>
+    
     <!-- Popup overlay -->
     <PotjesStatusPopup
       :show="showPopup"
@@ -112,25 +93,21 @@ export default {
 
 <style scoped>
 .c-header {
-  z-index: 100;
+  display: flex;
+  align-items: center;
   padding: var(--spacing-06);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
+  margin-left: auto;
+  margin-right: auto;
 
-.c-header__content {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   max-width: 26.25rem;
+  
 
 
   @media (min-width: 768px) {
 
     max-width: 500px;
     gap: var(--spacing-08);
+    
 
   }
 
@@ -138,8 +115,19 @@ export default {
 
       max-width: 550px;
       gap: var(--spacing-09);
+      padding: var(--spacing-06) 0;
 
   }
+
+}
+
+
+.c-header__content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
 }
 
 .c-bell-notification {

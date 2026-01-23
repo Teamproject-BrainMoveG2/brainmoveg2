@@ -125,15 +125,15 @@
 </script>
 
 <template>
-    <header class="c-header">
-    <div class="c-header__content">
-      <div class="c-header__title-wrapper">
-        <h1>Resultaten</h1>
-        <ExportButton :icon="Download" label="Exporteer" @click="openExportPopup" />
+    <div class="c-header">
+        <div class="c-header__content">
+          <div class="c-header__title-wrapper">
+            <h1>Resultaten</h1>
+            <ExportButton :icon="Download" label="Exporteer" @click="openExportPopup" />
+          </div>
+          <p class="small-body">Bekijk het totale aantal resultaten </p>
+        </div>
       </div>
-      <p class="small-body">Bekijk het totale aantal resultaten </p>
-    </div>
-  </header>
     <TabSwitcher
       v-model:activeTab="activeTab"
       :tabs=" [
@@ -147,12 +147,12 @@
     <main class="c-content-wrapper">
       <div class="c-result-grid" v-if="data">
       <StatCard 
-        label="Gem. accuracy" 
+        label="accuraatheid" 
         :value="`${Math.round(data.avg_accuracy)}`"
         
         />
       <StatCard 
-        label="Avg. snelheid" 
+        label="Gem. snelheid" 
         :value="`${Math.round(data.avg_reaction_speed)}`"
         :icon="Clock"
       />
@@ -212,14 +212,38 @@
 }
 
 .c-header {
-  padding: var(--spacing-06);
   display: flex;
-  justify-content: center;
   align-items: center;
+  padding: 0 var(--spacing-06);
+  margin-bottom: var(--spacing-06);
+  margin-left: auto;
+  margin-right: auto;
+
+  max-width: 26.25rem;
+  
+
+
+  @media (min-width: 768px) {
+
+    max-width: 500px;
+    gap: var(--spacing-08);
+    padding: 0;
+
+  }
+
+  @media (min-width: 1024px) {
+
+      max-width: 550px;
+      gap: var(--spacing-09);
+      padding: 0;
+
+  }
+
 }
 
+
 .c-header__content {
-  padding: 0 var(--spacing-06);
+  
   width: 100%;
   display: flex;
   flex-direction: column;
