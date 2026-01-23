@@ -1,3 +1,4 @@
+import os
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_sio, get_settings
@@ -8,8 +9,27 @@ import logging
 import socketio
 from services.mqtt_service import MQTTService
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+os.makedirs('./logs', exist_ok=True)
+logging.root.handlers.clear()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+console_handler.setFormatter(console_formatter)
+
+file_handler = logging.FileHandler('./logs/brainmove.log')
+file_handler.setLevel(logging.WARNING)
+file_formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+file_handler.setFormatter(file_formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 app = FastAPI(title="BrainMove", debug=True, description="BrainMove API", logger=logger)
@@ -33,7 +53,6 @@ settings = get_settings()
 
 mqtt = MQTTService(settings.mqtt_broker, settings.mqtt_port, settings.mqtt_username, settings.mqtt_password)
 mqtt.connect()
-logger.info("MQTT Service connected and assigned to app state.")
 app.state.mqtt = mqtt
 
 

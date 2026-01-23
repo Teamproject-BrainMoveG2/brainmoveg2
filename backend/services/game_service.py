@@ -43,10 +43,10 @@ class GameService:
         global session_id, maxRounds, maxCones, difficulty, TOO_LATE_MS, session_username, session_mode_id, difficulty_modifier, game_started
         self.logger.info("Game started.")
         if len(roundList) > 0 or currentRoundStartTime is not None or currentCone is not None or game_started:
-            self.logger.info("roundList: " + str(roundList))
-            self.logger.info("currentRoundStartTime: " + str(currentRoundStartTime))
-            self.logger.info("currentCone: " + str(currentCone))
-            self.logger.info("game_started: " + str(game_started))
+            self.logger.debug("roundList: " + str(roundList))
+            self.logger.debug("currentRoundStartTime: " + str(currentRoundStartTime))
+            self.logger.debug("currentCone: " + str(currentCone))
+            self.logger.debug("game_started: " + str(game_started))
             self.logger.warning("Game is already in progress. Cannot start a new game.")
             raise Exception("Game is already in progress. Cannot start a new game.")
         if mode_id == 2 and aantal_kleuren < 2:
