@@ -28,6 +28,12 @@ String mqtt_topic_buzzer;
 // Buzzer code
 const int BUZZER_PIN = D6;
 
+static unsigned long buzzerOnUntil = 0;
+static unsigned long buzzerOffUntil = 0;
+static int buzzerBeepsLeft = 0;
+static int buzzerDuration = 0;
+static int buzzerPause = 0;
+
 // Batterij code
 int batterij = A0;
 unsigned long lastBatteryMs = 0;
@@ -98,6 +104,9 @@ void setup()
 
 void loop()
 {
+  // buzzer code
+  update_buzzer();
+
   // MQTT
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -156,6 +165,7 @@ void tof()
     String payload = String("{\"cone_id\":\"") + KLEUR + "\"}";
     http.POST(payload);
     http.end();
+    trigger_buzzer_pattern("single", 50);
   }
 }
 
@@ -241,50 +251,59 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
     trigger_buzzer_pattern(pattern, duration);
   }
 }
-
 // Buzzer code
-void beep(int times, int duration_ms, int pause_ms)
-{
-  for (int i = 0; i < times; i++)
-  {
-    digitalWrite(BUZZER_PIN, HIGH);
-    delay(duration_ms);
-    digitalWrite(BUZZER_PIN, LOW);
-    if (i < times - 1)
-    {
-      delay(pause_ms);
-    }
-  }
-}
-
 void trigger_buzzer_pattern(String pattern, int duration)
 {
+  buzzerBeepsLeft = 0;
+  buzzerDuration = duration;
+  buzzerPause = 100;
   if (pattern == "single")
-  {
-    beep(1, duration, 100);
-  }
+    buzzerBeepsLeft = 1;
   else if (pattern == "double")
-  {
-    beep(2, duration, 100);
-  }
+    buzzerBeepsLeft = 2;
   else if (pattern == "triple")
-  {
-    beep(3, duration, 100);
-  }
-  else if (pattern == "long")
-  {
-    beep(1, duration, 200);
-  }
+    buzzerBeepsLeft = 3;
+  buzzerOnUntil = millis() + buzzerDuration; // Start immediately
 }
-
+// MQTT reconnect
 void reconnect_mqtt()
 {
   if (!mqttClient.connected())
   {
-    if (mqttClient.connect("ESP32-red"))
+    String clientId = String("ESP32-") + KLEUR; // concat hier
+    if (mqttClient.connect(clientId.c_str()))
     {
       mqttClient.subscribe(mqtt_topic_buzzer.c_str());
       Serial.println("MQTT Connected and subscribed to: " + mqtt_topic_buzzer);
+    }
+  }
+}
+// Buzzer code
+void update_buzzer()
+{
+  unsigned long now = millis();
+  if (buzzerOnUntil > 0)
+  {
+    if (now < buzzerOnUntil)
+    {
+      digitalWrite(BUZZER_PIN, HIGH);
+    }
+    else
+    {
+      digitalWrite(BUZZER_PIN, LOW);
+      buzzerOnUntil = 0;
+      buzzerOffUntil = now + buzzerPause;
+    }
+  }
+  else if (buzzerOffUntil > 0)
+  {
+    if (now >= buzzerOffUntil)
+    {
+      buzzerOffUntil = 0;
+      if (--buzzerBeepsLeft > 0)
+      {
+        buzzerOnUntil = now + buzzerDuration;
+      }
     }
   }
 }
