@@ -31,7 +31,31 @@ const colorMap = {
 const settings = route.query;
 console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
 
-const startCountdown = () => {
+const fetchCones = async () => {
+    try {
+      const response = await fetch(`http://${Ip}/games/status`);
+      const data = await response.json();
+      cones.value = data;
+    } catch (error) {
+      cones.value = [];
+    }
+  };
+
+const startCountdown = async () => {
+    // Check if a game is already in progress
+    try {
+        const response = await fetch(`http://${Ip}/games/status`);
+        const status = await response.json();
+        if (status && status.game_in_progress) {
+            showCountdown.value = false;
+            roundResult.value = "spel bezig even geduld.";
+            showResultOverlay.value = true;
+            return;
+        }
+    } catch (error) {
+        // If status check fails, proceed as normal
+    }
+    showCountdown.value = true;
     const interval = setInterval(() => {
         if (countdownValue.value > 1) {
             countdownValue.value--;
@@ -40,7 +64,6 @@ const startCountdown = () => {
             setTimeout(() => {
                 showCountdown.value = false;
                 clearInterval(interval);
-  
                 startGame();
             }, 1000);
         }

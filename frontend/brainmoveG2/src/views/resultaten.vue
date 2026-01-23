@@ -147,12 +147,12 @@
     <main class="c-content-wrapper">
       <div class="c-result-grid" v-if="data">
       <StatCard 
-        label="Gem. accuracy" 
+        label="accuraatheid" 
         :value="`${Math.round(data.avg_accuracy)}`"
         
         />
       <StatCard 
-        label="Avg. snelheid" 
+        label="Gem. snelheid" 
         :value="`${Math.round(data.avg_reaction_speed)}`"
         :icon="Clock"
       />
