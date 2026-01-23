@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import Tooltip from '../components/Tooltip.vue';
+const showTooltip = ref(false);
 import { useRoute } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
@@ -12,7 +14,7 @@ import TabSwitcher from '../components/tabs/TabSwitcher.vue';
 const route = useRoute();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
-const activeTab = ref('scoreboard');
+const activeTab = ref('scorebord');
 
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
@@ -118,17 +120,30 @@ const accuracy = computed(() => {
         </section>
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
-    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
+    <main v-show="activeTab === 'scorebord'" class="c-content-wrapper ">
         <div class="c-title-div">
             <h1>Proficiat!</h1>
         </div>
         <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
         <section class="c-leaderboard">
-            <div class="c-leaderboard__head">
+            <div class="c-leaderboard__head" style="position: relative;">
                 <p class="c-leaderboard__head-title">scorebord</p>
-                <Info class="c-leaderboard__head-icon"/>
+                <div style="display: inline-block; position: relative;">
+                    <Info 
+                        class="c-leaderboard__head-icon"
+                        @mouseenter="showTooltip = true"
+                        @mouseleave="showTooltip = false"
+                        @click="showTooltip = !showTooltip"
+                        tabindex="0"
+                        @blur="showTooltip = false"
+                    />
+                    <Tooltip :show="showTooltip">
+                        <p>De score wordt berekend op basis van je accuraatheid en je snelheid</p>
+                    </Tooltip>
+                </div>
             </div>
+    
             <table class="c-table">
                 <thead>
                     <tr class="c-table__headings">
@@ -153,6 +168,23 @@ const accuracy = computed(() => {
 </template>
 
 <style>
+
+/* Tooltip styles */
+.c-tooltip {
+    position: absolute;
+    top: 2.2rem;
+    right: 0;
+    background-color: var(--white);
+    color: var(--grey-90);
+    border: 1px solid var(--grey-80);
+    border-radius: .375rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    z-index: 10;
+    min-width: 13.75rem;
+    max-width: 18.75rem;
+    pointer-events: auto;
+}
 
 .c-table{
 
@@ -226,7 +258,12 @@ td:nth-child(2) {
 .c-leaderboard__head-icon{
     width: 1.5rem;
     height: 1.5rem;
+    transition: all 0.3s ease;
     
+}
+
+.c-leaderboard__head-icon:hover, .c-leaderboard__head-icon:focus {
+    color: var(--primary);
 }
 
 .c-overzichttab {
