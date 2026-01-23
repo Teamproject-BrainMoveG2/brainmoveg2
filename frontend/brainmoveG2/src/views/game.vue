@@ -25,21 +25,17 @@ const colorMap = {
             'green': 'var(--accent-green)',
             'orange': 'var(--accent-orange)',
             'red': 'var(--red)',
-            'yellow': 'var(--yellow)'
+            'yellow': 'var(--yellow)',
+            'purple': 'var(--purple)',
+            'brown': 'var(--brown)',
+            "teal": 'var(--teal)',
+            "green": 'var(--green)',
+            "lime": 'var(--lime)'
+
         };
 
 const settings = route.query;
 console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
-
-const fetchCones = async () => {
-    try {
-      const response = await fetch(`http://${Ip}/games/status`);
-      const data = await response.json();
-      cones.value = data;
-    } catch (error) {
-      cones.value = [];
-    }
-  };
 
 const startCountdown = async () => {
     // Check if a game is already in progress

@@ -11,7 +11,8 @@ export function useGameColors(gameId) {
         const colorMap = {
             '1': 'green',
             '2': 'orange',
-            '3': 'primary'
+            '3': 'primary',
+            '4': 'purple'
         };
         return colorMap[gameId.value] || 'primary'; // Default to primary (blue)
     });
@@ -26,7 +27,8 @@ export function useGameColors(gameId) {
         const backgroundMap = {
             '1': 'var(--accent-green-light)',
             '2': 'var(--accent-orange-light)',
-            '3': 'var(--primary-light)'
+            '3': 'var(--primary-light)',
+            '4': 'var(--purple-light)'
         };
         return backgroundMap[gameId.value] || 'var(--primary-light)';
     });
@@ -36,7 +38,8 @@ export function useGameColors(gameId) {
         const primaryMap = {
             '1': 'var(--accent-green)',
             '2': 'var(--accent-orange)',
-            '3': 'var(--primary)'
+            '3': 'var(--primary)',
+            '4': 'var(--purple)'
         };
         return primaryMap[gameId.value] || 'var(--primary)';
     });

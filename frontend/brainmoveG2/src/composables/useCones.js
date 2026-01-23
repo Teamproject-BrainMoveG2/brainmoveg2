@@ -18,7 +18,8 @@ export function useCones() {
     'blue': 'Blauw',
     'green': 'Groen',
     'yellow': 'Geel',
-    'orange': 'Oranje'
+    'orange': 'Oranje',
+    'purple': 'Paars'
   };
 
   const fetchCones = async () => {

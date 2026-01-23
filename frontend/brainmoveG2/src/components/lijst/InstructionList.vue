@@ -8,7 +8,7 @@ const props = defineProps({
     color: {
         type: String,
         default: 'primary',
-        validator: (value) => ['primary', 'orange', 'green'].includes(value)
+        validator: (value) => ['primary', 'orange', 'green','purple'].includes(value)
     }
 });
 </script>
@@ -63,6 +63,22 @@ const props = defineProps({
 
 .c-instruction-number--green {
     background-color: var(--accent-green-light);
+}
+
+.c-instruction-number--primary {
+    background-color: var(--primary-light-5);
+}
+
+.c-instruction-number--orange {
+    background-color: var(--accent-orange-light);
+}
+
+.c-instruction-number--green {
+    background-color: var(--accent-green-light);
+}
+
+.c-instruction-number--purple {
+    background-color: var(--purple-light);
 }
 
 .c-instruction-text {

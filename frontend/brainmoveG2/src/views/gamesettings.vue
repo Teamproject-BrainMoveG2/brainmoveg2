@@ -16,7 +16,8 @@ const getColorValue = (color) => {
         'blue': 'var(--blue)',
         'green': 'var(--accent-green)',
         'yellow': 'var(--yellow)',
-        'orange': 'var(--accent-orange)'
+        'orange': 'var(--accent-orange)',
+        'purple': 'var(--purple)'
     };
     return colorMap[color] || 'var(--accent-green)';
 };
