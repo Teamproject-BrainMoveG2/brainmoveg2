@@ -107,3 +107,7 @@ class Tutorial(BaseModel):
 class ModeTutorial(BaseModel):
     image: str | None
     steps: list[Tutorial]
+
+class ColorCombination(BaseModel):
+    mixed: str
+    base_cones: list[Cone]

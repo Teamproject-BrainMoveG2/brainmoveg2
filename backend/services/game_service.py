@@ -1,7 +1,7 @@
 from fastapi.concurrency import run_in_threadpool
 from services.mqtt_service import MQTTService
 import config
-from models.models import Round, RoundResult, GameOverStats, ScoreEntry, MemoryGameRound
+from models.models import Cone, Round, RoundResult, GameOverStats, ScoreEntry, MemoryGameRound, ColorCombination
 from datetime import datetime, timezone
 from services.cone_service import ConeService 
 from services.score_service import ScoreService
@@ -31,6 +31,18 @@ session_mode_id = 0
 difficulty_modifier = 0
 memory_game_delay_colors = 1
 game_started = False
+cones = [Cone(cone_id=1, color="red", battery_percentage=None, last_status=None),
+        Cone(cone_id=2, color="blue", battery_percentage=None, last_status=None),
+        Cone(cone_id=3, color="green", battery_percentage=None, last_status=None),
+        Cone(cone_id=4, color="yellow", battery_percentage=None, last_status=None)]
+color_combinations = [
+    ColorCombination(mixed="purple", base_cones=[cones[0], cones[1]]),
+    ColorCombination(mixed="brown", base_cones=[cones[0], cones[2]]),
+    ColorCombination(mixed="teal", base_cones=[cones[1], cones[2]]),
+    ColorCombination(mixed="orange", base_cones=[cones[0], cones[3]]),
+    ColorCombination(mixed="green", base_cones=[cones[1], cones[3]]),
+    ColorCombination(mixed="lime", base_cones=[cones[2], cones[3]]),
+]
 class GameService:
     def __init__(self):
         self.logger = logging.getLogger(__name__) 
@@ -52,6 +64,9 @@ class GameService:
         if mode_id == 2 and aantal_kleuren < 2:
             self.logger.warning("Memory mode requires at least 2 colors.")
             raise Exception("Memory mode requires at least 2 colors.")
+        if mode_id == 4 and aantal_kleuren < 4:
+            self.logger.warning("Reaction mode requires at least 3 colors.")
+            raise Exception("Reaction mode requires at least 3 colors.")
         maxRounds = aantal_rondes
         maxCones = aantal_kleuren
         session_username = username
@@ -61,7 +76,7 @@ class GameService:
             if session_mode_id == 1 or session_mode_id == 2:
                 raise Exception("Invalid difficulty_id for selected mode. difficulty_id: " + str(difficulty_id))
             difficulty_id = None
-        if session_mode_id == 3:
+        if session_mode_id == 3 or session_mode_id == 4:
             difficulty_id = None
         if session_mode_id == 2:
             if difficulty_id == 1:
@@ -114,23 +129,24 @@ class GameService:
                 self.logger.error(f"Error starting new round in background: {e}")
     
     async def new_round(self, sio: socketio.AsyncServer, coneService: ConeService, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList, difficulty_modifier
+        global currentRoundStartTime, currentCone, maxCones, session_mode_id, currentCones, roundList, difficulty_modifier, color_combinations
+        connectedCones = coneService.get_active_cones(maxCones)
+        if connectedCones is None or len(connectedCones) == 0:
+            self.logger.warning("No connected cones available to start a new round.")
+            raise Exception("No connected cones available to start a new round.")
+        elif len(connectedCones) < maxCones:
+            self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
+            raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
+        
         if session_mode_id == 2:
-            connectedCones = coneService.get_active_cones(maxCones)
             self.logger.info(f"Starting new round in memory mode. connected cones: {connectedCones}")
-            if connectedCones is None or len(connectedCones) == 0:
-                self.logger.warning("No connected cones available to start a new round.")
-                raise Exception("No connected cones available to start a new round.")
-            elif len(connectedCones) < maxCones:
-                self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-                raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
             amountOfColors = len(roundList) + 1 + difficulty_modifier
             for i in range(0, amountOfColors):
                 if i == 0:
-                    self.logger.info(f"connected cones: {connectedCones}, choosing first cone for memory game")
+                    self.logger.debug(f"connected cones: {connectedCones}, choosing first cone for memory game")
                     randomCone = random.choice(connectedCones)
                 else:
-                    self.logger.info(f"connected cones: {connectedCones}, choosing new cone excluding last cone {currentCones[i-1]}")
+                    self.logger.debug(f"connected cones: {connectedCones}, choosing new cone excluding last cone {currentCones[i-1]}")
                     randomCone = random.choice([c for c in connectedCones if c != currentCones[i-1]])
                 currentCones.append(randomCone)
                 await sio.emit('round_start', {'color': randomCone.color, 'round': len(roundList) + 1})
@@ -138,16 +154,14 @@ class GameService:
 
             await sio.emit('user_round_start', "Go")
             currentRoundStartTime = datetime.now(timezone.utc)
+        elif session_mode_id == 4:
+            self.logger.info(f"Starting new round in merge colors mode. connected cones: {connectedCones}")
+            combination = random.choice(color_combinations)
+            currentRoundStartTime = datetime.now(timezone.utc)
+            await sio.emit('round_start', {'color': combination.mixed, 'round': len(roundList) + 1, "max_rounds": maxRounds})
+            currentCones = combination.base_cones
         else:
             if (currentRoundStartTime is None and currentCone is None):
-                connectedCones = coneService.get_active_cones(maxCones)
-                if connectedCones is None or len(connectedCones) == 0:
-                    self.logger.warning("No connected cones available to start a new round.")
-                    raise Exception("No connected cones available to start a new round.")
-                elif len(connectedCones) < maxCones:
-                    self.logger.warning(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-                    raise Exception(f"Not enough connected cones ({len(connectedCones)}) to start a new round. Required: {maxCones}.")
-                    
                 currentCone = random.choice(connectedCones)
 
                 # Trigger buzzer on the selected cone
@@ -163,17 +177,16 @@ class GameService:
         
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
         global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started
-        if session_mode_id == 2:
-            connectedCones = coneService.get_active_cones()
-            coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
+        connectedCones = coneService.get_active_cones()
+        coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
+        if coneObject is None:
+            raise Exception("Cone with id " + str(cone) + " not found among connected cones.")
+        if currentRoundStartTime is None or currentCones is None:
             if coneObject is None:
-                raise Exception("Cone with id " + str(cone) + " not found among connected cones.")
-            if currentRoundStartTime is None or currentCones is None:
-                if coneObject is None:
-                    raise ValueError("No round has been started. cone id: unknown")
-                raise ValueError("No round has been started. id: " + str(cone))
-           
-
+                raise ValueError("No round has been started. cone id: unknown")
+            raise ValueError("No round has been started. id: " + str(cone))
+        
+        if session_mode_id == 2:
             if len(userCones) < len(currentCones):
                 userCones.append(coneObject)
                 if len(userCones) == len(currentCones):
@@ -268,7 +281,37 @@ class GameService:
 
             else:
                 raise ValueError("All cones for this round have already been hit. id: " + str(cone))
-            
+        elif session_mode_id == 4:
+            if len(roundList) >= maxRounds:
+                raise ValueError("Maximum number of rounds reached.")
+            if len(userCones) < len(currentCones):
+                userCones.append(coneObject)
+                if len(userCones) == len(currentCones): # if round complete
+                    if userCones == currentCones: # if correct , update condition
+                        self.logger.info("Merge Colors correct!")
+                        round_result = RoundResult.GOED
+                    else:   
+                        round_result = RoundResult.FOUT
+                        self.logger.info("Merge Colors wrong.")
+                    new_round = Round(
+                    number=len(roundList) + 1,
+                    reaction_speed_ms=reaction_speed_ms,
+                    result=round_result,
+                    cone_id=coneObject.cone_id
+                    )
+                    await sio.emit('round_result', {'round': new_round.number, 'result': new_round.result})
+                    
+                    roundList.append(new_round)
+                    
+                    currentRoundStartTime = None 
+                    currentCones = []
+                    userCones = []
+
+                    if len(roundList) >= maxRounds: #game over rounds reached
+                        self.logger.info("Max rounds reached. Game over. rounds:")
+
+                
+
         else:
             self.logger.debug(f"session_id {session_id}")
             if len(roundList) >= maxRounds:
