@@ -3,8 +3,6 @@ from typing import Optional
 from services.mqtt_service import MQTTService
 from models.models import ConeWithStatus
 
-logger = logging.getLogger(__name__)
-
 class BuzzerService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -48,7 +46,7 @@ class BuzzerService:
         return self.trigger_buzzer(
             cone_id=cone.cone_id,
             cone_color=cone.color,
-            buzzer_pattern="long",
+            buzzer_pattern="double",
             duration_ms=150,
             mqtt_service=mqtt_service
         )

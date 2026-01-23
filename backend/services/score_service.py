@@ -1,3 +1,4 @@
+import logging
 import config
 from repositories.gamesession_repository import GameSessionRepository
 from models.models import ScoreEntry
@@ -8,6 +9,9 @@ ACCURACY_MULTIPLIER = 10
 MAX_REACTION_TIME_MS = 6000
 SCORE_MULTIPLIER = 200
 class ScoreService:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("ScoreService initialized.")
     def calculate_score(self, total_rounds, correct_hits, average_reaction_speed, difficulty) -> float:
         if total_rounds == 0:
             return 0.0

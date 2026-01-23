@@ -1,15 +1,19 @@
+import logging
 import tempfile
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 class ExportService:
+    def __init__ (self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("ExportService initialized.")
     def export_data_to_excel(self, data):
         wb = Workbook()
         ws = wb.active
         ws.title = "BrainMove Data"
 
-        headers = ["Datum", "Gebruikersnaam", "Moeilijkheid", "Score", "Gem. Reactietijd (ms)", "Accuraatheid (%)"]
-        keys = ["datum", "username", "naam", "score", "avg_reactietijd_ms", "accuracy_percent"]
+        headers = ["Datum", "Gebruikersnaam", "Spelmodus", "Moeilijkheid", "Score", "Gem. Reactietijd (ms)", "Accuraatheid (%)", "Aantal Rondes"]
+        keys = ["datum", "username", "spelmodus", "moeilijkheid", "score", "avg_reactietijd_ms", "accuracy_percent", "aantal_rondes"]
 
         ws.append(headers)
 
@@ -32,7 +36,7 @@ class ExportService:
             for cell in row:
                 cell.alignment = align
                 cell.border = thin_border
-                if cell.column == 6:
+                if cell.column == 7:
                     cell.number_format = '0.0"%"'
 
         for col in ws.columns:

@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-
 from fastapi.encoders import jsonable_encoder
 import socketio
 from models.models import Cone, ConeStatusDTO, ConeWithStatus
