@@ -71,7 +71,7 @@ const accuracy = computed(() => {
     <TabSwitcher
       v-model:activeTab="activeTab"
       :tabs="[
-        { label: 'Scoreboard', value: 'scoreboard' },
+        { label: 'Scorebord', value: 'scorebord' },
         { label: 'Speloverzicht', value: 'speloverzicht' }
       ]"
     />
@@ -80,7 +80,7 @@ const accuracy = computed(() => {
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
         </div>
-        <div class="c-stats-grid">
+        <section class="c-stats-grid">
             <StatCard 
                 label="Gem. snelheid" 
                 :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}`"
@@ -104,8 +104,8 @@ const accuracy = computed(() => {
                 :value="gameStats ? gameStats.niveau : ''"
                 :icon="Trophy"
             />
-        </div>
-        <div class="c-results-container">
+        </section>
+        <section class="c-results-container">
             <div class="c-result-card c-result-card--correct">
                 <p>Correct: {{ gameStats ? gameStats.correct_hits : 0 }}</p>
             </div>
@@ -115,7 +115,7 @@ const accuracy = computed(() => {
             <div class="c-result-card c-result-card--gemist">
                 <p>Gemist: {{ gameStats ? gameStats.missed_hits : 0 }}</p>
             </div>
-        </div>
+        </section>
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
     <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
@@ -124,9 +124,9 @@ const accuracy = computed(() => {
         </div>
         <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
-        <div class="c-leaderboard">
+        <section class="c-leaderboard">
             <div class="c-leaderboard__head">
-                <p class="c-leaderboard__head-title">scoreboard</p>
+                <p class="c-leaderboard__head-title">scorebord</p>
                 <Info class="c-leaderboard__head-icon"/>
             </div>
             <table class="c-table">
@@ -148,7 +148,7 @@ const accuracy = computed(() => {
                     />
                 </tbody>
             </table>
-        </div>
+        </section>
     </main>
 </template>
 

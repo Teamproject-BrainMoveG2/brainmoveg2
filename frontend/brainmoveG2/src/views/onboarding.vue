@@ -14,11 +14,11 @@
       <p class="body-large">Heeft u hulp nodig bij het opstellen?</p>
       
   
-      <div class="c-button__container">
+      <section class="c-button__container">
         <RouterLink class="c-btn c-btn--primary" to="/introductie"> Hoe start ik de potjes</RouterLink>
       
         <RouterLink class="c-btn c-btn--secondary" to="/dashboard"> Klaar om te spelen</RouterLink>
-      </div>
+      </section>
   </main>
 </template>
 

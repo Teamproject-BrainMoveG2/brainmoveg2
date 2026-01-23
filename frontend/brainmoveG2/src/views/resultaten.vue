@@ -145,9 +145,9 @@
       @select="handleTabSelect"
     />
     <main class="c-content-wrapper">
-      <div class="c-result-grid" v-if="data">
+      <section class="c-result-grid" v-if="data">
       <StatCard 
-        label="accuraatheid" 
+        label="Accuraatheid" 
         :value="`${Math.round(data.avg_accuracy)}`"
         
         />
@@ -156,18 +156,18 @@
         :value="`${Math.round(data.avg_reaction_speed)}`"
         :icon="Clock"
       />
-    </div>
-    <div class="c-resultaten-filter">
+    </section>
+    <section class="c-resultaten-filter">
       <h2>Resultaten:</h2>
       <ResultSelect v-model="selectedMode" :options="gameOptions" />
       <ResultSearch v-model="searchQuery" placeholder="Gebruiker zoeken..." @search="onSearch" />
-  </div>
-  <div class="c-table--resultaten-wrapper" v-if="data && data.data">
+  </section>
+  <section class="c-table--resultaten-wrapper" v-if="data && data.data">
   <table class="c-table c-table--resultaten">
   <thead>
     <tr class="c-table__headings">
       <th>Naam</th>
-      <th>ACCURATHEID</th>
+      <th>ACCURAATHEID</th>
       <th>GEM. REACTIE</th>
       <th>MOEILIJKHEID</th>
     </tr>
@@ -182,7 +182,7 @@
       :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
   </tbody>
 </table>
-</div>
+</section>
 </main>
 <ExportPopup
   :show="showExportPopup"

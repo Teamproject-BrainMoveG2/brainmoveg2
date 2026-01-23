@@ -31,7 +31,7 @@ const { cones, colorToDutch } = useCones();
    
     <InstructionList :instructions="instructions" />
     
-    <div class="c-cardcontainer">
+    <section class="c-cardcontainer">
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
             <PotjeCard 
@@ -42,7 +42,7 @@ const { cones, colorToDutch } = useCones();
                 :isConnected="cone.connected"
             />
         </div>
-    </div>
+    </section>
   </main>
 </template>
 
