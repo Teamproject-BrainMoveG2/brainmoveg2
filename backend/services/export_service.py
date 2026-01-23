@@ -1,8 +1,12 @@
+import logging
 import tempfile
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 class ExportService:
+    def __init__ (self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("ExportService initialized.")
     def export_data_to_excel(self, data):
         wb = Workbook()
         ws = wb.active

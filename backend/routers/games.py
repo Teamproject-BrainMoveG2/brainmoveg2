@@ -48,7 +48,7 @@ async def record_cone_hit(cone: ConeDTO, settings: Annotated[config.Settings, De
     try:
         await game_service.record_round(cone.cone_id, sio, cone_service, score_service, settings, buzzer_service, mqtt_service)
     except ValueError as ve:
-        logger.error(f"Error recording cone hit: {ve}")
+        logger.warning(f"Cone hit not recorded: {ve}")
         raise HTTPException(status_code=400, detail="No round is in progress.")
     except Exception as e:
         logger.error(f"Error recording cone hit: {e}")

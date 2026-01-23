@@ -38,6 +38,7 @@ class MQTTService:
                 return
             
             try:
+                logger.info(f"Connecting to MQTT broker at {self.broker_host}:{self.broker_port}")
                 self.client = mqtt.Client()
                 self.client.on_connect = self._on_connect
                 self.client.on_disconnect = self._on_disconnect
@@ -48,7 +49,6 @@ class MQTTService:
                 
                 self.client.connect(self.broker_host, self.broker_port, keepalive=60)
                 self.client.loop_start()
-                logger.info(f"Connecting to MQTT broker at {self.broker_host}:{self.broker_port}")
                 
                 # Wait for connection
                 timeout = 10

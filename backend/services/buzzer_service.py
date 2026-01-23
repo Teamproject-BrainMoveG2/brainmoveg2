@@ -3,8 +3,6 @@ from typing import Optional
 from services.mqtt_service import MQTTService
 from models.models import ConeWithStatus
 
-logger = logging.getLogger(__name__)
-
 class BuzzerService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
