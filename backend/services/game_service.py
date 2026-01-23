@@ -105,7 +105,7 @@ class GameService:
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
         global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones, game_started
-        if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
+        if not game_started and len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
             self.logger.warning("No game in progress to stop.")
             raise Exception("No game in progress to stop.")
         
@@ -266,15 +266,8 @@ class GameService:
                         gameoverStats.score = playerScore
                         await sio.emit('game_over', gameoverStats.model_dump_json())
 
-                        # Reset game state
                         rounds_to_save = roundList.copy()
-                        roundList = []
-                        totalTimeMs = 0
-                        currentRoundStartTime = None
-                        currentCone = None
-                        userCones = []
-                        currentCones = []
-                        game_started = False
+                        await self.stop_game(sio, coneService, settings)
                         for r in rounds_to_save:
                             await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
                           
@@ -314,64 +307,62 @@ class GameService:
 
                         for r in roundList:
                             self.logger.debug(r)
-                        playerScore = ScoreEntry(
-                            username=session_username,
-                            score=0.0,
-                            place=0
-                        )
-                        playerScore.score = scoreService.calculate_score(
-                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
-                        )
-                        self.logger.info("ending session")
-                        await run_in_threadpool(
-                            GameSessionRepository.end_session,
-                            settings=settings,
-                            session_id=session_id,
-                            ended_on=datetime.now(timezone.utc),
-                            score=playerScore.score
-                        )
+                        try:
+                            playerScore = ScoreEntry(
+                                username=session_username,
+                                score=0.0,
+                                place=0
+                            )
+                            playerScore.score = scoreService.calculate_score(
+                                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                            )
+                            self.logger.info("ending session")
+                            await run_in_threadpool(
+                                GameSessionRepository.end_session,
+                                settings=settings,
+                                session_id=session_id,
+                                ended_on=datetime.now(timezone.utc),
+                                score=playerScore.score
+                            )
                     
-                        player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
-                        playerScore.place = player_rank["rank"]
-                        if player_rank['rank'] <= 3:
-                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
-                            top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
-                        else:
-                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
-                        if top_scores is None:
-                            top_scores = []
-                        niveau = scoreService.calculate_level(playerScore.score, settings)
-                        gameoverStats = GameOverStats(
-                            total_rounds=len(roundList),
-                            total_time_ms=totalTimeMs,
-                            niveau=niveau,
-                            correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
-                            wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
-                            missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
-                            average_reaction_speed_ms=totalTimeMs / len(roundList),
-                            rounds=roundList,
-                            score=playerScore,
-                            top_scores=top_scores
-                        )
-                        gameoverStats.score = playerScore
-                        await sio.emit('game_over', gameoverStats.model_dump_json())
-
-                        # Reset game state
-                        rounds_to_save = roundList.copy()
-                        roundList = []
-                        totalTimeMs = 0
-                        currentRoundStartTime = None
-                        currentCone = None
-                        userCones = []
-                        currentCones = []
-                        game_started = False
-                        for r in rounds_to_save:
-                            await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, None, r.result)
+                            player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
+                            playerScore.place = player_rank["rank"]
+                            try:
+                                if player_rank['rank'] <= 3:
+                                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                                    top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                                else:
+                                    top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                                if top_scores is None:
+                                    top_scores = []
+                            except Exception as e:
+                                top_scores = []
+                                self.logger.error(f"Error retrieving top scores: {e}")
+                            niveau = scoreService.calculate_level(playerScore.score, settings)
+                            gameoverStats = GameOverStats(
+                                total_rounds=len(roundList),
+                                total_time_ms=totalTimeMs,
+                                niveau=niveau,
+                                correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                                wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                                missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                                average_reaction_speed_ms=totalTimeMs / len(roundList),
+                                rounds=roundList,
+                                score=playerScore,
+                                top_scores=top_scores
+                            )
+                            gameoverStats.score = playerScore
+                            await sio.emit('game_over', gameoverStats.model_dump_json())
+                        except Exception as e:
+                            self.logger.error(f"Error during game over processing: {e}")
+                        finally:
+                            rounds_to_save = roundList.copy()
+                            await self.stop_game(sio, coneService, settings)
+                            for r in rounds_to_save:
+                                await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, None, r.result)
                     else:
                         self.logger.info("Merge Colors round complete, scheduling new round.")
                         asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
-
-                
 
         else:
             self.logger.debug(f"session_id {session_id}")
@@ -415,66 +406,66 @@ class GameService:
 
                 for r in roundList:
                     self.logger.debug(r)
-                playerScore = ScoreEntry(
-                    username=session_username,
-                    score=0.0,
-                    place=0
-                )
-                playerScore.score = scoreService.calculate_score(
-                    total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
-                )
-                self.logger.info("session id: " + str(session_id))
 
-                await run_in_threadpool(
-                    GameSessionRepository.end_session,
-                    settings=settings,
-                    session_id=session_id,
-                    ended_on=datetime.now(timezone.utc),
-                    score=playerScore.score
-                )
-                self.logger.info("session id: " + str(session_id))
-                
-
-
-                self.logger.info("session id: " + str(session_id))
-                player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
-                self.logger.info("player rank: " + str(player_rank))
-                playerScore.place = player_rank["rank"]
                 try:
-                    if player_rank['rank'] <= 3:
-                        top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
-                        top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
-                    else:
-                        top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
-                    if top_scores is None:
-                        top_scores = []
-                except Exception as e:
-                    top_scores = []
-                    self.logger.error(f"Error retrieving top scores: {e}")
-                    
-                niveau = scoreService.calculate_level(playerScore.score, settings)
-                gameoverStats = GameOverStats(
-                    total_rounds=len(roundList),
-                    total_time_ms=totalTimeMs,
-                    niveau=niveau,
-                    correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
-                    wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
-                    missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
-                    average_reaction_speed_ms=totalTimeMs / len(roundList),
-                    rounds=roundList,
-                    score=playerScore,
-                    top_scores=top_scores
-                )
-                gameoverStats.score = playerScore
-                await sio.emit('game_over', gameoverStats.model_dump_json())
+                    playerScore = ScoreEntry(
+                        username=session_username,
+                        score=0.0,
+                        place=0
+                    )
+                    playerScore.score = scoreService.calculate_score(
+                        total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                    )
+                    self.logger.info("session id: " + str(session_id))
 
-                rounds_to_save = roundList.copy()
-                roundList = []
-                totalTimeMs = 0
-                currentRoundStartTime = None
-                currentCone = None
-                game_started = False
-                for r in rounds_to_save:
-                    await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
+                    await run_in_threadpool(
+                        GameSessionRepository.end_session,
+                        settings=settings,
+                        session_id=session_id,
+                        ended_on=datetime.now(timezone.utc),
+                        score=playerScore.score
+                    )
+                    self.logger.info("session id: " + str(session_id))
+                    
+
+
+                    self.logger.info("session id: " + str(session_id))
+                    player_rank = await run_in_threadpool(GameSessionRepository.get_player_rank, settings, session_id, session_mode_id)
+                    self.logger.info("player rank: " + str(player_rank))
+                    playerScore.place = player_rank["rank"]
+                    try:
+                        if player_rank['rank'] <= 3:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=4)
+                            top_scores = [ts for ts in top_scores if ts.place != player_rank['rank']][:3]
+                        else:
+                            top_scores = await run_in_threadpool(scoreService.get_top_scores, settings, session_mode_id, limit=3)
+                        if top_scores is None:
+                            top_scores = []
+                    except Exception as e:
+                        top_scores = []
+                        self.logger.error(f"Error retrieving top scores: {e}")
+                    
+                    niveau = scoreService.calculate_level(playerScore.score, settings)
+                    gameoverStats = GameOverStats(
+                        total_rounds=len(roundList),
+                        total_time_ms=totalTimeMs,
+                        niveau=niveau,
+                        correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED),
+                        wrong_hits=sum(1 for r in roundList if r.result == RoundResult.FOUT),
+                        missed_hits=sum(1 for r in roundList if r.result == RoundResult.GEMIST),
+                        average_reaction_speed_ms=totalTimeMs / len(roundList),
+                        rounds=roundList,
+                        score=playerScore,
+                        top_scores=top_scores
+                    )
+                    gameoverStats.score = playerScore
+                    await sio.emit('game_over', gameoverStats.model_dump_json())
+                except Exception as e:
+                    self.logger.error(f"Error during game over processing: {e}")
+                finally:
+                    rounds_to_save = roundList.copy()
+                    await self.stop_game(sio, coneService, settings)
+                    for r in rounds_to_save:
+                        await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
             else:
                 asyncio.create_task(self._schedule_new_round(sio, coneService, buzzerService, mqtt_service))
