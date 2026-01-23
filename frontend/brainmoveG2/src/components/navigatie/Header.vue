@@ -6,6 +6,7 @@ import { Bell, X } from 'lucide-vue-next';
 
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 import PotjesStatusPopup from '../popups/PotjesStatusPopup.vue';
+import { watch } from 'vue';
 
 export default {
   name: 'Header',
