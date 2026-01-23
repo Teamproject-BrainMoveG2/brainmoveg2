@@ -269,8 +269,7 @@ class GameService:
                 raise ValueError("All cones for this round have already been hit. id: " + str(cone))
             
         else:
-            self.logger.info(f"session_id {session_id}")
-            self.logger.info(f"Recording hit for cone {cone} in session {session_id}.")
+            self.logger.debug(f"session_id {session_id}")
             if len(roundList) >= maxRounds:
                 raise ValueError("Maximum number of rounds reached.")
             connectedCones = coneService.get_active_cones()
@@ -282,6 +281,7 @@ class GameService:
                     raise ValueError("No round has been started. cone id: unknown")
                 raise ValueError("No round has been started. id: " + str(cone))
             
+            self.logger.info(f"Recording hit for cone {cone} in session {session_id}.")
             reaction_speed_ms = int((datetime.now(timezone.utc) - currentRoundStartTime).total_seconds() * 1000)
             totalTimeMs += reaction_speed_ms
             if reaction_speed_ms > TOO_LATE_MS and session_mode_id != 3:
