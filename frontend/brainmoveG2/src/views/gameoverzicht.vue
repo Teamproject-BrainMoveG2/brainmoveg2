@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import Tooltip from '../components/Tooltip.vue';
+const showTooltip = ref(false);
 import { useRoute } from 'vue-router';
 import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
@@ -12,12 +14,10 @@ import TabSwitcher from '../components/tabs/TabSwitcher.vue';
 const route = useRoute();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
-const activeTab = ref('scoreboard');
+const activeTab = ref('scorebord');
 
-// Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
-// Computed leaderboard for ScoreboardRow
 const scoreboardData = computed(() => {
     if (!gameStats.value) return [];
     const topScores = Array.isArray(gameStats.value.top_scores) ? gameStats.value.top_scores : [];
@@ -28,7 +28,7 @@ const scoreboardData = computed(() => {
         score: Math.round(entry.score),
         isPlayer: player && entry.username === player.username && Math.round(entry.score) === Math.round(player.score)
     }));
-    // Add player if not in top_scores
+
     if (player && !rows.some(r => r.name === player.username && r.position === player.place)) {
         rows.push({
             position: player.place,
@@ -37,13 +37,16 @@ const scoreboardData = computed(() => {
             isPlayer: true
         });
     }
-    // Sort by position (place)
+
     rows.sort((a, b) => a.position - b.position);
     return rows;
 });
 
 onMounted(() => {
-    // Get the game stats from navigation state
+    // Play completion sound (Vite asset handling)
+    const audio = new Audio(new URL('../assets/audio/completion.wav', import.meta.url).href);
+    audio.play();
+
     if (history.state && history.state.gameStats) {
         gameStats.value = history.state.gameStats;
         console.log('Game stats received:', gameStats.value);
@@ -70,7 +73,7 @@ const accuracy = computed(() => {
     <TabSwitcher
       v-model:activeTab="activeTab"
       :tabs="[
-        { label: 'Scoreboard', value: 'scoreboard' },
+        { label: 'Scorebord', value: 'scorebord' },
         { label: 'Speloverzicht', value: 'speloverzicht' }
       ]"
     />
@@ -79,7 +82,7 @@ const accuracy = computed(() => {
             <h1>Speloverzicht</h1>
             <p class="body-large">Totale tijd: {{ gameStats ? formatTimeMinutes(gameStats.total_time_ms) : '0:00' }}</p>
         </div>
-        <div class="c-stats-grid">
+        <section class="c-stats-grid">
             <StatCard 
                 label="Gem. snelheid" 
                 :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}`"
@@ -103,8 +106,8 @@ const accuracy = computed(() => {
                 :value="gameStats ? gameStats.niveau : ''"
                 :icon="Trophy"
             />
-        </div>
-        <div class="c-results-container">
+        </section>
+        <section class="c-results-container">
             <div class="c-result-card c-result-card--correct">
                 <p>Correct: {{ gameStats ? gameStats.correct_hits : 0 }}</p>
             </div>
@@ -114,20 +117,33 @@ const accuracy = computed(() => {
             <div class="c-result-card c-result-card--gemist">
                 <p>Gemist: {{ gameStats ? gameStats.missed_hits : 0 }}</p>
             </div>
-        </div>
+        </section>
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
     </main>
-    <main v-show="activeTab === 'scoreboard'" class="c-content-wrapper ">
+    <main v-show="activeTab === 'scorebord'" class="c-content-wrapper ">
         <div class="c-title-div">
             <h1>Proficiat!</h1>
         </div>
         <ScoreCircle :score="gameStats ? Math.round(gameStats.score.score) : 0" />
         <RouterLink :class="buttonClass" :to="`/gamesettings/${gameId}`">Spel opnieuw spelen!</RouterLink>
-        <div class="c-leaderboard">
-            <div class="c-leaderboard__head">
-                <p class="c-leaderboard__head-title">scoreboard</p>
-                <Info class="c-leaderboard__head-icon"/>
+        <section class="c-leaderboard">
+            <div class="c-leaderboard__head" style="position: relative;">
+                <p class="c-leaderboard__head-title">scorebord</p>
+                <div style="display: inline-block; position: relative;">
+                    <Info 
+                        class="c-leaderboard__head-icon"
+                        @mouseenter="showTooltip = true"
+                        @mouseleave="showTooltip = false"
+                        @click="showTooltip = !showTooltip"
+                        tabindex="0"
+                        @blur="showTooltip = false"
+                    />
+                    <Tooltip :show="showTooltip">
+                        <p>De score wordt berekend op basis van je accuraatheid en je snelheid</p>
+                    </Tooltip>
+                </div>
             </div>
+    
             <table class="c-table">
                 <thead>
                     <tr class="c-table__headings">
@@ -147,11 +163,28 @@ const accuracy = computed(() => {
                     />
                 </tbody>
             </table>
-        </div>
+        </section>
     </main>
 </template>
 
 <style>
+
+/* Tooltip styles */
+.c-tooltip {
+    position: absolute;
+    top: 2.2rem;
+    right: 0;
+    background-color: var(--white);
+    color: var(--grey-90);
+    border: 1px solid var(--grey-80);
+    border-radius: .375rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    z-index: 10;
+    min-width: 13.75rem;
+    max-width: 18.75rem;
+    pointer-events: auto;
+}
 
 .c-table{
 
@@ -225,7 +258,12 @@ td:nth-child(2) {
 .c-leaderboard__head-icon{
     width: 1.5rem;
     height: 1.5rem;
+    transition: all 0.3s ease;
     
+}
+
+.c-leaderboard__head-icon:hover, .c-leaderboard__head-icon:focus {
+    color: var(--primary);
 }
 
 .c-overzichttab {

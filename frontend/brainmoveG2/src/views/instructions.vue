@@ -1,8 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGameColors } from '../composables/useGameColors';
 import InstructionList from '../components/lijst/InstructionList.vue';
+import { TriangleAlert } from 'lucide-vue-next';
 
 
 const route = useRoute();
@@ -10,6 +11,7 @@ const router = useRouter();
 const gameId = ref(route.params.id);
 const tutorial = ref({steps: [] });
 const settings = route.query;
+const gameInProgress = ref(false);
 
 const Ip = `${window.location.hostname}:8000`;
 
@@ -23,10 +25,32 @@ async function fetchTutorial() {
     }
 }
 
+async function CheckForGame(){
+     try {
+        const response = await fetch(`http://${Ip}/games/status`);
+        const status = await response.json();
+        if (status && status.game_in_progress) {
+            gameInProgress.value = true;
+        } else {
+            gameInProgress.value = false;
+        }
+    } catch (error) {
+        gameInProgress.value = false;
+    }
+}
+
+
+let intervalId = null;
 onMounted(() => {
     fetchTutorial();
+    CheckForGame();
+    intervalId = setInterval(CheckForGame, 5000);
     console.log('Route params:', route.params);
     console.log('Route query:', route.query);
+});
+
+onUnmounted(() => {
+    if (intervalId) clearInterval(intervalId);
 });
 
 function startGameAndGo() {
@@ -50,7 +74,11 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
              <h1>hoe te spelen</h1>
          </div>
         <InstructionList :instructions="tutorial.steps" :color="colorVariant" />
-        <button :class="buttonClass" @click="startGameAndGo">Spel starten!</button>
+        <div v-if="gameInProgress" class="c-warning">
+            <TriangleAlert size="30px" />
+            <h2>Er is een spel bezig, even geduld!</h2>
+        </div>
+        <button v-else :class="buttonClass" @click="startGameAndGo">Spel starten!</button>
     </main>
 </template>
 
@@ -63,6 +91,22 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
 
 .c-mascot{
     width: 125%;
+}
+
+.c-warning{
+    background-color: var(--red-light);
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    padding: var(--spacing-06);
+    margin-top: var(--spacing-06);
+    margin-bottom: var(--spacing-06);
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-03);
 }
 
 </style>

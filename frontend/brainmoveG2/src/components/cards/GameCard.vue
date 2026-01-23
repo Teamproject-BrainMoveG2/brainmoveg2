@@ -1,9 +1,6 @@
 <script setup>
 
 import { CirclePlay } from 'lucide-vue-next';
-import ClockIcon from '../../assets/svg/clock.svg';
-import BrainIcon from '../../assets/svg/brain.svg';
-import TargetIcon from '../../assets/svg/target.svg';
 
 
 const props = defineProps({
@@ -24,11 +21,6 @@ const props = defineProps({
         required: true
     }
 });
-const iconMap = {
-    clock: ClockIcon,
-    brain: BrainIcon,
-    target: TargetIcon
-};
 
 </script>
 
@@ -127,6 +119,7 @@ const iconMap = {
 .c-game-card__clock img {
     height: auto;
     opacity: 0.9;
+    width: 7rem;
 }
 
 @media (min-width: 768px) {
