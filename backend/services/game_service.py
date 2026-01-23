@@ -105,7 +105,7 @@ class GameService:
     
     async def stop_game(self, sio: socketio.AsyncServer, coneService: ConeService, settings: config.Settings) -> None:
         global roundList, currentRoundStartTime, currentCone, totalTimeMs, session_id, currentCones, userCones, game_started
-        if len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
+        if not(game_started) and len(roundList) == 0 and currentRoundStartTime is None and currentCone is None:
             self.logger.warning("No game in progress to stop.")
             raise Exception("No game in progress to stop.")
         
@@ -268,13 +268,7 @@ class GameService:
 
                         # Reset game state
                         rounds_to_save = roundList.copy()
-                        roundList = []
-                        totalTimeMs = 0
-                        currentRoundStartTime = None
-                        currentCone = None
-                        userCones = []
-                        currentCones = []
-                        game_started = False
+                        self.stop_game(sio, coneService, settings)
                         for r in rounds_to_save:
                             await run_in_threadpool(RondeRepository.create_memory_ronde, settings, session_id, r.number, r.reaction_speed_ms, len(r.sequence), r.result)
                           
@@ -358,13 +352,7 @@ class GameService:
 
                         # Reset game state
                         rounds_to_save = roundList.copy()
-                        roundList = []
-                        totalTimeMs = 0
-                        currentRoundStartTime = None
-                        currentCone = None
-                        userCones = []
-                        currentCones = []
-                        game_started = False
+                        self.stop_game(sio, coneService, settings)
                         for r in rounds_to_save:
                             await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, None, r.result)
                     else:
@@ -469,11 +457,7 @@ class GameService:
                 await sio.emit('game_over', gameoverStats.model_dump_json())
 
                 rounds_to_save = roundList.copy()
-                roundList = []
-                totalTimeMs = 0
-                currentRoundStartTime = None
-                currentCone = None
-                game_started = False
+                self.stop_game(sio, coneService, settings)
                 for r in rounds_to_save:
                     await run_in_threadpool(RondeRepository.create_ronde, settings, session_id, r.number, r.reaction_speed_ms, r.cone_id, r.result)
             else:
