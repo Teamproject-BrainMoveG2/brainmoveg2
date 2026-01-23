@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { formatSnelheid } from '../../composables/useFormatSnelheid';
 const props = defineProps({
   name: { type: String, required: true },
@@ -6,11 +7,15 @@ const props = defineProps({
   reaction: { type: [String, Number], required: true },
   difficulty: { type: String, required: true }
 });
+const truncatedName = computed(() => {
+  if (!props.name) return '';
+  return props.name.length > 14 ? props.name.slice(0, 11) + '...' : props.name;
+});
 </script>
 
 <template>
   <tr class="c-table__row">
-    <td>{{ name }}</td>
+    <td>{{ truncatedName }}</td>
     <td>{{ accuracy }}</td>
     <td>{{ formatSnelheid('snelheid', reaction) }}</td>
     <td>{{ difficulty }}</td>

@@ -46,6 +46,9 @@ const startCountdown = async () => {
             showCountdown.value = false;
             roundResult.value = "spel bezig even geduld.";
             showResultOverlay.value = true;
+            setTimeout(() => {
+                router.push({ name: 'dashboard' });
+            }, 2000);
             return;
         }
     } catch (error) {

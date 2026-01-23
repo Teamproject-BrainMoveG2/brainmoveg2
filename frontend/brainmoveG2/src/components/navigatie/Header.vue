@@ -43,17 +43,21 @@ export default {
       showPopup.value = false;
     };
 
-    // Check if current page is dashboard
     const isDashboard = computed(() => {
       return route.name === 'dashboard' || route.path === '/dashboard';
     });
 
-    // Use shared composable for cones logic
+  
+    const isGameOverzicht = computed(() => {
+      return route.name === 'gameoverzicht' || /^\/gameoverzicht\/.*/.test(route.path);
+    });
+
     const { warningCones, colorToDutch } = useCones();
 
     return {
       goBack,
       isDashboard,
+      isGameOverzicht,
       showPopup,
       togglePopup,
       closePopup,
@@ -68,7 +72,7 @@ export default {
   <header class="c-header">
     <div class="c-header__content">
     <!-- Back button for other pages -->
-    <button v-if="!isDashboard" @click="goBack" class="c-back-button" aria-label="Ga terug">
+    <button v-if="!isDashboard && !isGameOverzicht" @click="goBack" class="c-back-button" aria-label="Ga terug">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -179,7 +183,6 @@ export default {
   border: none;
   cursor: pointer;
   color: var(--grey-85);
-  padding: var(--spacing-03);
   display: flex;
   align-items: center;
   justify-content: center;

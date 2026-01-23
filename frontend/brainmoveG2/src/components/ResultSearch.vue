@@ -38,6 +38,7 @@ function onSearch() {
   display: flex;
   align-items: center;
   padding: 0;
+  justify-content: space-between;
 }
 
 .c-resultaten-search:hover, .c-resultaten-search:focus {
@@ -58,7 +59,7 @@ function onSearch() {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0 0.3em;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
   color: var(--grey-85);

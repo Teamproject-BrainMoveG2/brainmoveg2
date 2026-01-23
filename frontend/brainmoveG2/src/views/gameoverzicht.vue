@@ -14,10 +14,8 @@ const gameId = ref(route.params.id);
 const gameStats = ref(null);
 const activeTab = ref('scoreboard');
 
-// Use the game colors composable
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
-// Computed leaderboard for ScoreboardRow
 const scoreboardData = computed(() => {
     if (!gameStats.value) return [];
     const topScores = Array.isArray(gameStats.value.top_scores) ? gameStats.value.top_scores : [];
@@ -28,7 +26,7 @@ const scoreboardData = computed(() => {
         score: Math.round(entry.score),
         isPlayer: player && entry.username === player.username && Math.round(entry.score) === Math.round(player.score)
     }));
-    // Add player if not in top_scores
+
     if (player && !rows.some(r => r.name === player.username && r.position === player.place)) {
         rows.push({
             position: player.place,
@@ -37,13 +35,16 @@ const scoreboardData = computed(() => {
             isPlayer: true
         });
     }
-    // Sort by position (place)
+
     rows.sort((a, b) => a.position - b.position);
     return rows;
 });
 
 onMounted(() => {
-    // Get the game stats from navigation state
+    // Play completion sound (Vite asset handling)
+    const audio = new Audio(new URL('../assets/audio/completion.wav', import.meta.url).href);
+    audio.play();
+
     if (history.state && history.state.gameStats) {
         gameStats.value = history.state.gameStats;
         console.log('Game stats received:', gameStats.value);

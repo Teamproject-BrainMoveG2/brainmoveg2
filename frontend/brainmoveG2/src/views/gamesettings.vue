@@ -69,7 +69,7 @@ function getInstructionsRoute() {
 const connectedPotjesMismatch = computed(() => {
     if (!Array.isArray(cones.value)) return false;
     const connectedCount = cones.value.filter(c => c.connected).length;
-    // Show error only when there are fewer connected potjes than selected colors
+
     return connectedCount < colors.value && colors.value > 0;
 });
 
@@ -109,7 +109,7 @@ function goToInstructions() {
             <SettingContainer title="Aantal rondes" v-if="gameId !== '2'">
                 <CounterButton v-model="rounds" :min="1" />
             </SettingContainer>
-            <SettingContainer title="Aantal kleuren">
+            <SettingContainer title="Aantal kleuren" v-if="gameId !== '4'">
                 <CounterButton v-model="colors" :min="2" :max="4"/>
             </SettingContainer>
         </div>
