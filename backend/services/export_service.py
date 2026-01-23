@@ -12,8 +12,8 @@ class ExportService:
         ws = wb.active
         ws.title = "BrainMove Data"
 
-        headers = ["Datum", "Gebruikersnaam", "Moeilijkheid", "Score", "Gem. Reactietijd (ms)", "Accuraatheid (%)"]
-        keys = ["datum", "username", "naam", "score", "avg_reactietijd_ms", "accuracy_percent"]
+        headers = ["Datum", "Gebruikersnaam", "Spelmodus", "Moeilijkheid", "Score", "Gem. Reactietijd (ms)", "Accuraatheid (%)", "Aantal Rondes"]
+        keys = ["datum", "username", "spelmodus", "moeilijkheid", "score", "avg_reactietijd_ms", "accuracy_percent", "aantal_rondes"]
 
         ws.append(headers)
 
@@ -36,7 +36,7 @@ class ExportService:
             for cell in row:
                 cell.alignment = align
                 cell.border = thin_border
-                if cell.column == 6:
+                if cell.column == 7:
                     cell.number_format = '0.0"%"'
 
         for col in ws.columns:
