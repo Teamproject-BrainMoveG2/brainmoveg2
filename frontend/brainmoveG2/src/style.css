@@ -203,10 +203,12 @@ p {
   max-width: 26.25rem;
   margin: 0 auto;
 
+
   @media (min-width: 768px) {
 
     max-width: 500px;
     gap: var(--spacing-08);
+    padding: 0;
 
   }
 
@@ -214,6 +216,7 @@ p {
 
       max-width: 550px;
       gap: var(--spacing-09);
+      padding: 0;
 
   }
 

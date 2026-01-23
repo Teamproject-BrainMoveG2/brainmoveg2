@@ -119,7 +119,7 @@ function goToInstructions() {
             title="Gebruikte kleuren"
             layout="grid"
             :showGridError="showErrors && connectedPotjesMismatch"
-            gridErrorMessage="Verbind het juiste aantal potjes"
+            gridErrorMessage="Niet genoeg verbonden potjes voor het aantal kleuren."
         >
             <SmallPotjeCard 
                 v-for="cone in limitedCones" 

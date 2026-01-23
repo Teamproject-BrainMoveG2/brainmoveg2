@@ -235,7 +235,6 @@ td:nth-child(2) {
   align-items: center;
   max-width: 26.25rem;
   margin: 0 auto;
-  padding-top: 2rem;
   margin-bottom: 2rem;
   
 
@@ -243,6 +242,7 @@ td:nth-child(2) {
   @media (min-width: 768px) {
 
     max-width: 500px;
+    padding: 0;
    
 
   }
@@ -250,6 +250,7 @@ td:nth-child(2) {
   @media (min-width: 1024px) {
 
       max-width: 550px;
+       padding: 0;
     
 
   }
