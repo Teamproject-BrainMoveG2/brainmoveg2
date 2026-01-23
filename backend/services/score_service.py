@@ -3,8 +3,8 @@ import config
 from repositories.gamesession_repository import GameSessionRepository
 from models.models import ScoreEntry
 from repositories.niveau_repository import NiveauRepository
-ACCURACY_WEIGHT = 0.2
-REACTION_WEIGHT = 0.8
+ACCURACY_WEIGHT = 0.3
+REACTION_WEIGHT = 0.7
 ACCURACY_MULTIPLIER = 10
 MAX_REACTION_TIME_MS = 6000
 SCORE_MULTIPLIER = 200
@@ -13,10 +13,10 @@ class ScoreService:
         self.logger = logging.getLogger(__name__)
         self.logger.info("ScoreService initialized.")
     def calculate_score(self, total_rounds, correct_hits, average_reaction_speed, difficulty) -> float:
-        if total_rounds == 0:
+        if total_rounds == 0 or average_reaction_speed <= 0:
             return 0.0
         accuracy = correct_hits / total_rounds * ACCURACY_MULTIPLIER
-        score = SCORE_MULTIPLIER * (ACCURACY_WEIGHT * accuracy + REACTION_WEIGHT * MAX_REACTION_TIME_MS/average_reaction_speed)
+        score = SCORE_MULTIPLIER * ((ACCURACY_WEIGHT * accuracy) * REACTION_WEIGHT * MAX_REACTION_TIME_MS/average_reaction_speed)
         if difficulty == 2:
             score *= 1.1
         elif difficulty == 3:
