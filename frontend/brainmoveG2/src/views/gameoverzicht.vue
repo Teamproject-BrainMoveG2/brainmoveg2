@@ -43,7 +43,6 @@ const scoreboardData = computed(() => {
 });
 
 onMounted(() => {
-    // Play completion sound (Vite asset handling)
     const audio = new Audio(new URL('../assets/audio/completion.wav', import.meta.url).href);
     audio.play();
 
@@ -169,7 +168,6 @@ const accuracy = computed(() => {
 
 <style>
 
-/* Tooltip styles */
 .c-tooltip {
     position: absolute;
     top: 2.2rem;

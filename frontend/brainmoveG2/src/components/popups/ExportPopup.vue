@@ -30,7 +30,7 @@ async function handleDownload() {
   if (isNaN(endDateObj)) {
     endDateObj = new Date();
   }
-  // Today as start
+
   const todayObj = new Date();
   const pad = n => n.toString().padStart(2, '0');
   const end = `${todayObj.getFullYear()}-${pad(todayObj.getMonth() + 1)}-${pad(todayObj.getDate())}`;

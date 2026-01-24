@@ -11,7 +11,6 @@
   import { useGames } from '../composables/useGames';
   import ExportPopup from '../components/popups/ExportPopup.vue';
 
-  // Export popup state
   const showExportPopup = ref(false);
   const exportInitialDate = ref(new Date());
 
@@ -145,44 +144,52 @@
       @select="handleTabSelect"
     />
     <main class="c-content-wrapper">
-      <section class="c-result-grid" v-if="data">
-      <StatCard 
-        label="Accuraatheid" 
-        :value="`${Math.round(data.avg_accuracy)}`"
+    <div class="c-resultaten__content">
+      <section class="c-resultaten__section">
+          <div class="c-result-grid" v-if="data">
+            <StatCard 
+              label="Accuraatheid" 
+              :value="`${Math.round(data.avg_accuracy)}`"
+              
+              />
+            <StatCard 
+              label="Gem. snelheid" 
+              :value="`${Math.round(data.avg_reaction_speed)}`"
+              :icon="Clock"
+            />
+          </div>
+          <div class="c-resultaten-filter">
+            <h2>Resultaten:</h2>
+            <ResultSelect v-model="selectedMode" :options="gameOptions" />
+            <ResultSearch v-model="searchQuery" placeholder="Gebruiker zoeken..." @search="onSearch" />
+          </div>
+      </section>
         
-        />
-      <StatCard 
-        label="Gem. snelheid" 
-        :value="`${Math.round(data.avg_reaction_speed)}`"
-        :icon="Clock"
-      />
-    </section>
-    <section class="c-resultaten-filter">
-      <h2>Resultaten:</h2>
-      <ResultSelect v-model="selectedMode" :options="gameOptions" />
-      <ResultSearch v-model="searchQuery" placeholder="Gebruiker zoeken..." @search="onSearch" />
-  </section>
-  <section class="c-table--resultaten-wrapper" v-if="data && data.data">
-  <table class="c-table c-table--resultaten">
-  <thead>
-    <tr class="c-table__headings">
-      <th>Naam</th>
-      <th>ACCURAATHEID</th>
-      <th>GEM. REACTIE</th>
-      <th>MOEILIJKHEID</th>
-    </tr>
-  </thead>
-  <tbody>
-    <ResultTableRow 
-      v-for="item in filteredData" 
-      :key="item.spelsessie_id"
-      :name="item.username" 
-      :accuracy="`${Math.round(item.accuracy_percent)}%`" 
-      :reaction="`${Math.round(item.avg_reactietijd_ms)}`" 
-      :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
-  </tbody>
-</table>
-</section>
+      <section>
+          <div class="c-table--resultaten-wrapper" v-if="data && data.data">
+            <table class="c-table c-table--resultaten">
+            <thead>
+              <tr class="c-table__headings">
+                <th>Naam</th>
+                <th>ACCURAATHEID</th>
+                <th>GEM. REACTIE</th>
+                <th>MOEILIJKHEID</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ResultTableRow 
+                v-for="item in filteredData" 
+                :key="item.spelsessie_id"
+                :name="item.username" 
+                :accuracy="`${Math.round(item.accuracy_percent)}%`" 
+                :reaction="`${Math.round(item.avg_reactietijd_ms)}`" 
+                :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
+            </tbody>
+          </table>
+        </div>
+      </section>
+</div>
+  
 </main>
 <ExportPopup
   :show="showExportPopup"
@@ -192,6 +199,30 @@
 </template>
 
 <style scoped>
+
+.c-resultaten__content {
+  max-width: 100%;
+  width: 100%;
+
+  @media (min-width: 1245px) {
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: var(--spacing-06);
+  }
+}
+
+.c-resultaten__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-06);
+  margin-bottom: var(--spacing-06);
+
+  @media (min-width: 1024px) {
+      width: 100%;
+  }
+}
 
 
 .c-resultaten-filter {
@@ -218,7 +249,7 @@
   margin-bottom: var(--spacing-06);
   margin-left: auto;
   margin-right: auto;
-  max-width: 26.25rem;
+  max-width: 34.375rem;
 
 
   @media (min-width: 768px) {
@@ -275,6 +306,10 @@
   min-width: 400px;
   width: 100%;
   border-collapse: collapse;
+
+  @media (min-width: 1410px) {
+      width: 500px;
+  }
 }
 
 .c-table__headings {

@@ -71,7 +71,7 @@ onMounted(() => {
   display: flex;
   flex-direction: row;
   align-items: center;
-  max-width: 26.25rem;
+  max-width: 34.375rem;
   margin: 0 auto;
   margin-bottom: 2rem;
   width: 100%;

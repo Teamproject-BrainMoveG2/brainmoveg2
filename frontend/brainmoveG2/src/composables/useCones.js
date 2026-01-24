@@ -3,8 +3,7 @@ import io from 'socket.io-client';
 
 export function useCones() {
   const cones = ref([]);
-  const prevWarningLength = ref(0);
-  // Use dynamic import for audio file path (Vite/Webpack compatible)
+
   let audio = null;
   if (typeof window !== 'undefined') {
     const audioUrl = new URL('../assets/audio/notification.wav', import.meta.url).href;
@@ -40,7 +39,6 @@ export function useCones() {
     });
     socket.on('cone_update', (data) => {
       if (Array.isArray(data)) {
-        // Calculate previous and new warningCones length
         const prevWarning = cones.value.filter(cone => !cone.connected || cone.battery_percentage < 25).length;
         const newWarning = data.filter(cone => !cone.connected || cone.battery_percentage < 25).length;
         cones.value = data;

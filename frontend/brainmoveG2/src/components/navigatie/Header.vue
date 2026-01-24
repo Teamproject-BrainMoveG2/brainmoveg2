@@ -71,7 +71,7 @@ export default {
   padding: var(--spacing-06);
   margin-left: auto;
   margin-right: auto;
-  max-width: 26.25rem;
+  max-width: 34.375rem;
 
   @media (min-width: 768px) {
     max-width: 75%;

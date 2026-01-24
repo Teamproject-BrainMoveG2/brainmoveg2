@@ -38,7 +38,7 @@ const settings = route.query;
 console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
 
 const startCountdown = async () => {
-    // Check if a game is already in progress
+   
     try {
         const response = await fetch(`http://${Ip}/games/status`);
         const status = await response.json();
@@ -52,7 +52,7 @@ const startCountdown = async () => {
             return;
         }
     } catch (error) {
-        // If status check fails, proceed as normal
+       
     }
     showCountdown.value = true;
     const interval = setInterval(() => {
@@ -181,7 +181,7 @@ onUnmounted(() => {
       <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
     </div>
   </header>
-    <main class="u-viewport-height" :style="{ backgroundColor: backgroundColor }">
+    <main class="u-viewport-height c-animated-bg" :style="{ backgroundColor: backgroundColor }">
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
                 {{ countdownValue }}
@@ -200,11 +200,11 @@ onUnmounted(() => {
 
 <style scoped>
 
+.c-animated-bg {
+    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .c-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
   padding: var(--spacing-06);
   display: flex;
@@ -214,25 +214,23 @@ onUnmounted(() => {
 }
 
 .c-game-header {
-  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-    max-width: 26.25rem;
+  justify-content: space-between;
+  padding: var(--spacing-06);
+  max-width: 34.375rem;
+  width: 100%;
 
-   @media (min-width: 768px) {
-
-    max-width: 500px;
-    gap: var(--spacing-08);
-
+  @media (min-width: 768px) {
+    max-width: 75%;
+   
   }
 
   @media (min-width: 1024px) {
-
-      max-width: 550px;
-      gap: var(--spacing-09);
-
+    max-width: 60%;
+    padding: var(--spacing-06) 0;
   }
+
 }
 
 .c-stop-button {

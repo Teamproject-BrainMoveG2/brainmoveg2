@@ -72,7 +72,7 @@ display: none;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 26.25rem;
+  max-width: 34.375rem;
 
   @media (min-width: 768px) {
 
