@@ -55,7 +55,6 @@ const { cones, colorToDutch } = useCones();
     width: 100%;
   }
 
-
 .c-cardcontainer{
  width: 100%;
  flex-direction: column;
@@ -87,12 +86,12 @@ const { cones, colorToDutch } = useCones();
 
     @media (min-width: 768px) {
 
-        max-width: 300px;
+        width: 65%;
     }
 
     @media (min-width: 1024px) {
 
-        max-width: 350px;
+        width: 100%;
     }
 }
 

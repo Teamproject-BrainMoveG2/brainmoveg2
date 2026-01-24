@@ -1,21 +1,17 @@
 <script>
+
 import { useRouter, useRoute } from 'vue-router';
-import { computed, ref } from 'vue';
-import { useCones } from '../../composables/useCones';
+import { computed } from 'vue';
 import { X } from 'lucide-vue-next';
 import BellNotification from '../BellNotification.vue';
-
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
-import PotjesStatusPopup from '../popups/PotjesStatusPopup.vue';
-import { watch } from 'vue';
 
 export default {
   name: 'Header',
   components: {
     BellNotification,
     X,
-    SmallPotjeCard,
-    PotjesStatusPopup
+    SmallPotjeCard
   },
   props: {
     currentRound: {
@@ -30,40 +26,23 @@ export default {
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const showPopup = ref(false);
-    
+
     const goBack = () => {
       router.back();
-    };
-
-    const togglePopup = () => {
-      showPopup.value = !showPopup.value;
-    };
-
-    const closePopup = () => {
-      showPopup.value = false;
     };
 
     const isDashboard = computed(() => {
       return route.name === 'dashboard' || route.path === '/dashboard';
     });
 
-  
     const isGameOverzicht = computed(() => {
       return route.name === 'gameoverzicht' || /^\/gameoverzicht\/.*/.test(route.path);
     });
 
-    const { warningCones, colorToDutch } = useCones();
-
     return {
       goBack,
       isDashboard,
-      isGameOverzicht,
-      showPopup,
-      togglePopup,
-      closePopup,
-      warningCones,
-      colorToDutch
+      isGameOverzicht
     };
   }
 };
@@ -77,8 +56,10 @@ export default {
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-
-    <BellNotification />
+    <div class="c-header__bell">
+      <BellNotification  />
+    </div>
+    
   </div>
   </header>
 </template>
@@ -90,25 +71,16 @@ export default {
   padding: var(--spacing-06);
   margin-left: auto;
   margin-right: auto;
-
   max-width: 26.25rem;
-  
-
 
   @media (min-width: 768px) {
-
-    max-width: 500px;
-    gap: var(--spacing-08);
-    
-
+    max-width: 75%;
+   
   }
 
   @media (min-width: 1024px) {
-
-      max-width: 550px;
-      gap: var(--spacing-09);
-      padding: var(--spacing-06) 0;
-
+    max-width: 60%;
+    padding: var(--spacing-06) 0;
   }
 
 }
@@ -120,6 +92,15 @@ export default {
   justify-content: space-between;
   align-items: center;
 
+}
+
+.c-header__bell{
+  display: inline;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
 }
 
 .c-game-header {

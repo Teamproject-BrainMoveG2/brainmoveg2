@@ -42,7 +42,7 @@ const route = useRoute()
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   background: var(--white);
   padding: var(--spacing-04) 0;
@@ -53,9 +53,8 @@ const route = useRoute()
   @media (min-width: 768px) {
 
     position: relative;
-    justify-content: flex-start;
     width: 100%;
-    padding: var(--spacing-05) var(--spacing-08);
+    padding: var(--spacing-06);
 
   }
 }
@@ -70,15 +69,21 @@ display: none;
 
 .c-navbar__content {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   max-width: 26.25rem;
 
   @media (min-width: 768px) {
 
-    max-width: 100%;
-    justify-content: space-between;
+    max-width: 75%;
+
+  }
+
+  @media (min-width: 1024px) {
+
+    max-width: 60%;
+    
 
   }
 }
@@ -128,7 +133,6 @@ display: none;
   }
 }
 
-/* Add a pseudo-element for the border to allow opacity fade */
 .c-navbar__item::after {
   content: '';
   position: absolute;

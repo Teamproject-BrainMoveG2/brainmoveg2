@@ -218,22 +218,19 @@
   margin-bottom: var(--spacing-06);
   margin-left: auto;
   margin-right: auto;
-
   max-width: 26.25rem;
-  
 
 
   @media (min-width: 768px) {
 
-    max-width: 500px;
+    max-width: 75%;
     gap: var(--spacing-08);
-    padding: 0;
 
   }
 
   @media (min-width: 1024px) {
 
-      max-width: 550px;
+      max-width: 60%;
       gap: var(--spacing-09);
       padding: 0;
 
@@ -247,7 +244,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  max-width: 26.25rem;
   gap: var(--spacing-03);
   color: var(--grey-85);
 
@@ -256,17 +252,7 @@
     padding: 0;
 
   }
-   @media (min-width: 768px) {
-   
-    max-width: 500px;
 
-  }
-
-  @media (min-width: 1024px) {
-     
-      max-width: 550px;
-
-  }
 }
 
 .c-header__title-wrapper {
@@ -303,5 +289,9 @@
   width: 25%;
   box-sizing: border-box;
   text-align: left;
+}
+
+:deep(.c-tab){
+  padding: var(--spacing-03);
 }
 </style>

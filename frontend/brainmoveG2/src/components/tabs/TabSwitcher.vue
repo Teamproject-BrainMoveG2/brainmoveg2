@@ -64,9 +64,24 @@ onMounted(() => {
 </template>
 
 <style>
+
 .c-overzichttab {
-    position: relative;
-    display: flex;
+  position: relative;
+  padding: 0 var(--spacing-06);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-width: 26.25rem;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  width: 100%;
+  @media (min-width: 768px) {
+    max-width: 75%;
+  }
+  @media (min-width: 1024px) {
+    max-width: 60%;
+    padding: 0;
+  }
 }
 
 .c-tab {
@@ -77,20 +92,25 @@ onMounted(() => {
     border: none;
     text-align: center;
     width: 100%;
-    transition: color 0.2s ease; 
+    transition: color 0.3s ease; 
     border-bottom: 2px solid var(--grey-15);
+
+    @media (min-width: 768px) {
+    padding-bottom: var(--spacing-06);
+    }
 }
 
 .c-tab.is-active {
-    color: var(--primary);
+  color: var(--primary);
 }
 
 .c-tab-indicator {
-    position: absolute;
-    bottom: -0px;
-    height: 2px;
-    background-color: var(--primary);
-    transition: all 0.3s ease;
-    pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--primary);
+  pointer-events: none;
+  z-index: 0;
+  transition: all 0.3s ease;
 }
 </style>

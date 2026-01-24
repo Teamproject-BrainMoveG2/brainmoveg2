@@ -29,6 +29,10 @@
   flex-direction: column;
   gap: var(--spacing-05);
   width: 100%;
+
+  @media (min-width: 768px) {
+    max-width: 26.25rem;
+  }
 }
 
 </style>

@@ -266,34 +266,6 @@ td:nth-child(2) {
     color: var(--primary);
 }
 
-.c-overzichttab {
-    padding: 0 var(--spacing-06);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  max-width: 26.25rem;
-  margin: 0 auto;
-  margin-bottom: 2rem;
-  
-
-
-  @media (min-width: 768px) {
-
-    max-width: 500px;
-    padding: 0;
-   
-
-  }
-
-  @media (min-width: 1024px) {
-
-      max-width: 550px;
-       padding: 0;
-    
-
-  }
-}
-
 .c-title-div {
     display: flex;
     flex-direction: column;
