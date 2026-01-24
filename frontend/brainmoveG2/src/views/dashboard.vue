@@ -39,11 +39,13 @@ onMounted(fetchGames);
     flex-direction: column;
     gap: var(--spacing-06);
     width: 100%;
-}
 
-@media (min-width: 768px) {
-    .c-game-grid {
-        gap: var(--spacing-07);
+    @media (min-width: 768px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: var(--spacing-06);
     }
+
 }
 </style>

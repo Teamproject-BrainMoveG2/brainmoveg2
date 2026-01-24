@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   modelValue: { type: String, required: true },
-  options: { type: Array, required: true }, // [{ label, value }]
+  options: { type: Array, required: true }, 
 });
 const emit = defineEmits(['update:modelValue']);
 function onChange(e) {

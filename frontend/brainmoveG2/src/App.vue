@@ -11,6 +11,7 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 
 
 <template>
+    <Navbar v-if="showNavbar" />
     <transition name="fade" mode="out-in">
         <div :key="route.fullPath" class="page-content">
             <Header v-if="showHeader" />
@@ -19,7 +20,7 @@ const showHeader = computed(() => route.meta.showHeader !== false);
             </div>
         </div>
     </transition>
-    <Navbar v-if="showNavbar" />
+    
 </template>
 
 <style>

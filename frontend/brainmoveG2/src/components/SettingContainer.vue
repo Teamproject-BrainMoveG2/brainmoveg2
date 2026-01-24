@@ -37,6 +37,7 @@ const props = defineProps({
 .c-error-message{
    color: var(--red);
    margin-top: var(--spacing-02);
+    font-size: 0.9rem;
 }
 
 .c-setting-section {
