@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   label: { type: String, required: true },
-  icon: { type: Object, required: false },
+  icon: { type: [Object, Function], required: false },
 });
 const emit = defineEmits(['click']);
 function handleClick(e) {

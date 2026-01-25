@@ -117,11 +117,16 @@
     }
   }
 
-  onMounted(() => {
-    fetchDataToday();
-    fetchGames();
-  });
+
+function onSearch() {
+}
+
+onMounted(() => {
+  fetchDataToday();
+  fetchGames();
+});
 </script>
+
 
 <template>
     <div class="c-header">

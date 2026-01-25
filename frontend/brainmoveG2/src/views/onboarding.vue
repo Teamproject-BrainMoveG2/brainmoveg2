@@ -20,6 +20,14 @@
         <RouterLink class="c-btn c-btn--secondary" to="/dashboard"> Klaar om te spelen</RouterLink>
       </section>
   </main>
+
+  <footer class="c-footer">
+    <div class="c-footer__content">
+      <img src="../assets/img/Howes_logo.jpg" alt="Mascot Left" class="c-footer__img" />
+      <span class="c-footer__text">Howest MCT 2026</span>
+      <img src="../assets/img/sport_innovatie.webp" alt="Mascot Right" class="c-footer__img" />
+    </div>
+  </footer>
 </template>
 
 <style scoped>
@@ -35,4 +43,54 @@
   }
 }
 
+
+.c-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  padding: 0.5rem 0;
+  z-index: 100;
+
+}
+
+.c-footer__content {
+
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+
+  @media (min-width: 768px) {
+    max-width: 75%;
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 60%;
+    padding: 0;
+  }
+
+}
+
+.c-footer__img {
+  padding: 0.5rem;
+  height: 3rem;
+  width: auto;
+}
+.c-footer__text {
+  font-size:  var(--font-size-2);
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  text-align: center;
+
+  @media (min-width: 1024px) {
+    font-size:  var(--font-size-4);
+  }
+}
 </style>
