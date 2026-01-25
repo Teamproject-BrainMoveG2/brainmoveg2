@@ -78,7 +78,7 @@
 }
 
 .c-footer__img {
-  padding: 0.5rem;
+  padding: var(--spacing-baseline);
   height: 3rem;
   width: auto;
 }

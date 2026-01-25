@@ -6,7 +6,7 @@
   import { ref, onMounted, computed } from 'vue';
   import ResultTableRow from '../components/table/ResultTableRow.vue';
   import ResultSelect from '../components/ResultSelect.vue';
-  import ResultSearch from '../components/ResultSearch.vue';
+  import ResultSearch from '../components/inputs/ResultSearch.vue';
   import ExportButton from '../components/buttons/ExportButton.vue';
   import { useGames } from '../composables/useGames';
   import ExportPopup from '../components/popups/ExportPopup.vue';

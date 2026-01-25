@@ -1,7 +1,7 @@
 <script setup>
 import { Home, TrendingUp, Info } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
-import BellNotification from '../BellNotification.vue';
+import BellNotification from '../buttons/BellNotification.vue';
 
 const route = useRoute()
 </script>
