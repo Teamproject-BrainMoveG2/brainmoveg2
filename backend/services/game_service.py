@@ -176,7 +176,7 @@ class GameService:
                 self.logger.warning("Cannot start a new round while another is in progress.")
         
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started, difficulty_modifier
         connectedCones = coneService.get_active_cones()
         coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
         if coneObject is None:
@@ -229,8 +229,11 @@ class GameService:
                             score=0.0,
                             place=0
                         )
+                        amountOfColors = len(roundList) + 1 + difficulty_modifier
+                        divisionModifier = (amountOfColors + (len(roundList) + 1)) / 2
+
                         playerScore.score = scoreService.calculate_score(
-                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty, divide_by=divisionModifier
                         )
                         self.logger.info("ending session")
                         await run_in_threadpool(
@@ -313,8 +316,9 @@ class GameService:
                                 score=0.0,
                                 place=0
                             )
+
                             playerScore.score = scoreService.calculate_score(
-                                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty, divide_by=2
                             )
                             self.logger.info("ending session")
                             await run_in_threadpool(
