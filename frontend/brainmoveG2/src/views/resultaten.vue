@@ -39,7 +39,12 @@
 
     let filtered = data.value.data;
 
+    // Filter by selected mode
+    if (selectedMode.value && selectedMode.value !== '') {
+      filtered = filtered.filter(item => String(item.spelmodus_id) === String(selectedMode.value));
+    }
 
+    // Filter by search query
     if (searchQuery.value && searchQuery.value.trim() !== '') {
       const query = searchQuery.value.trim().toLowerCase();
       filtered = filtered.filter(item => item.username && item.username.toLowerCase().includes(query));
