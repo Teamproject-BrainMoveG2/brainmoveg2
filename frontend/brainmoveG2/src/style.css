@@ -111,13 +111,18 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Source Sans Pro", sans-serif;
-  background-color: var(--grey-2);
+  background-color: var(--white);
   font-size: var(--font-size-3);      
   line-height: 24px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   color: var(--grey-85);
   height: 100%;
+
+  @media (min-width: 1024px) {
+
+    background-color: var(--grey-2);
+  }
 }
 
 /* Heading 1 */

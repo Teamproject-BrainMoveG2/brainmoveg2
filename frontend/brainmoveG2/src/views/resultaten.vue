@@ -14,19 +14,15 @@
   const showExportPopup = ref(false);
   const exportInitialDate = ref(new Date());
 
-  function openExportPopup() {
-    showExportPopup.value = true;
-  }
-  function closeExportPopup() {
-    showExportPopup.value = false;
-  }
-
+  const activeTab = ref('Vandaag');
+  const data = ref(null);
+  const Ip = `${window.location.hostname}:8000`;
   const { modes, fetchGames } = useGames();
-  const selectedMode = ref('all');
+  const selectedMode = ref('1');
   const searchQuery = ref('');
 
   const gameOptions = computed(() => {
-    const options = [{ label: 'Alle Gamemodes', value: 'all' }];
+    const options = [];
     if (Array.isArray(modes.value)) {
       modes.value.forEach(game => {
         options.push({ label: game.naam, value: game.spelmodus_id });
@@ -35,30 +31,27 @@
     return options;
   });
 
-  const activeTab = ref('Vandaag');
-  const data = ref(null);
-  const Ip = `${window.location.hostname}:8000`;
-
   const filteredData = computed(() => {
     if (!data.value || !data.value.data) {
       return [];
     }
-
     let filtered = data.value.data;
-
-  
-    if (selectedMode.value !== 'all') {
-      filtered = filtered.filter(item => item.spelmodus_id == selectedMode.value);
+    if (selectedMode.value) {
+      filtered = filtered.filter(item => String(item.spelmodus_id) === String(selectedMode.value));
     }
-
-   
     if (searchQuery.value && searchQuery.value.trim() !== '') {
       const query = searchQuery.value.trim().toLowerCase();
       filtered = filtered.filter(item => item.username && item.username.toLowerCase().includes(query));
     }
-
     return filtered;
   });
+
+  function openExportPopup() {
+    showExportPopup.value = true;
+  }
+  function closeExportPopup() {
+    showExportPopup.value = false;
+  } 
 
   async function fetchDataToday() {
     try {

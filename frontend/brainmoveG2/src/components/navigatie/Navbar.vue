@@ -41,22 +41,21 @@ const route = useRoute()
   bottom: 0;
   left: 0;
   right: 0;
-  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
   background: var(--white);
-  padding: var(--spacing-04) 0 0 0;
+  padding: var(--spacing-04) 0;
+  padding-bottom: 0;
   z-index: 100;
-  border-radius: 0;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+  border-radius: var(--radius);
 
   @media (min-width: 768px) {
+
     position: relative;
     width: 100%;
     padding: var(--spacing-06);
-    border-radius: var(--radius);
-    box-shadow: none;
+
   }
 }
 .c-navbar__logo{
