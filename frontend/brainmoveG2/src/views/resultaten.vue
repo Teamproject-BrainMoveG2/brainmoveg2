@@ -208,6 +208,10 @@ onMounted(() => {
 
 <style scoped>
 
+.c-stat-card:nth-child(1){
+    background-color: var(--white);
+}
+
 .c-resultaten__content {
   max-width: 100%;
   width: 100%;
