@@ -205,7 +205,8 @@ onUnmounted(() => {
 }
 
 .c-header {
-  z-index: 1000;
+position: relative;
+  z-index: 1001;
   padding: var(--spacing-06);
   display: flex;
   justify-content: center;
