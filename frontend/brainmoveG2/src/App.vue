@@ -20,7 +20,7 @@ onUnmounted(() => {
 });
 
 const contentStyle = computed(() => {
-    // Ensure enough space for the navbar on mobile
+    
     return showNavbar.value && isMobileOrTablet.value ? 'padding-bottom: 80px;' : '';
 });
 </script>
@@ -43,7 +43,7 @@ const contentStyle = computed(() => {
 
 .page-content {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: var(--grey-2);
 }
 

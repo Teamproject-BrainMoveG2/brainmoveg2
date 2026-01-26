@@ -226,6 +226,7 @@ p {
   text-align: center;
   gap: var(--spacing-07);
   max-width: 34.375rem;
+  height: 100%;
   margin: 0 auto;
 
 
