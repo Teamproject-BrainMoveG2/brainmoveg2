@@ -164,13 +164,13 @@ class GameService:
             if (currentRoundStartTime is None and currentCone is None):
                 currentCone = random.choice(connectedCones)
 
+                self.logger.info(f"New round started. Hit cone {currentCone}!")
+                await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
                 # Trigger buzzer on the selected cone
                 if buzzerService:
                     await run_in_threadpool(buzzerService.trigger_buzzer_for_round_start, currentCone, mqtt_service)
             
                 currentRoundStartTime = datetime.now(timezone.utc)
-                self.logger.info(f"New round started. Hit cone {currentCone}!")
-                await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
 
             else:
                 self.logger.warning("Cannot start a new round while another is in progress.")
