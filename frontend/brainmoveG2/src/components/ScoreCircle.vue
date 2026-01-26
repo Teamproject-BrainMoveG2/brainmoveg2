@@ -12,8 +12,8 @@ const props = defineProps({
 const animatedScore = ref(0);
 
 const animateScore = (target) => {
-  const duration = 1350; // ms
-  const frameRate = 30; // fps
+  const duration = 1350;
+  const frameRate = 30; 
   const totalFrames = Math.round((duration / 1000) * frameRate);
   const increment = target / totalFrames;
   let frame = 0;

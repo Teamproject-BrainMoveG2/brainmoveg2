@@ -1,20 +1,19 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import Tooltip from '../components/Tooltip.vue';
-const showTooltip = ref(false);
 import { useRoute } from 'vue-router';
-import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
+import { Clock, RotateCw, Target, Trophy, Info } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
-
 import StatCard from '../components/cards/StatCard.vue';
 import ScoreboardRow from '../components/table/ScoreboardRow.vue';
 import ScoreCircle from '../components/ScoreCircle.vue';
 import TabSwitcher from '../components/tabs/TabSwitcher.vue';
+import Tooltip from '../components/popups/Tooltip.vue';
 
 const route = useRoute();
 const gameId = ref(route.params.id);
 const gameStats = ref(null);
 const activeTab = ref('scorebord');
+const showTooltip = ref(false);
 
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
@@ -95,7 +94,7 @@ const accuracy = computed(() => {
             />
             
             <StatCard 
-                label="Accuracy" 
+                label="Accuraatheid" 
                 :value="`${accuracy}%`"
                 :icon="Target"
             />

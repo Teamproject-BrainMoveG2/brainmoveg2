@@ -1,12 +1,28 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import Navbar from './components/navigatie/Navbar.vue';
 import Header from './components/navigatie/Header.vue';
 
 const route = useRoute();
 const showNavbar = computed(() => route.meta.showNavbar !== false);
 const showHeader = computed(() => route.meta.showHeader !== false);
+
+const isMobileOrTablet = ref(window.innerWidth <= 1024);
+const updateWidth = () => {
+    isMobileOrTablet.value = window.innerWidth <= 1024;
+};
+onMounted(() => {
+    window.addEventListener('resize', updateWidth);
+});
+onUnmounted(() => {
+    window.removeEventListener('resize', updateWidth);
+});
+
+const contentStyle = computed(() => {
+    // Ensure enough space for the navbar on mobile
+    return showNavbar.value && isMobileOrTablet.value ? 'padding-bottom: 80px;' : '';
+});
 </script>
 
 
@@ -15,7 +31,7 @@ const showHeader = computed(() => route.meta.showHeader !== false);
     <transition name="fade" mode="out-in">
         <div :key="route.fullPath" class="page-content">
             <Header v-if="showHeader" />
-            <div :style="showNavbar ? 'padding-bottom: 100px;' : ''">
+            <div :style="contentStyle">
                 <RouterView />
             </div>
         </div>
@@ -28,6 +44,7 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 .page-content {
     width: 100%;
     height: 100%;
+    background-color: var(--grey-2);
 }
 
 .fade-enter-active,

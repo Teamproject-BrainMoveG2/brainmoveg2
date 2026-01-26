@@ -1,8 +1,8 @@
 <script>
 import { ref } from 'vue';
 import { Bell } from 'lucide-vue-next';
-import PotjesStatusPopup from './popups/PotjesStatusPopup.vue';
-import { useCones } from './../composables/useCones';
+import PotjesStatusPopup from '../popups/PotjesStatusPopup.vue';
+import { useCones } from '../../composables/useCones';
 
 export default {
   name: 'BellNotification',

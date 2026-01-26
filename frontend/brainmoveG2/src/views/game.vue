@@ -201,11 +201,12 @@ onUnmounted(() => {
 <style scoped>
 
 .c-animated-bg {
-    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .c-header {
-  z-index: 1000;
+position: relative;
+  z-index: 1001;
   padding: var(--spacing-06);
   display: flex;
   justify-content: center;

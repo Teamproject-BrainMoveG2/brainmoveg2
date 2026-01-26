@@ -3,7 +3,7 @@
 import { useRouter, useRoute } from 'vue-router';
 import { computed } from 'vue';
 import { X } from 'lucide-vue-next';
-import BellNotification from '../BellNotification.vue';
+import BellNotification from '../buttons/BellNotification.vue';
 import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 
 export default {
