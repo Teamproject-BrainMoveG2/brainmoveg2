@@ -8,6 +8,7 @@ from routers import cones, games, modes, data
 import logging
 import socketio
 from services.mqtt_service import MQTTService
+from services.score_service import ScoreService
 
 os.makedirs('./logs', exist_ok=True)
 logging.root.handlers.clear()
@@ -67,6 +68,19 @@ async def ingest_data(data: TestModel, response_model=StatusResponse):
     print("Data received:", data)
     return {"status": "success", "data_received": data}
 
+@app.post("/test-score")
+async def test_score_endpoint(score: ScoreDTO, score_service: ScoreService = Depends(ScoreService)):
+    logger.info(f"Test score received: {score}")
+    calculated_score = score_service.calculate_score(
+        total_rounds=score.total_rounds,
+        correct_hits=score.correct_hits,
+        average_reaction_speed=score.average_reaction_speed,
+        difficulty=score.difficulty,
+        divide_by=score.divide_by
+    )
+    logger.info(f"Calculated score: {calculated_score}")
+
+    return {"message": "Score received", "score": calculated_score}
 @sio.event
 async def connect(sid, environ):
     print(f"Client connected: {sid}")
