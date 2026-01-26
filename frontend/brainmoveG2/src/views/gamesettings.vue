@@ -27,6 +27,8 @@ const router = useRouter();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
 const isGameIdThree = computed(() => String(gameId.value) === '3');
+const isGameIdFour = computed(() => String(gameId.value) === '4');
+const hideDifficulty = computed(() => isGameIdThree.value || isGameIdFour.value);
 const rounds = ref(10);
 const colors = ref(4);
 const username = ref('');
@@ -44,7 +46,7 @@ const { modes, fetchGames } = useGames();
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 const selectDifficulty = (difficulty) => {
-    if (!isGameIdThree.value) {
+    if (!hideDifficulty.value) {
         selectedDifficulty.value = difficulty;
     }
 };
@@ -58,7 +60,7 @@ function getInstructionsRoute() {
         query: {
             username: username.value,
             mode_id: Number(gameId.value),
-            difficulty_id: isGameIdThree.value ? null : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
+            difficulty_id: hideDifficulty.value ? null : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
             aantal_rondes: rounds.value,
             aantal_kleuren: colors.value
         }
@@ -95,7 +97,7 @@ function goToInstructions() {
             <h1>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.naam || '' }}</h1>
             <p>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.description || '' }}</p>
         </div>
-        <SettingContainer v-if="!isGameIdThree" title="Kies je moeilijkheidsgraad">
+        <SettingContainer v-if="!hideDifficulty" title="Kies je moeilijkheidsgraad">
             <DifficultyButton
                 v-for="difficulty in difficulties"
                 :key="difficulty.id"
