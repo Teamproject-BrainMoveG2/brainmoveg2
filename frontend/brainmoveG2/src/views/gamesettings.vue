@@ -116,6 +116,7 @@ function goToInstructions() {
         <SettingContainer title="Gebruikersnaam">
             <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" :show-errors="showErrors" />
         </SettingContainer>
+        
         <SettingContainer
             title="Gebruikte kleuren"
             layout="grid"
@@ -132,7 +133,6 @@ function goToInstructions() {
             />
       
         </SettingContainer>
-        
         <button
             :class="buttonClass"
             @click="goToInstructions"

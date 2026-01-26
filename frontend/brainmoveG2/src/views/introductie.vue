@@ -29,7 +29,8 @@ const { cones, colorToDutch } = useCones();
     </div>
    
     <InstructionList :instructions="instructions" />
-    
+
+    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
     <section class="c-cardcontainer">
 
         <h2>Status Potjes</h2>
@@ -43,7 +44,7 @@ const { cones, colorToDutch } = useCones();
             />
         </div>
     </section>
-    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
+   
     
   </main>
 </template>
