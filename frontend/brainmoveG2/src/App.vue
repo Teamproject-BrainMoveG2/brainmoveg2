@@ -43,7 +43,7 @@ const contentStyle = computed(() => {
 
 .page-content {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-color: var(--grey-2);
 }
 
