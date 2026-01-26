@@ -44,7 +44,7 @@ const props = defineProps({
     border-bottom: 2px solid var(--grey-15);
     gap: var(--spacing-04);
 
-    font-family: "Source Sans Pro", sans-serif;
+    font-family: "source-sans-pro", sans-serif;
     font-size: var(--font-size-3); 
     line-height: 1.5rem;
     font-weight: var(--font-weight-regular);

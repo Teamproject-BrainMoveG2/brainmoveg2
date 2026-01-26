@@ -14,6 +14,7 @@
   const showExportPopup = ref(false);
   const exportInitialDate = ref(new Date());
 
+
   const activeTab = ref('Vandaag');
   const data = ref(null);
   const Ip = `${window.location.hostname}:8000`;
@@ -35,14 +36,15 @@
     if (!data.value || !data.value.data) {
       return [];
     }
+
     let filtered = data.value.data;
-    if (selectedMode.value) {
-      filtered = filtered.filter(item => String(item.spelmodus_id) === String(selectedMode.value));
-    }
+
+
     if (searchQuery.value && searchQuery.value.trim() !== '') {
       const query = searchQuery.value.trim().toLowerCase();
       filtered = filtered.filter(item => item.username && item.username.toLowerCase().includes(query));
     }
+
     return filtered;
   });
 
@@ -219,6 +221,13 @@ onMounted(() => {
 
   @media (min-width: 1024px) {
       width: 100%;
+  }
+
+   @media (min-width: 1245px) {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    z-index: 2;
   }
 }
 

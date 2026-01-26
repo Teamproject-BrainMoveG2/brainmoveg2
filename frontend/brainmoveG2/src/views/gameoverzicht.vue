@@ -94,7 +94,7 @@ const accuracy = computed(() => {
             />
             
             <StatCard 
-                label="Accuracy" 
+                label="Accuraatheid" 
                 :value="`${accuracy}%`"
                 :icon="Target"
             />

@@ -28,7 +28,7 @@ function onSearch() {
   border: 1px solid var(--grey-15);
   background: var(--white);
   font-size: 1rem;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-3);
   line-height: 1.5rem;
   font-weight: var(--font-weight-regular);

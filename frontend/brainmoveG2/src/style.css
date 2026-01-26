@@ -110,7 +110,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   background-color: var(--white);
   font-size: var(--font-size-3);      
   line-height: 24px;
@@ -141,7 +141,7 @@ h1 {
 
 /* Heading 2 */
 h2 {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-5);   
   line-height: 32px;
   font-weight: var(--font-weight-regular);
@@ -153,7 +153,7 @@ h2 {
 p {
   margin: 0;
   padding: 0;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-3);
   line-height: 1.5rem;
   font-weight: var(--font-weight-regular);
@@ -169,7 +169,7 @@ p {
 
 /* Logo text */
 .logo-text {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-6);      
   line-height: 2rem;
   font-weight: var(--font-weight-regular);
@@ -182,7 +182,7 @@ p {
 
 /* Smaller body */
 .small-body {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-2);     
   line-height: 1.5rem;
   font-weight: var(--font-weight-regular);
@@ -198,7 +198,7 @@ p {
 }
 
 .body-large {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-5);      
   line-height: 32px;
   font-weight: var(--font-weight-regular);
@@ -208,7 +208,7 @@ p {
 }
 
 .body-extra-large {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-7);      
   line-height: 40px;
   font-weight: var(--font-weight-regular);
