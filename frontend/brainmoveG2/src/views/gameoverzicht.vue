@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { Clock, RotateCw, Target, Trophy, Info, Medal } from 'lucide-vue-next';
+import { Clock, RotateCw, Target, Trophy, Info } from 'lucide-vue-next';
 import { useGameColors } from '../composables/useGameColors';
 import StatCard from '../components/cards/StatCard.vue';
 import ScoreboardRow from '../components/table/ScoreboardRow.vue';
