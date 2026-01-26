@@ -40,7 +40,6 @@ color_combinations = [
     ColorCombination(mixed="brown", base_cones=[cones[0], cones[2]]),
     ColorCombination(mixed="teal", base_cones=[cones[1], cones[2]]),
     ColorCombination(mixed="orange", base_cones=[cones[0], cones[3]]),
-    ColorCombination(mixed="green", base_cones=[cones[1], cones[3]]),
     ColorCombination(mixed="lime", base_cones=[cones[2], cones[3]]),
 ]
 class GameService:
