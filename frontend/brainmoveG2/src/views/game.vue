@@ -128,7 +128,7 @@ const connectSocketColorGames = () => {
 
     socket.on('user_round_start', (data) => {
         console.log('Round result:', data);
-        roundResult.value = "Spel bezig";
+        roundResult.value = "GO!";
         showResultOverlay.value = true;
         backgroundColor.value = 'var(--grey-2)';
     });
