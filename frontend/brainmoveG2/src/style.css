@@ -219,6 +219,7 @@ p {
 
 .c-content-wrapper {
   padding: 0 var(--spacing-06);
+  padding-bottom: var(--spacing-baseline);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -229,19 +230,14 @@ p {
 
 
   @media (min-width: 768px) {
-
     justify-content: flex-start;
     max-width: 75%;
- 
-
   }
 
   @media (min-width: 1024px) {
-
     justify-content: flex-start;
     max-width: 60%;
     padding: 0;
-
   }
 
 }

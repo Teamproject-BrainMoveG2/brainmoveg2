@@ -63,7 +63,7 @@ const { isLowBattery, batteryIcon } = useBattery(toRef(props, 'battery'));
     gap: var(--spacing-baseline);
 }
 
-@media (max-width: 380px) {
+@media (max-width: 435px) {
     .c-smallPotjeCard__name {
         display: none;
     }
