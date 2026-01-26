@@ -171,8 +171,8 @@ onMounted(() => {
       </section>
         
       <section>
-          <div class="c-table--resultaten-wrapper" v-if="data && data.data">
-            <table class="c-table c-table--resultaten">
+        <div class="c-table--resultaten-wrapper" v-if="data && data.data && filteredData.length">
+          <table class="c-table c-table--resultaten">
             <thead>
               <tr class="c-table__headings">
                 <th>Naam</th>
@@ -191,6 +191,9 @@ onMounted(() => {
                 :difficulty="!item.naam || item.naam === 'null' ? 'geen' : item.naam" />
             </tbody>
           </table>
+        </div>
+        <div v-else class="c-noData__message">
+          geen data, speel een spel
         </div>
       </section>
 </div>
@@ -215,6 +218,16 @@ onMounted(() => {
     flex-direction: row;
     justify-content: space-between;
     gap: var(--spacing-06);
+  }
+}
+
+.c-noData__message{
+  min-width: 400px;
+  width: 100%;
+  border-collapse: collapse;
+
+  @media (min-width: 1410px) {
+      width: 500px;
   }
 }
 
