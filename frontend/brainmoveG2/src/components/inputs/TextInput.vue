@@ -32,7 +32,7 @@ const isInvalid = computed(() => {
 </script>
 
 <template>
-    <form action="#" class="c-form">
+    <form action="#" class="c-form" @submit.prevent>
         <input 
             :type="type"
             :value="modelValue"
