@@ -43,7 +43,11 @@ const contentStyle = computed(() => {
   width: 100%;
   height: 100%;
   background-color: var(--grey-2);
-  flex-grow: 1;
+}
+@media (max-width: 768px) {
+  .page-content {
+    flex-grow: 1;
+  }
 }
 
 .fade-enter-active,
