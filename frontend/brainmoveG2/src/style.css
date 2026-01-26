@@ -119,8 +119,7 @@ body {
   color: var(--grey-85);
   height: 100%;
 
-  @media (min-width: 1024px) {
-
+  @media (min-width: 768px) {
     background-color: var(--grey-2);
   }
 }
