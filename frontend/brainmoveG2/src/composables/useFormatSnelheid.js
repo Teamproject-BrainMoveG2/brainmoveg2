@@ -1,5 +1,5 @@
 export function formatSnelheid(label, value) {
-  if (label && label.toLowerCase().includes('snelheid')) {
+  if (label && label.toLowerCase().includes('reactie')) {
     console.log('formatSnelheid composable value:', value);
     if (Number(value) > 1000) {
       return (Number(value) / 1000).toFixed(2) + ' s';

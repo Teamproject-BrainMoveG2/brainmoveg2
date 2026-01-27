@@ -158,7 +158,7 @@ onMounted(() => {
               
               />
             <StatCard 
-              label="Gem. snelheid" 
+              label="Gem. reactie" 
               :value="`${Math.round(data.avg_reaction_speed)}`"
               :icon="Clock"
             />

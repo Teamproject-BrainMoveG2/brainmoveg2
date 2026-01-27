@@ -7,17 +7,13 @@ const props = defineProps({
   reaction: { type: [String, Number], required: true },
   difficulty: { type: String, required: true }
 });
-const truncatedName = computed(() => {
-  if (!props.name) return '';
-  return props.name.length > 14 ? props.name.slice(0, 11) + '...' : props.name;
-});
 </script>
 
 <template>
   <tr class="c-table__row">
-    <td>{{ truncatedName }}</td>
+    <td>{{ name }}</td>
     <td>{{ accuracy }}</td>
-    <td>{{ formatSnelheid('snelheid', reaction) }}</td>
+    <td>{{ formatSnelheid('reactie', reaction) }}</td>
     <td>{{ difficulty }}</td>
   </tr>
 </template>
@@ -29,6 +25,11 @@ const truncatedName = computed(() => {
   width: 25%;
   box-sizing: border-box;
   text-align: left;
+}
+tr td:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: .5rem;
 }
 
 .c-table__row {
