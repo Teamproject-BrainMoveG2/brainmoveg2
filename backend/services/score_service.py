@@ -12,11 +12,11 @@ class ScoreService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("ScoreService initialized.")
-    def calculate_score(self, total_rounds, correct_hits, average_reaction_speed, difficulty) -> float:
+    def calculate_score(self, total_rounds, correct_hits, average_reaction_speed, difficulty, divide_by=1) -> float:
         if total_rounds == 0 or average_reaction_speed <= 0:
             return 0.0
         accuracy = correct_hits / total_rounds * ACCURACY_MULTIPLIER
-        score = SCORE_MULTIPLIER * ((ACCURACY_WEIGHT * accuracy) * REACTION_WEIGHT * MAX_REACTION_TIME_MS/average_reaction_speed)
+        score = SCORE_MULTIPLIER * ((ACCURACY_WEIGHT * accuracy) * REACTION_WEIGHT * MAX_REACTION_TIME_MS/(average_reaction_speed/divide_by))
         if difficulty == 2:
             score *= 1.1
         elif difficulty == 3:
@@ -25,11 +25,11 @@ class ScoreService:
     
     def calculate_level(self, score: float, settings: config.Settings) -> str:
         niveau = 1
-        if score >= 1500:
+        if score >= 2500:
             niveau = 5
-        elif score >= 1200:
+        elif score >= 1800:
             niveau = 4
-        elif score >= 900:
+        elif score >= 1200:
             niveau = 3
         elif score >= 600:
             niveau = 2

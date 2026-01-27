@@ -14,3 +14,5 @@ class ScoreDTO(BaseModel):
     total_rounds: int
     correct_hits: int
     average_reaction_speed: float
+    difficulty: int
+    divide_by: int

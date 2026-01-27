@@ -39,7 +39,12 @@
 
     let filtered = data.value.data;
 
+    // Filter by selected mode
+    if (selectedMode.value && selectedMode.value !== '') {
+      filtered = filtered.filter(item => String(item.spelmodus_id) === String(selectedMode.value));
+    }
 
+    // Filter by search query
     if (searchQuery.value && searchQuery.value.trim() !== '') {
       const query = searchQuery.value.trim().toLowerCase();
       filtered = filtered.filter(item => item.username && item.username.toLowerCase().includes(query));
@@ -153,7 +158,7 @@ onMounted(() => {
               
               />
             <StatCard 
-              label="Gem. snelheid" 
+              label="Gem. reactie" 
               :value="`${Math.round(data.avg_reaction_speed)}`"
               :icon="Clock"
             />
@@ -166,8 +171,8 @@ onMounted(() => {
       </section>
         
       <section>
-          <div class="c-table--resultaten-wrapper" v-if="data && data.data">
-            <table class="c-table c-table--resultaten">
+        <div class="c-table--resultaten-wrapper" v-if="data && data.data && filteredData.length">
+          <table class="c-table c-table--resultaten">
             <thead>
               <tr class="c-table__headings">
                 <th>Naam</th>
@@ -187,6 +192,9 @@ onMounted(() => {
             </tbody>
           </table>
         </div>
+        <div v-else class="c-noData__message">
+          geen data, speel een spel
+        </div>
       </section>
 </div>
   
@@ -200,6 +208,10 @@ onMounted(() => {
 
 <style scoped>
 
+.c-stat-card:nth-child(1){
+    background-color: var(--white);
+}
+
 .c-resultaten__content {
   max-width: 100%;
   width: 100%;
@@ -210,6 +222,16 @@ onMounted(() => {
     flex-direction: row;
     justify-content: space-between;
     gap: var(--spacing-06);
+  }
+}
+
+.c-noData__message{
+  min-width: 400px;
+  width: 100%;
+  border-collapse: collapse;
+
+  @media (min-width: 1410px) {
+      width: 500px;
   }
 }
 

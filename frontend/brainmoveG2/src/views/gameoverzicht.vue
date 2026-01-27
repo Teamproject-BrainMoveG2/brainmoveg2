@@ -82,7 +82,7 @@ const accuracy = computed(() => {
         </div>
         <section class="c-stats-grid">
             <StatCard 
-                label="Gem. snelheid" 
+                label="Gem. reactie" 
                 :value="`${gameStats ? Math.round(gameStats.average_reaction_speed_ms) : 0}`"
                 :icon="Clock"
             />

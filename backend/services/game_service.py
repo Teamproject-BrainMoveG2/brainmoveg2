@@ -13,7 +13,7 @@ import socketio
 import logging
 import asyncio
 
-TOO_LATE = {1: 5000, 2: 4000, 3: 3000}
+TOO_LATE = {1: 3000, 2: 2000, 3: 1400}
 TOO_LATE_MS = 5000
 maxRounds = 10
 maxCones = 4
@@ -40,7 +40,6 @@ color_combinations = [
     ColorCombination(mixed="brown", base_cones=[cones[0], cones[2]]),
     ColorCombination(mixed="teal", base_cones=[cones[1], cones[2]]),
     ColorCombination(mixed="orange", base_cones=[cones[0], cones[3]]),
-    ColorCombination(mixed="green", base_cones=[cones[1], cones[3]]),
     ColorCombination(mixed="lime", base_cones=[cones[2], cones[3]]),
 ]
 class GameService:
@@ -164,19 +163,19 @@ class GameService:
             if (currentRoundStartTime is None and currentCone is None):
                 currentCone = random.choice(connectedCones)
 
+                self.logger.info(f"New round started. Hit cone {currentCone}!")
+                await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
                 # Trigger buzzer on the selected cone
                 if buzzerService:
                     await run_in_threadpool(buzzerService.trigger_buzzer_for_round_start, currentCone, mqtt_service)
             
                 currentRoundStartTime = datetime.now(timezone.utc)
-                self.logger.info(f"New round started. Hit cone {currentCone}!")
-                await sio.emit('round_start', {'color': currentCone.color, 'round': len(roundList) + 1, "max_rounds": maxRounds})
 
             else:
                 self.logger.warning("Cannot start a new round while another is in progress.")
         
     async def record_round(self, cone: int, sio: socketio.AsyncServer, coneService: ConeService, scoreService: ScoreService,  settings: config.Settings, buzzerService: BuzzerService, mqtt_service: MQTTService) -> None:
-        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started
+        global TOO_LATE_MS, roundList, currentRoundStartTime, currentCone, maxRounds, totalTimeMs, connectedCones, session_username, session_id, session_mode_id, userCones, currentCones, difficulty, game_started, difficulty_modifier
         connectedCones = coneService.get_active_cones()
         coneObject = next((c for c in connectedCones if c.cone_id == cone), None)
         if coneObject is None:
@@ -229,8 +228,11 @@ class GameService:
                             score=0.0,
                             place=0
                         )
+                        amountOfColors = len(roundList) + 1 + difficulty_modifier
+                        divisionModifier = (amountOfColors + (len(roundList) + 1)) / 2
+
                         playerScore.score = scoreService.calculate_score(
-                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                            total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty, divide_by=divisionModifier
                         )
                         self.logger.info("ending session")
                         await run_in_threadpool(
@@ -313,8 +315,9 @@ class GameService:
                                 score=0.0,
                                 place=0
                             )
+
                             playerScore.score = scoreService.calculate_score(
-                                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty
+                                total_rounds=len(roundList), correct_hits=sum(1 for r in roundList if r.result == RoundResult.GOED), average_reaction_speed=totalTimeMs / len(roundList), difficulty=difficulty, divide_by=2
                             )
                             self.logger.info("ending session")
                             await run_in_threadpool(

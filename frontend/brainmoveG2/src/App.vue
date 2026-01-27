@@ -10,51 +10,53 @@ const showHeader = computed(() => route.meta.showHeader !== false);
 
 const isMobileOrTablet = ref(window.innerWidth <= 1024);
 const updateWidth = () => {
-    isMobileOrTablet.value = window.innerWidth <= 1024;
+  isMobileOrTablet.value = window.innerWidth <= 1024;
 };
 onMounted(() => {
-    window.addEventListener('resize', updateWidth);
+  window.addEventListener('resize', updateWidth);
 });
 onUnmounted(() => {
-    window.removeEventListener('resize', updateWidth);
+  window.removeEventListener('resize', updateWidth);
 });
 
 const contentStyle = computed(() => {
-    // Ensure enough space for the navbar on mobile
-    return showNavbar.value && isMobileOrTablet.value ? 'padding-bottom: 80px;' : '';
+  return showNavbar.value && isMobileOrTablet.value
+    ? 'padding-bottom: 80px;'
+    : '';
 });
 </script>
 
-
 <template>
-    <Navbar v-if="showNavbar" />
-    <transition name="fade" mode="out-in">
-        <div :key="route.fullPath" class="page-content">
-            <Header v-if="showHeader" />
-            <div :style="contentStyle">
-                <RouterView />
-            </div>
-        </div>
-    </transition>
-    
+  <Navbar v-if="showNavbar" />
+  <transition name="fade" mode="out-in">
+    <div :key="route.fullPath" class="page-content">
+      <Header v-if="showHeader" />
+      <div :style="contentStyle">
+        <RouterView />
+      </div>
+    </div>
+  </transition>
 </template>
 
 <style>
-
 .page-content {
-    width: 100%;
-    height: 100%;
-    background-color: var(--grey-2);
+  width: 100%;
+  height: 100%;
+  background-color: var(--grey-2);
+}
+@media (max-width: 768px) {
+  .page-content {
+    flex-grow: 1;
+  }
 }
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-    opacity: 0;
+  opacity: 0;
 }
 </style>
-

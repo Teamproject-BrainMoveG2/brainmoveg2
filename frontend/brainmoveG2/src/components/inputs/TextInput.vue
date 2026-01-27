@@ -32,7 +32,7 @@ const isInvalid = computed(() => {
 </script>
 
 <template>
-    <form action="#" class="c-form">
+    <div class="c-form">
         <input 
             :type="type"
             :value="modelValue"
@@ -42,7 +42,7 @@ const isInvalid = computed(() => {
             maxlength="45"
         />
         <div v-if="isInvalid" class="c-input-error">Geef een gebruikersnaam</div>
-    </form>
+    </div>
 </template>
 
 
