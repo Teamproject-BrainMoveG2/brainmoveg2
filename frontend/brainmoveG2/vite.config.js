@@ -1,7 +1,20 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-})
+  base: '/',
+  plugins: [vue(), vuetify({ autoImport: true })],
+  build: {
+    rollupOptions: {
+      external: [
+        // 'vuetify/styles',
+        // '@mdi/font/css/materialdesignicons.css',
+        // 'vuetify',
+        // 'vuetify/iconsets/mdi',
+        // 'vuetify/components',
+      ],
+    },
+  },
+});

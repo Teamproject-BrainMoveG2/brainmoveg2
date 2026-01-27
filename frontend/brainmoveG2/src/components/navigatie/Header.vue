@@ -1,13 +1,17 @@
 <script>
+
 import { useRouter, useRoute } from 'vue-router';
 import { computed } from 'vue';
-import { Bell, X } from 'lucide-vue-next';
+import { X } from 'lucide-vue-next';
+import BellNotification from '../buttons/BellNotification.vue';
+import SmallPotjeCard from '../cards/SmallPotjeCard.vue';
 
 export default {
   name: 'Header',
   components: {
-    Bell,
-    X
+    BellNotification,
+    X,
+    SmallPotjeCard
   },
   props: {
     currentRound: {
@@ -22,30 +26,23 @@ export default {
   setup() {
     const router = useRouter();
     const route = useRoute();
-    
+
     const goBack = () => {
       router.back();
     };
 
-    const stopGame = () => {
-      router.push('/dashboard');
-    };
-
-    // Check if current page is dashboard
     const isDashboard = computed(() => {
       return route.name === 'dashboard' || route.path === '/dashboard';
     });
 
-    // Check if current page is game (exact match only, not gamesettings)
-    const isGame = computed(() => {
-      return route.name === 'game';
+    const isGameOverzicht = computed(() => {
+      return route.name === 'gameoverzicht' || /^\/gameoverzicht\/.*/.test(route.path);
     });
 
     return {
       goBack,
-      stopGame,
       isDashboard,
-      isGame
+      isGameOverzicht
     };
   }
 };
@@ -53,40 +50,57 @@ export default {
 
 <template>
   <header class="c-header">
-    <!-- Game header layout -->
-    <div v-if="isGame" class="c-game-header">
-      <button @click="stopGame" class="c-stop-button" aria-label="Stop game">
-        <X :size="24" />
-        <span>Stoppen</span>
-      </button>
-      <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
-    </div>
-
-    <!-- Dashboard header -->
-    <button v-else-if="isDashboard" class="c-bell-button" aria-label="Notificaties">
-      <Bell />
-    </button>
-
-    <!-- Back button for other pages -->
-    <button v-else @click="goBack" class="c-back-button" aria-label="Ga terug">
+    <div class="c-header__content">
+    <button v-if="!isDashboard && !isGameOverzicht" @click="goBack" class="c-back-button" aria-label="Ga terug">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
+    <div class="c-header__bell">
+      <BellNotification  />
+    </div>
+    
+  </div>
   </header>
 </template>
 
 <style scoped>
 .c-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+  display: flex;
+  align-items: center;
   padding: var(--spacing-06);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 34.375rem;
+
+  @media (min-width: 768px) {
+    max-width: 75%;
+   
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 60%;
+    padding: var(--spacing-06) 0;
+  }
+
+}
+
+
+.c-header__content {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+}
+
+.c-header__bell{
+  display: inline;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
 }
 
 .c-game-header {
@@ -125,7 +139,6 @@ export default {
   border: none;
   cursor: pointer;
   color: var(--grey-85);
-  padding: var(--spacing-03);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,22 +152,5 @@ export default {
 .c-back-button svg {
   width: 24px;
   height: 24px;
-}
-
-.c-bell-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--grey-85);
-  padding: var(--spacing-03);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease;
-  margin-left: auto;
-}
-
-.c-bell-button:hover {
-  color: var(--primary);
 }
 </style>

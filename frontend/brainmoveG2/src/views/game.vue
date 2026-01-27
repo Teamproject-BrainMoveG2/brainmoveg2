@@ -1,13 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import CloseButton from '../components/buttons/CloseButton.vue';
 import io from 'socket.io-client';
-import { X } from 'lucide-vue-next';
 
 const Ip = `${window.location.hostname}:8000`;
 const route = useRoute();
 const router = useRouter();
 const gameId = ref(route.params.id);
+
 const showCountdown = ref(true);
 const countdownValue = ref(3);
 const currentRound = ref(0);
@@ -15,22 +17,73 @@ const currentColor = ref('');
 const backgroundColor = ref('var(--grey-2)');
 const showResultOverlay = ref(false);
 const roundResult = ref('');
+const totalRounds = ref(0);
 let socket = null;
 
-const startCountdown = () => {
+const colorMap = {
+            'blue': 'var(--blue)',
+            'green': 'var(--accent-green)',
+            'orange': 'var(--accent-orange)',
+            'red': 'var(--red)',
+            'yellow': 'var(--yellow)',
+            'purple': 'var(--purple)',
+            'brown': 'var(--brown)',
+            "teal": 'var(--teal)',
+            "green": 'var(--green)',
+            "lime": 'var(--lime)'
+
+        };
+
+const settings = route.query;
+console.log('Received game settings from previous page:', JSON.stringify(settings, null, 2));
+
+const startCountdown = async () => {
+   
+    try {
+        const response = await fetch(`http://${Ip}/games/status`);
+        const status = await response.json();
+        if (status && status.game_in_progress) {
+            showCountdown.value = false;
+            roundResult.value = "spel bezig even geduld.";
+            showResultOverlay.value = true;
+            setTimeout(() => {
+                router.push({ name: 'dashboard' });
+            }, 2000);
+            return;
+        }
+    } catch (error) {
+       
+    }
+    showCountdown.value = true;
     const interval = setInterval(() => {
         if (countdownValue.value > 1) {
             countdownValue.value--;
         } else if (countdownValue.value === 1) {
-            countdownValue.value = 0; // Show "GO!"
+            countdownValue.value = 0; 
             setTimeout(() => {
                 showCountdown.value = false;
                 clearInterval(interval);
-                // Start the game after countdown
                 startGame();
             }, 1000);
         }
     }, 1000);
+};
+
+const stopGame = async () => {
+    try {
+        await fetch(`http://${Ip}/games/stop`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error('Error stopping game:', error);
+    }
+    if (socket) {
+        socket.disconnect();
+    }
+    router.push({ name: 'dashboard' });
 };
 
 const startGame = async () => {
@@ -39,7 +92,14 @@ const startGame = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                username: settings.username || 'speler',
+                mode_id: settings.mode_id,
+                difficulty_id: settings.difficulty_id,
+                aantal_rondes: settings.aantal_rondes,
+                aantal_kleuren: settings.aantal_kleuren
+            })
         });
         const data = await response.json();
         console.log('Game started:', data);
@@ -48,7 +108,7 @@ const startGame = async () => {
     }
 };
 
-const connectSocket = () => {
+const connectSocketColorGames = () => {
     socket = io(`http://${Ip}`);
     
     socket.on('connect', () => {
@@ -59,39 +119,40 @@ const connectSocket = () => {
         console.log('Round started:', data);
         currentRound.value = data.round;
         currentColor.value = data.color;
-        
-        // Hide result overlay when new round starts
+        totalRounds.value = data.max_rounds;
+
         showResultOverlay.value = false;
-        
-        // Change background color based on received color
-        const colorMap = {
-            'blue': 'var(--blue)',
-            'green': 'var(--accent-green)',
-            'orange': 'var(--accent-orange)',
-            'red': 'var(--red)',
-            'yellow': 'var(--yellow)'
-        };
-        backgroundColor.value = colorMap[data.color.toLowerCase()] || 'var(--grey-2)';
+      
+        backgroundColor.value = colorMap[data.color?.toLowerCase()] || 'var(--grey-2)';
+    });
+
+    socket.on('user_round_start', (data) => {
+        console.log('Round result:', data);
+        roundResult.value = "GO!";
+        showResultOverlay.value = true;
+        backgroundColor.value = 'var(--grey-2)';
     });
     
     socket.on('round_result', (data) => {
         console.log('Round result:', data);
-        // Show result overlay
         roundResult.value = data.result;
         showResultOverlay.value = true;
-        // Reset background after result
+   
         backgroundColor.value = 'var(--grey-2)';
     });
     
     socket.on('game_over', (data) => {
         console.log('Game over:', data);
-        // Parse the JSON string and navigate to game overview page with stats
-        const gameStats = JSON.parse(data);
-        router.push({
-            name: 'gameoverzicht',
-            params: { id: gameId.value },
-            state: { gameStats }
-        });
+     
+        setTimeout(() => {
+          
+            const gameStats = JSON.parse(data);
+            router.push({
+                name: 'gameoverzicht',
+                params: { id: gameId.value },
+                state: { gameStats }
+            });
+        }, 2000);
     });
     
     socket.on('disconnect', () => {
@@ -99,28 +160,10 @@ const connectSocket = () => {
     });
 };
 
-const recordHit = async (coneId) => {
-    try {
-        const response = await fetch(`http://${Ip}/games/hit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                cone_id: coneId,
-                color: currentColor.value
-            })
-        });
-        const data = await response.json();
-        console.log('Hit recorded:', data);
-    } catch (error) {
-        console.error('Error recording hit:', error);
-    }
-};
-
 onMounted(() => {
     startCountdown();
-    connectSocket();
+    connectSocketColorGames();
+    
 });
 
 onUnmounted(() => {
@@ -134,15 +177,11 @@ onUnmounted(() => {
 <template>
     <header class="c-header">
     <div class="c-game-header">
-      <button @click="stopGame" class="c-stop-button" aria-label="Stop game">
-        <X :size="24" />
-        <span>Stoppen</span>
-      </button>
+     <CloseButton @close="stopGame"/>
       <span class="c-round-counter">{{ currentRound }}/{{ totalRounds }}</span>
     </div>
   </header>
-    <main class="c-content-wrapper" :style="{ backgroundColor: backgroundColor }">
-        <!-- Countdown Overlay -->
+    <main class="u-viewport-height c-animated-bg" :style="{ backgroundColor: backgroundColor }">
         <div v-if="showCountdown" class="c-countdown-overlay">
             <div class="c-countdown-number" v-if="countdownValue > 0">
                 {{ countdownValue }}
@@ -151,8 +190,6 @@ onUnmounted(() => {
                 GO!
             </div>
         </div>
-
-        <!-- Result Overlay -->
         <div v-if="showResultOverlay" class="c-result-overlay">
             <div class="c-result-text" :class="`c-result-${roundResult}`">
                 {{ roundResult.toUpperCase() }}
@@ -163,24 +200,38 @@ onUnmounted(() => {
 
 <style scoped>
 
+.c-animated-bg {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .c-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+position: relative;
+  z-index: 1001;
   padding: var(--spacing-06);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   background-color: var(--white);
 }
 
 .c-game-header {
-  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-06);
+  max-width: 34.375rem;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    max-width: 75%;
+   
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 60%;
+    padding: var(--spacing-06) 0;
+  }
+
 }
 
 .c-stop-button {
@@ -217,7 +268,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 999;
 }
 
 .c-countdown-number {
@@ -276,14 +327,16 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    text-align: center;
+    z-index: 999;
 }
 
 .c-result-text {
     font-family: "Bebas Neue", sans-serif;
-    font-size: var(--font-size-22);
-    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-21);
+    line-height: var(--font-size-22);
     animation: resultPulse 0.5s ease-in-out;
+    color: var(--white); 
 }
 
 .c-result-goed {

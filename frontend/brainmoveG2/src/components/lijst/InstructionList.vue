@@ -8,7 +8,7 @@ const props = defineProps({
     color: {
         type: String,
         default: 'primary',
-        validator: (value) => ['primary', 'orange', 'green'].includes(value)
+        validator: (value) => ['primary', 'orange', 'green','purple'].includes(value)
     }
 });
 </script>
@@ -21,7 +21,7 @@ const props = defineProps({
             class="c-instruction-item"
         >
             <span class="c-instruction-number" :class="`c-instruction-number--${color}`">{{ instruction.number }}</span>
-            <p class="c-instruction-text">{{ instruction.text }}</p>
+            <p class="c-instruction-text">{{ instruction.description }}</p>
         </div>
     </div>
 </template>
@@ -65,6 +65,22 @@ const props = defineProps({
     background-color: var(--accent-green-light);
 }
 
+.c-instruction-number--primary {
+    background-color: var(--primary-light-5);
+}
+
+.c-instruction-number--orange {
+    background-color: var(--accent-orange-light);
+}
+
+.c-instruction-number--green {
+    background-color: var(--accent-green-light);
+}
+
+.c-instruction-number--purple {
+    background-color: var(--purple-light);
+}
+
 .c-instruction-text {
     font-size: var(--font-size-3);
     line-height: 24px;
@@ -72,21 +88,4 @@ const props = defineProps({
     color: var(--grey-85);
 }
 
-@media (min-width: 768px) {
-    .c-instruction-text {
-        font-size: var(--font-size-4);
-        line-height: 28px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .c-instruction-number {
-        font-size: var(--font-size-8);
-    }
-    
-    .c-instruction-text {
-        font-size: var(--font-size-5);
-        line-height: 32px;
-    }
-}
 </style>

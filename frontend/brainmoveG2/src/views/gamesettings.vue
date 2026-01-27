@@ -1,11 +1,38 @@
 <script setup>
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useCones } from '../composables/useCones';
 import { useGameColors } from '../composables/useGameColors';
+import { useRoute, useRouter } from 'vue-router';
+import { ref,onMounted, computed } from 'vue';
+import SettingContainer from '../components/SettingContainer.vue';
+import DifficultyButton from '../components/buttons/DifficultyButton.vue';
+import CounterButton from '../components/buttons/CounterButton.vue';
+import TextInput from '../components/inputs/TextInput.vue';
+import SmallPotjeCard from '../components/cards/SmallPotjeCard.vue';
+import { useGames } from '../composables/useGames';
+
+const getColorValue = (color) => {
+    const colorMap = {
+        'red': 'var(--red)',
+        'blue': 'var(--blue)',
+        'green': 'var(--accent-green)',
+        'yellow': 'var(--yellow)',
+        'orange': 'var(--accent-orange)',
+        'purple': 'var(--purple)'
+    };
+    return colorMap[color] || 'var(--accent-green)';
+};
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
 const selectedDifficulty = ref('relaxed');
+const isGameIdThree = computed(() => String(gameId.value) === '3');
+const isGameIdFour = computed(() => String(gameId.value) === '4');
+const hideDifficulty = computed(() => isGameIdThree.value || isGameIdFour.value);
+const rounds = ref(10);
+const colors = ref(4);
+const username = ref('');
+const showErrors = ref(false);
 
 const difficulties = [
     { id: 'relaxed', label: 'Relaxed', color: 'green' },
@@ -13,161 +40,156 @@ const difficulties = [
     { id: 'intense', label: 'Intense', color: 'red' }
 ];
 
-// Use the game colors composable
+const { cones, colorToDutch } = useCones();
+const { modes, fetchGames } = useGames();
+
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 const selectDifficulty = (difficulty) => {
-    selectedDifficulty.value = difficulty;
+    if (!hideDifficulty.value) {
+        selectedDifficulty.value = difficulty;
+    }
 };
+
+onMounted(fetchGames);
+
+function getInstructionsRoute() {
+    return {
+        name: 'instructions',
+        params: { id: gameId.value },
+        query: {
+            username: username.value,
+            mode_id: Number(gameId.value),
+            difficulty_id: hideDifficulty.value ? null : (difficulties.findIndex(d => d.id === selectedDifficulty.value) + 1),
+            aantal_rondes: rounds.value,
+            aantal_kleuren: colors.value
+        }
+    };
+}
+
+
+const connectedPotjesMismatch = computed(() => {
+    if (!Array.isArray(cones.value)) return false;
+    const connectedCount = cones.value.filter(c => c.connected).length;
+
+    return connectedCount < colors.value && colors.value > 0;
+});
+
+const limitedCones = computed(() => {
+    if (!Array.isArray(cones.value)) return [];
+    const num = typeof colors.value === 'number' ? colors.value : 0;
+    const sorted = [...cones.value].sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
+    return sorted.slice(0, num);
+});
+
+function goToInstructions() {
+    showErrors.value = true;
+    if (username.value && connectedPotjesMismatch.value === false) {
+        router.push(getInstructionsRoute());
+    }
+}
 
 </script>
 
 <template>
     <main class="c-content-wrapper">
         <div class="c-title">
-            <h1>Game</h1>
+            <h1>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.naam || '' }}</h1>
+            <p>{{ modes.find(mode => mode.spelmodus_id.toString() === gameId)?.description || '' }}</p>
         </div>
-        <div>
-            <p>Description</p>
+        <SettingContainer v-if="!hideDifficulty" title="Kies je moeilijkheidsgraad">
+            <DifficultyButton
+                v-for="difficulty in difficulties"
+                :key="difficulty.id"
+                :difficulty="difficulty"
+                :is-active="selectedDifficulty === difficulty.id"
+                :disabled="isGameIdThree"
+                @select="selectDifficulty(difficulty.id)"
+            />
+        </SettingContainer>
+        <div class="c-setting-section--extra">
+            <SettingContainer title="Aantal rondes" v-if="gameId !== '2'">
+                <CounterButton v-model="rounds" :min="1" />
+            </SettingContainer>
+            <SettingContainer title="Aantal kleuren" v-if="gameId !== '4'">
+                <CounterButton v-model="colors" :min="2" :max="4"/>
+            </SettingContainer>
         </div>
-        <div class="c-difficulty-selector">
-            <p>Selecteer moeilijkheid</p>
-            <div class="c-difficulty-options">
-                <button 
-                    v-for="difficulty in difficulties" 
-                    :key="difficulty.id"
-                    :class="['c-difficulty-option', `c-difficulty--${difficulty.color}`, { 'is-active': selectedDifficulty === difficulty.id }]"
-                    @click="selectDifficulty(difficulty.id)"
-                >
-                    <p>{{ difficulty.label }}</p>
-                    <div class="c-difficulty-bars">
-                        <span class="c-bar c-bar--first" :class="[`c-bar--${difficulty.color}`, { 'is-filled': true }]"></span>
-                        <span class="c-bar c-bar--middle" :class="[`c-bar--${difficulty.color}`, { 'is-filled': difficulty.id === 'challenging' || difficulty.id === 'intense' }]"></span>
-                        <span class="c-bar c-bar--last" :class="[`c-bar--${difficulty.color}`, { 'is-filled': difficulty.id === 'intense' }]"></span>
-                    </div>
-                </button>
-            </div>
-        </div>
-        <div class="c-settingOptions">
-
-        </div>
-        <RouterLink :class="buttonClass" :to="`/instructions/${gameId}`">Ga door</RouterLink>
+        <SettingContainer title="Gebruikersnaam">
+            <TextInput v-model="username" placeholder="Voer je gebruikersnaam in" :show-errors="showErrors" />
+        </SettingContainer>
+        
+        <SettingContainer
+            title="Gebruikte kleuren"
+            layout="grid"
+            :showGridError="showErrors && connectedPotjesMismatch"
+            gridErrorMessage="Niet genoeg verbonden potjes voor het aantal kleuren."
+        >
+            <SmallPotjeCard 
+                v-for="cone in limitedCones" 
+                :key="cone.cone_id"
+                :name="colorToDutch[cone.color] || cone.color" 
+                :color="getColorValue(cone.color)"
+                :battery="cone.battery_percentage"
+                :isConnected="cone.connected"
+            />
+      
+        </SettingContainer>
+        <button
+            :class="buttonClass"
+            @click="goToInstructions"
+        >
+            Ga door
+        </button>
+    
     </main>
 </template>
 
 <style scoped>
-
-.c-title{
-    text-align: left;
-    width: 100%;
-  }
-
-.c-settingOptions{
+.c-smallPotjeCard {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-05);
-    width: 100%;
-    margin-bottom: var(--spacing-06);
+    padding: var(--spacing-baseline);
+    background-color: var(--white);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--radius-s);
 }
 
-.c-difficulty-selector {
-    width: 100%;
-    gap: var(--spacing-baseline);
+.c-smallPotjeCard__section {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-03);
 }
 
-.c-difficulty-options {
+.c-smallPotjeCard__section--battery {
+    gap: var(--spacing-02);
+}
+
+.c-smallPotjeCard__color {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+}
+
+.c-battery-icon {
+    color: var(--grey-85);
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.c-setting-section--extra {
     display: flex;
     gap: var(--spacing-04);
     width: 100%;
 }
 
-.c-difficulty-option {
-    flex: 1;
+.c-title{
+    text-align: left;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-03);
-    padding: var(--spacing-03) var(--spacing-05);
-    background-color: var(--grey-2);
-    border: 2px solid transparent;
-    border-radius: var(--radius-s);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--grey-85);
+    width: 100%;
+    gap: var(--spacing-05);
 }
-
-.c-difficulty-option.is-active {
-    border-color: currentColor;
-}
-
-.c-difficulty--green.is-active {
-    color: var(--accent-green);
-}
-
-.c-difficulty--orange.is-active {
-    color: var(--accent-orange);
-}
-
-.c-difficulty--red.is-active {
-    color: var(--red);
-}
-
-.c-difficulty-bars {
-    display: flex;
-    gap: var(--spacing-02);
-}
-
-.c-bar {
-    width: 20px;
-    height: 5px;
-    background: var(--white);
-    border-radius: 0;
-}
-
-.c-bar--first {
-    border-radius: 999px 0 0 999px;
-}
-
-.c-bar--middle {
-    border-radius: 0;
-}
-
-.c-bar--last {
-    border-radius: 0 999px 999px 0;
-}
-
-.c-bar--green {
-    border: 2px solid var(--accent-green);
-}
-
-.c-bar--orange {
-    border: 2px solid var(--accent-orange);
-}
-
-.c-bar--red {
-    border: 2px solid var(--red);
-}
-
-.c-bar--green.is-filled {
-    background: var(--accent-green);
-}
-
-.c-bar--orange.is-filled {
-    background: var(--accent-orange);
-}
-
-.c-bar--red.is-filled {
-    background: var(--red);
-}
-
-/* Wrap difficulty options on small screens */
-@media (max-width: 410px) {
-    .c-difficulty-options {
-        flex-wrap: wrap;
-    }
-}
-
 </style>

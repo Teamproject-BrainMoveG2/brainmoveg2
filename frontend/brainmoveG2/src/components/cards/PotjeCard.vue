@@ -1,6 +1,7 @@
 <script setup>
-import { BatteryMedium, Wifi, WifiOff } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Wifi, WifiOff } from 'lucide-vue-next';
+import { computed, toRef } from 'vue';
+import { useBattery } from '../../composables/useBattery';
 
 const props = defineProps({
     name: {
@@ -21,13 +22,13 @@ const circleColor = computed(() => {
     const colorName = props.name.toLowerCase();
     
     const colorMap = {
-        // Dutch names
+
         'groen': 'var(--accent-green)',
         'oranje': 'var(--accent-orange)',
         'geel': 'var(--yellow)',
         'blauw': 'var(--blue)',
         'rood': 'var(--red)',
-        // English names
+ 
         'green': 'var(--accent-green)',
         'orange': 'var(--accent-orange)',
         'yellow': 'var(--yellow)',
@@ -38,9 +39,7 @@ const circleColor = computed(() => {
     return colorMap[colorName] || 'var(--accent-green)';
 });
 
-const isLowBattery = computed(() => {
-    return props.batteryPercentage < 25;
-});
+const { isLowBattery, batteryIcon } = useBattery(toRef(props, 'batteryPercentage'));
 </script>
 
 <template>
@@ -52,7 +51,7 @@ const isLowBattery = computed(() => {
         <div class="c-cardpotje__content">
             <div class="c-cardpotje__status" v-if="isConnected">
                 <p class="c-cardpotje__percentage" :class="{ 'c-cardpotje__percentage--low': isLowBattery }">{{ batteryPercentage }}%</p>
-                <BatteryMedium class="c-cardpotje__icon" :class="{ 'c-cardpotje__icon--low-battery': isLowBattery }" />
+                <component :is="batteryIcon" class="c-cardpotje__icon" :class="{ 'c-cardpotje__icon--low-battery': isLowBattery }" />
             </div>
             <p class="c-cardpotje__connecting" v-else>Connecting ...</p>
             <Wifi v-if="isConnected" class="c-cardpotje__icon" />

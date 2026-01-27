@@ -1,46 +1,20 @@
 <script setup>
-import PotjeCard from '../components/PotjeCard.vue';
-import InstructionList from '../components/InstructionList.vue';
-import { ref, onMounted } from 'vue';
+import PotjeCard from '../components/cards/PotjeCard.vue';
+import InstructionList from '../components/lijst/InstructionList.vue';
+import { useCones } from '../composables/useCones';
 
-const Ip = `${window.location.hostname}:8000`;
-
-//hard coded instructions for setting up the potjes
 const instructions = [
     {
         number: 1,
-        text: 'Zet de schakelaar aan van alle potjes.'
+        description: 'Zet de schakelaar aan van alle potjes.'
     },
     {
         number: 2,
-        text: 'Zet de potjes in een vierkant van 2m op 2m. Als je minder dan 4 potjes gebruikt, laat dan sommige hoeken leeg.'
+        description: 'Zet de potjes in een vierkant van 2m op 2m. Als je minder dan 4 potjes gebruikt, laat dan sommige hoeken leeg.'
     }
 ];
 
-const cones = ref([]);
-
-// Color mapping from English to Dutch
-const colorToDutch = {
-    'red': 'Rood',
-    'blue': 'Blauw',
-    'green': 'Groen',
-    'yellow': 'Geel',
-    'orange': 'Oranje'
-};
-
-const fetchCones = async () => {
-    try {
-        const response = await fetch(`http://${Ip}/cones`);
-        const data = await response.json();
-        cones.value = data;
-    } catch (error) {
-        console.error('Error fetching cones:', error);
-    }
-};
-
-onMounted(() => {
-    fetchCones();
-});
+const { cones, colorToDutch } = useCones();
 
 </script>
 
@@ -55,8 +29,10 @@ onMounted(() => {
     </div>
    
     <InstructionList :instructions="instructions" />
-    
-    <div class="c-cardcontainer">
+
+    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
+    <section class="c-cardcontainer">
+
         <h2>Status Potjes</h2>
         <div class="c-cardgrid">
             <PotjeCard 
@@ -67,8 +43,9 @@ onMounted(() => {
                 :isConnected="cone.connected"
             />
         </div>
-    </div>
-    <RouterLink class="c-btn c-btn--primary" to="/dashboard">Ga door</RouterLink>
+    </section>
+   
+    
   </main>
 </template>
 
@@ -78,7 +55,6 @@ onMounted(() => {
     text-align: left;
     width: 100%;
   }
-
 
 .c-cardcontainer{
  width: 100%;
@@ -103,5 +79,21 @@ onMounted(() => {
     gap: var(--spacing-04);
 }
 
+.c-mascot {
+  width: 60%;
+  height: auto;
+  position: relative;
+  z-index: 2;   
+
+    @media (min-width: 768px) {
+
+        width: 65%;
+    }
+
+    @media (min-width: 1024px) {
+
+        width: 100%;
+    }
+}
 
 </style>

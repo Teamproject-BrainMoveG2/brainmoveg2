@@ -1,89 +1,85 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import InstructionList from '../components/InstructionList.vue';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useGameColors } from '../composables/useGameColors';
+import InstructionList from '../components/lijst/InstructionList.vue';
+import { TriangleAlert } from 'lucide-vue-next';
+
 
 const route = useRoute();
+const router = useRouter();
 const gameId = ref(route.params.id);
+const tutorial = ref({steps: [] });
+const settings = route.query;
+const gameInProgress = ref(false);
 
-// Instructions for different games
-const gameInstructions = {
-    '1': {
-        steps: [
-            {
-                number: 1,
-                text: 'Een kleur verschijnt op je scherm'
-            },
-            {
-                number: 2,
-                text: 'Tik zo snel mogelijk het bijbehorende potje aan'
-            },
-            {
-                number: 3,
-                text: 'De tijd wordt steeds korter - hoe lang houd je vol?'
-            }
-        ]
-    },
-    '2': {
-        title: 'Memory game',
-        steps: [
-            {
-                number: 1,
-                text: 'Onthoud de volgorde van de oplichtende potjes'
-            },
-            {
-                number: 2,
-                text: 'Herhaal de volgorde door de potjes aan te tikken'
-            },
-            {
-                number: 3,
-                text: 'De volgorde wordt steeds langer - hoeveel kun je onthouden?'
-            }
-        ],
-    },
-    '3': {
-        title: 'Calm game',
-        steps: [
-            {
-                number: 1,
-                text: 'Een kleur verschijnt op je scherm'
-            },
-            {
-                number: 2,
-                text: 'Tik zo snel mogelijk het bijbehorende potje aan'
-            },
-            {
-                number: 3,
-                text: 'Er is geen tijdslimiet - Doe je best om rustig en gefocust te blijven'
-            }
-        ],
+const Ip = `${window.location.hostname}:8000`;
+
+async function fetchTutorial() {
+    try {
+        const response = await fetch(`http://${Ip}/modes/${gameId.value}/tutorial`);
+        if (!response.ok) throw new Error('Failed to fetch tutorial');
+        tutorial.value = await response.json();
+    } catch (e) {
+        tutorial.value = {steps: [] };
     }
-    // Add more games here as needed
-};
+}
 
-// Get the instructions for the current game based on game ID
-const currentGame = computed(() => {
-    return gameInstructions[gameId.value] 
+async function CheckForGame(){
+     try {
+        const response = await fetch(`http://${Ip}/games/status`);
+        const status = await response.json();
+        if (status && status.game_in_progress) {
+            gameInProgress.value = true;
+        } else {
+            gameInProgress.value = false;
+        }
+    } catch (error) {
+        gameInProgress.value = false;
+    }
+}
+
+
+let intervalId = null;
+onMounted(() => {
+    fetchTutorial();
+    CheckForGame();
+    intervalId = setInterval(CheckForGame, 5000);
+    console.log('Route params:', route.params);
+    console.log('Route query:', route.query);
 });
 
-// Use the game colors composable
+onUnmounted(() => {
+    if (intervalId) clearInterval(intervalId);
+});
+
+function startGameAndGo() {
+    router.push({
+        name: 'game',
+        params: { id: gameId.value },
+        query: settings
+    });
+}
+
 const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGameColors(gameId);
 
 </script>
 
 <template>
-    <main class="c-content-wrapper">
+    <main class="c-content-wrapper u-justify-center u-viewport-height-80">
         <div class="c-mascot__container">
             <img src="../assets/img/mascot3.png" alt="BrainMove Mascot" class="c-mascot" />
         </div>
          <div class="c-title">
              <h1>hoe te spelen</h1>
          </div>
-        <InstructionList :instructions="currentGame.steps" :color="colorVariant" />
-        <RouterLink :class="buttonClass" :to="`/game/${gameId}`">Spel starten!</RouterLink>
+        <InstructionList :instructions="tutorial.steps" :color="colorVariant" />
+        <div v-if="gameInProgress" class="c-warning">
+            <TriangleAlert size="30px" />
+            <h2>Er is een spel bezig, even geduld!</h2>
+        </div>
+        <button v-else :class="buttonClass" @click="startGameAndGo">Spel starten!</button>
     </main>
-
 </template>
 
 <style scoped>
@@ -95,6 +91,22 @@ const { buttonClass, colorVariant, cardBackgroundColor, primaryColor } = useGame
 
 .c-mascot{
     width: 125%;
+}
+
+.c-warning{
+    background-color: var(--red-light);
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    padding: var(--spacing-06);
+    margin-top: var(--spacing-06);
+    margin-bottom: var(--spacing-06);
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-03);
 }
 
 </style>

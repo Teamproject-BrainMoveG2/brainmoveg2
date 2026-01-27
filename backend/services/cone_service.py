@@ -1,5 +1,7 @@
 from datetime import datetime
 import logging
+from fastapi.encoders import jsonable_encoder
+import socketio
 from models.models import Cone, ConeStatusDTO, ConeWithStatus
 
 colors = ['red', 'blue', 'green', 'yellow']
@@ -13,14 +15,15 @@ class ConeService:
         self.logger = logging.getLogger(__name__) 
         self.logger.info("ConeService initialized.")
 
-    def register_cone(self, coneStatus: ConeStatusDTO) -> None:
+    async def register_cone(self, coneStatus: ConeStatusDTO, sio: socketio.AsyncServer) -> None:
         for c in cones:
             if c.cone_id == coneStatus.cone_id:
                 c.battery_percentage = coneStatus.battery_percentage
                 c.last_status = datetime.now()
                 self.logger.info(f"Cone updated: {c}")
+                await sio.emit('cone_update', jsonable_encoder(self.get_cones()))
                 break
-    def get_cones(self):
+    def get_cones(self) -> list[ConeWithStatus]:
         conesWithStatus = []
         for c in cones:
             if c.battery_percentage is not None and c.last_status is not None:
@@ -39,6 +42,10 @@ class ConeService:
                 ))
         return conesWithStatus
 
-    def get_active_cones(self):
+    def get_active_cones(self, max_cones: int = None):
         active_cones = [c for c in cones if c.battery_percentage is not None and (datetime.now() - c.last_status).total_seconds() < 60]
+        if max_cones is not None:
+            active_cones = active_cones[:max_cones]
+        self.logger.debug(f"{datetime.now()} - Active cones retrieved: {active_cones}")
+        self.logger.debug(f"{datetime.now()} - Total cones: {cones}")
         return active_cones

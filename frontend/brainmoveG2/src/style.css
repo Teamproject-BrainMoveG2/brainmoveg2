@@ -38,11 +38,18 @@
 
   --blue: #183CDC;
   --blue-dark: #0D1F73;
-  --blue-dark-2: #0D1F73;
+
+  --purple: #a72fdb;
+  --purple-dark: #751f99;
+  --purple-light: #ecc7fa;
 
   --green: #18DC63;
 
   --brown: #844200;
+
+  --teal: #20B2AA;
+
+  --lime: #BFFF00;
 
   /* Font sizes */
   --font-size-1: .75rem;
@@ -103,19 +110,35 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: "Source Sans Pro", sans-serif;
-  background-color: var(--grey-2);
-  font-size: var(--font-size-3);      /* 16px */
+  font-family: "source-sans-pro", sans-serif;
+  background-color: var(--white);
+  font-size: var(--font-size-3);      
   line-height: 24px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   color: var(--grey-85);
+  /* height: 100%; */
+  
+  @media (min-width: 768px) {
+    background-color: var(--grey-2);
+  }
+}
+@media (max-width: 768px) {
+    body{
+      display: flex;
+      flex-direction: column;
+    }
+    #app{
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+    }
 }
 
 /* Heading 1 */
 h1 {
   font-family: "Bebas Neue", sans-serif;
-  font-size: var(--font-size-9);      /* 36px */
+  font-size: var(--font-size-9);  
   line-height: 40px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
@@ -128,8 +151,8 @@ h1 {
 
 /* Heading 2 */
 h2 {
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: var(--font-size-5);      /* 20px */
+  font-family: "source-sans-pro", sans-serif;
+  font-size: var(--font-size-5);   
   line-height: 32px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
@@ -140,19 +163,25 @@ h2 {
 p {
   margin: 0;
   padding: 0;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "source-sans-pro", sans-serif;
   font-size: var(--font-size-3);
-  line-height: 24px;
+  line-height: 1.5rem;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   color: var(--grey-85);
+
+  @media (min-width: 1024px) {
+  font-size: var(--font-size-4);
+  line-height: 2rem;
+
+  }
 }
 
 /* Logo text */
 .logo-text {
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: var(--font-size-6);      /* 24px */
-  line-height: 32px;
+  font-family: "source-sans-pro", sans-serif;
+  font-size: var(--font-size-6);      
+  line-height: 2rem;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   margin: 0;
@@ -163,18 +192,24 @@ p {
 
 /* Smaller body */
 .small-body {
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: var(--font-size-3);      /* 14px */
+  font-family: "source-sans-pro", sans-serif;
+  font-size: var(--font-size-2);     
   line-height: 1.5rem;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
   margin: 0;
   padding: 0;
+
+  @media (min-width: 1024px) {
+  font-size: var(--font-size-3);
+  line-height: 1.5rem;
+
+  }
 }
 
 .body-large {
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: var(--font-size-5);      /* 20px */
+  font-family: "source-sans-pro", sans-serif;
+  font-size: var(--font-size-5);      
   line-height: 32px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
@@ -183,8 +218,8 @@ p {
 }
 
 .body-extra-large {
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: var(--font-size-7);      /* 28px */
+  font-family: "source-sans-pro", sans-serif;
+  font-size: var(--font-size-7);      
   line-height: 40px;
   font-weight: var(--font-weight-regular);
   letter-spacing: 0;
@@ -193,33 +228,47 @@ p {
 }
 
 .c-content-wrapper {
-  margin-top: 5.5rem;
   padding: 0 var(--spacing-06);
+  padding-bottom: var(--spacing-baseline);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   text-align: center;
   gap: var(--spacing-07);
-  max-width: 26.25rem;
-  min-height: 100vh;
+  max-width: 34.375rem;
+  height: 100%;
   margin: 0 auto;
 
 
   @media (min-width: 768px) {
-
-    max-width: 500px;
-    gap: var(--spacing-08);
-
+    justify-content: flex-start;
+    max-width: 75%;
   }
 
   @media (min-width: 1024px) {
-
-      max-width: 550px;
-      gap: var(--spacing-09);
-
+    justify-content: flex-start;
+    max-width: 60%;
+    padding: 0;
   }
 
+}
+
+.u-justify-center {
+  justify-content: center;
+}
+
+
+.u-viewport-height {
+  height: 100vh;
+}
+
+.u-viewport-height-80 {
+  height: 80vh;
+}
+
+
+.u-margin-bottom{
+  margin-bottom: 5.7606rem;
 }
 
 .c-btn {
@@ -236,6 +285,7 @@ p {
   text-decoration: none;
   text-align: center;
   box-sizing: border-box;
+
 }
 
 .c-btn--primary {
@@ -295,7 +345,20 @@ p {
   transform: translateY(0);
 }
 
-/* Responsive for larger screens */
+.c-btn--purple {
+  background-color: var(--purple);
+  color: var(--white);
+}
+
+.c-btn--purple:hover {
+  background-color: var(--purple-dark);
+  transform: translateY(-2px);
+}
+
+.c-btn--purple:active {
+  transform: translateY(0);
+}
+
 @media (min-width: 768px) {
   .c-btn {
     font-size: var(--font-size-4);
