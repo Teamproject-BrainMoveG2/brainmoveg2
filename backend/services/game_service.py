@@ -13,7 +13,7 @@ import socketio
 import logging
 import asyncio
 
-TOO_LATE = {1: 5000, 2: 4000, 3: 3000}
+TOO_LATE = {1: 2400, 2: 1800, 3: 1200}
 TOO_LATE_MS = 5000
 maxRounds = 10
 maxCones = 4
